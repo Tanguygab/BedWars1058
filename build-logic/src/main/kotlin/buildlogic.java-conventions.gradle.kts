@@ -5,8 +5,6 @@ plugins {
 }
 
 repositories {
-    mavenLocal() // needed still for some NMS stuff apparently, I'll probably need to look into it
-
     maven("https://repo.andrei1058.com/snapshots/")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven {
@@ -49,7 +47,6 @@ dependencies {
     compileOnly("net.md-5:bungeecord-chat:1.8-SNAPSHOT")
     compileOnly("commons-io:commons-io:2.13.0")
     compileOnly("org.jetbrains:annotations:24.0.1")
-    compileOnly("org.projectlombok:lombok:1.18.36")
 }
 
 group = "com.andrei1058.bedwars"

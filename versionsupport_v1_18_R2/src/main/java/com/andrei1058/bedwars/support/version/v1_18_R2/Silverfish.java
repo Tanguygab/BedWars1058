@@ -36,7 +36,6 @@ import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackable
 import net.minecraft.world.entity.monster.EntitySilverfish;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.level.World;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_18_R2.entity.CraftLivingEntity;
@@ -100,7 +99,7 @@ public class Silverfish extends EntitySilverfish {
 
         customEnt.getBukkitEntity().setCustomName(Language.getDefaultLanguage().m(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME)
                 .replace("{despawn}", String.valueOf(despawn)
-                        .replace("{health}", StringUtils.repeat(Language.getDefaultLanguage().m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH) + " ", 10))
+                        .replace("{health}", (Language.getDefaultLanguage().m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH) + " ").repeat(10))
                         .replace("{TeamColor}", team.getColor().chat().toString())));
         return (LivingEntity) customEnt.getBukkitEntity();
     }

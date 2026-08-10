@@ -9,6 +9,7 @@ dependencies {
     compileOnly(libs.spigot) {
         version { require(libs.versions.spigot.v1204.get()) }
     }
+    compileOnly(libs.spigot.api)
 }
 
 description = "versionsupport_v1_20_R4"

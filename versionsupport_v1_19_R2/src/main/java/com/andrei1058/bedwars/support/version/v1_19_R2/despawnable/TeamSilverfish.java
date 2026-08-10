@@ -10,7 +10,6 @@ import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomLookaround;
 import net.minecraft.world.entity.ai.goal.PathfinderGoalRandomStroll;
 import net.minecraft.world.entity.ai.goal.target.PathfinderGoalHurtByTarget;
 import net.minecraft.world.entity.monster.EntitySilverfish;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.entity.EntityType;
@@ -30,7 +29,7 @@ public class TeamSilverfish extends DespawnableProvider<Silverfish> {
     String getDisplayName(@NotNull DespawnableAttributes attr, @NotNull ITeam team) {
         Language lang = Language.getDefaultLanguage();
         return lang.m(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME).replace("{despawn}", String.valueOf(attr.despawnSeconds())
-                .replace("{health}", StringUtils.repeat(lang.m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH) + " ", 10))
+                .replace("{health}", (lang.m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH) + " ").repeat(10))
                 .replace("{TeamColor}", team.getColor().chat().toString())
         );
     }

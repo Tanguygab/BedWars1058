@@ -8,6 +8,8 @@ dependencies {
     compileOnly(libs.spigot) {
         version { require(libs.versions.spigot.v1194.get()) }
     }
+    compileOnly(libs.mojang.datafixerupper)
+    compileOnly(libs.spigot.api)
 }
 
 description = "versionsupport_v1_19_R3"

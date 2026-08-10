@@ -37,7 +37,6 @@ import net.minecraft.world.entity.ai.goal.target.PathfinderGoalNearestAttackable
 import net.minecraft.world.entity.animal.EntityIronGolem;
 import net.minecraft.world.entity.player.EntityHuman;
 import net.minecraft.world.level.World;
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_18_R2.entity.CraftLivingEntity;
@@ -106,7 +105,7 @@ public class IGolem extends EntityIronGolem {
         customEnt.getBukkitEntity().setCustomNameVisible(true);
         customEnt.getBukkitEntity().setCustomName(Language.getDefaultLanguage().m(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME)
                 .replace("{despawn}", String.valueOf(despawn)
-                        .replace("{health}", StringUtils.repeat(Language.getDefaultLanguage().m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH) + " ", 10))
+                        .replace("{health}", (Language.getDefaultLanguage().m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH) + " ").repeat(10))
                         .replace("{TeamColor}", bedWarsTeam.getColor().chat().toString())));
         return (LivingEntity) customEnt.getBukkitEntity();
     }
