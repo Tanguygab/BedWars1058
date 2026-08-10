@@ -8,9 +8,7 @@ paf-redis = "1.0.3-SNAPSHOT"
 
 slf4j = "2.0.7"
 hikaricp = "5.0.1"
-google-collect = "1.0"
 bstats = "3.0.2"
-flow-nbt = "2.0.2"
 
 swm = "2.2.1"
 aswm = "1.20-R0.1-SNAPSHOT"
@@ -50,9 +48,7 @@ sidebar-v120-r4 = { module = "com.andrei1058.spigot.sidebar:sidebar-v1_20_R4", v
 
 slf4j = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
-google-collect = { module = "com.google.common:google-collect", version.ref = "google-collect" }
 bstats = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
-flow-nbt = { module = "com.flowpowered:flow-nbt", version.ref = "flow-nbt" }
 
 swm = { module = "com.grinderwolf:slimeworldmanager-api", version.ref = "swm" }
 aswm = { module = "com.infernalsuite.aswm:api", version.ref = "aswm" }

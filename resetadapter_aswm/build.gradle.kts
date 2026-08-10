@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(libs.flow.nbt)
     compileOnly(project(":bedwars-api"))
     compileOnly(libs.spigot.api)
     compileOnly(libs.swm)

@@ -5,7 +5,8 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
+    mavenLocal() // needed still for some NMS stuff apparently, I'll probably need to look into it
+
     maven("https://repo.andrei1058.com/snapshots/")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven {
@@ -14,61 +15,34 @@ repositories {
             artifact()
         }
     }
-
-    maven("https://repo.maven.apache.org/maven2/")
-
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://repo.codemc.io/repository/maven-public/")
 
-    maven {
-        url = uri("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://repo.helpch.at/releases/") {
+        name = "PAPI-repo"
     }
-
-    maven {
-        url = uri("https://repo.codemc.io/repository/maven-snapshots/")
+    maven("https://repo.alessiodp.com/releases/") {
+        name = "Parties-repo"
     }
-
-    maven {
-        url = uri("https://simonsator.de/repo/")
+    maven("https://simonsator.de/repo/") {
+        name = "PAF-repo"
     }
-
-    maven {
-        url = uri("https://maven.citizensnpcs.co/repo")
+    maven("https://gitlab.com/api/v4/projects/6491858/packages/maven") {
+        name = "VIPFeatures-repo"
     }
-
-    maven {
-        url = uri("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    maven("https://maven.citizensnpcs.co/repo") {
+        name = "Citizens-repo"
     }
-
-    maven {
-        url = uri("https://repo.alessiodp.com/releases/")
+    maven("https://repo.glaremasters.me/repository/concuncan") {
+        name = "SlimeWorldManager-repo"
     }
-
-    maven {
-        url = uri("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.titanvale.net/releases") {
+        name = "FlowNBT-repo"
     }
-
-    maven {
-        url = uri("https://repo.fusesource.com/nexus/content/repositories/releases-3rd-party/")
+    maven("https://repo.infernalsuite.com/repository/maven-snapshots/") {
+        name = "AdvancedSlimeWorldManager-repo"
     }
-
-    maven {
-        url = uri("https://repo.glaremasters.me/repository/concuncan/")
-    }
-
-    maven {
-        url = uri("https://repo.rapture.pw/repository/maven-snapshots/")
-    }
-
-    maven {
-        url = uri("https://repo.infernalsuite.com/repository/maven-snapshots/")
-    }
-
-    maven {
-        url = uri("https://repo.titanvale.net/releases")
-    }
-    maven("https://gitlab.com/api/v4/projects/6491858/packages/maven")
 }
 
 dependencies {
