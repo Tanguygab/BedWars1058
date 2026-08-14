@@ -141,11 +141,6 @@ public abstract class VersionSupport {
     }
 
     /**
-     * Register custom entities
-     */
-    public abstract void registerEntities();
-
-    /**
      * Spawn shop NPC
      */
     public abstract void spawnShop(Location loc, String name1, List<Player> players, IArena arena);
@@ -251,7 +246,7 @@ public abstract class VersionSupport {
      *
      * @return null if not present.
      */
-    @SuppressWarnings("unused")
+    @Nullable
     public abstract String getTag(ItemStack itemStack, String key);
 
     /**
@@ -362,9 +357,7 @@ public abstract class VersionSupport {
      * Set block data
      * For versions before 1.13
      */
-    public void setJoinSignBackgroundBlockData(BlockState b, byte data) {
-
-    }
+    public void setJoinSignBackgroundBlockData(BlockState b, byte data) {}
 
     /**
      * Change the block behind the join sign.
@@ -441,11 +434,11 @@ public abstract class VersionSupport {
     }
 
     public void spigotShowPlayer(Player victim, Player receiver) {
-        receiver.showPlayer(victim);
+        receiver.showPlayer(plugin, victim);
     }
 
     public void spigotHidePlayer(Player victim, Player receiver) {
-        receiver.hidePlayer(victim);
+        receiver.hidePlayer(plugin, victim);
     }
 
     /**

@@ -54,7 +54,10 @@ dependencies {
 description = "bedwars-plugin"
 
 tasks.processResources {
-    val props = mapOf("version" to version)
+    val props = mapOf(
+        "version" to version,
+        "kotlinVersion" to libs.versions.kotlin.get(),
+    )
     inputs.properties(props)
     filesMatching(listOf("plugin.yml")) {
         expand(props)

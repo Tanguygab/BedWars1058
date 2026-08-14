@@ -1,4 +1,5 @@
 plugins {
+    kotlin("jvm")
     `java-library`
     `maven-publish`
     id("com.gradleup.shadow")
@@ -51,18 +52,13 @@ dependencies {
 
 group = "com.andrei1058.bedwars"
 version = "25.2"
-java.sourceCompatibility = JavaVersion.VERSION_25
 
 publishing {
     publications.create<MavenPublication>("maven") {
-        from(components["java"])
+        from(components["kotlin"])
     }
 }
 
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
-tasks.withType<Javadoc> {
-    options.encoding = "UTF-8"
+kotlin {
+    jvmToolchain(25)
 }

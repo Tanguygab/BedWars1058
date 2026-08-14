@@ -8,7 +8,6 @@ dependencies {
     compileOnly(libs.spigot) {
         version { require(libs.versions.spigot.v1202.get()) }
     }
-    compileOnly(libs.mojang.datafixerupper)
     compileOnly(libs.spigot.api)
 }
 

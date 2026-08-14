@@ -8,7 +8,6 @@ dependencies {
     compileOnly(libs.spigot) {
         version { require(libs.versions.spigot.v1182.get()) }
     }
-    compileOnly(libs.mojang.datafixerupper)
     compileOnly(libs.mojang.brigadier)
     compileOnly(libs.spigot.api)
     compileOnly("io.netty:netty-all:5.0.0.Alpha2") // IDK why this is needed but eh

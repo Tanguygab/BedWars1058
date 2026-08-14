@@ -1,4 +1,7 @@
 [versions]
+kotlin = "2.4.0"
+shadow = "9.4.2"
+
 sidebar = "26.6-SNAPSHOT"
 
 alessiodp-parties = "3.2.9"
@@ -23,7 +26,6 @@ mojang-datafixerupper = "9.0.19"
 mojang-brigadier = "1.3.10"
 spigot-v18 = "1.8.8-R0.1-SNAPSHOT"
 spigot-v1122 = "1.12.2-R0.1-SNAPSHOT"
-spigot-v1144 = "1.14.4-R0.1-SNAPSHOT"
 spigot-v1165 = "1.16.5-R0.1-SNAPSHOT"
 spigot-v1171 = "1.17.1-R0.1-SNAPSHOT"
 spigot-v1182 = "1.18.2-R0.1-SNAPSHOT"
@@ -35,6 +37,9 @@ spigot-v1203 = "1.20.3-R0.1-SNAPSHOT"
 spigot-v1204 = "1.20.4-R0.1-SNAPSHOT"
 
 [libraries]
+kotlin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin"}
+shadow = { module = "com.gradleup.shadow:shadow-gradle-plugin", version.ref = "shadow"}
+
 sidebar-base = { module = "com.andrei1058.spigot.sidebar:sidebar-base", version.ref = "sidebar" }
 sidebar-v18-r3 = { module = "com.andrei1058.spigot.sidebar:sidebar-v1_8_R3", version.ref = "sidebar" }
 sidebar-v112-r1 = { module = "com.andrei1058.spigot.sidebar:sidebar-v1_12_R1", version.ref = "sidebar" }

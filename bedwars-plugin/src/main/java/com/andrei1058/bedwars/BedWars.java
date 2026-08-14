@@ -355,9 +355,6 @@ public class BedWars extends JavaPlugin {
             Bukkit.getScheduler().runTaskTimer(this, new OneTick(), 120, 1);
         }
 
-        /* Register NMS entities */
-        nms.registerEntities();
-
         /* Database support */
         if (config.getBoolean("database.enable")) {
             com.andrei1058.bedwars.database.MySQL mySQL = new com.andrei1058.bedwars.database.MySQL();

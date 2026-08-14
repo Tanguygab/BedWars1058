@@ -7,5 +7,6 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gradleup.shadow:shadow-gradle-plugin:9.4.2")
+    implementation(libs.kotlin)
+    implementation(libs.shadow)
 }
