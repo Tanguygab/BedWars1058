@@ -19,7 +19,6 @@
  */
 package com.andrei1058.bedwars.arena.mapreset.slime
 
-import com.andrei.bedwars1058.arena.mapreset.slime.SlimeAdapterCommon
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.configuration.ConfigPath
