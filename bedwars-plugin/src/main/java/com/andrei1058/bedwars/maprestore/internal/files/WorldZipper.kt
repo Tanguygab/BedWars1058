@@ -17,55 +17,36 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
+package com.andrei1058.bedwars.maprestore.internal.files
 
-package com.andrei1058.bedwars.maprestore.internal.files;
+import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.api.util.ZipFileUtil
+import org.bukkit.Bukkit
+import java.io.File
+import java.io.IOException
 
-import com.andrei1058.bedwars.api.util.ZipFileUtil;
-import com.andrei1058.bedwars.maprestore.internal.InternalAdapter;
-import org.bukkit.Bukkit;
-
-import java.io.File;
-import java.io.IOException;
-
-public class WorldZipper {
-
-    private final String worldName;
-    private boolean replace;
-
-    public WorldZipper(String worldName, boolean replace) {
-        this.worldName = worldName;
-        this.replace = replace;
-        execute();
+class WorldZipper(private val worldName: String, private val replace: Boolean) {
+    init {
+        execute()
     }
 
-    private void execute() {
+    private fun execute() {
         if (!exists() || replace) {
             try {
-                zipWorldFolder();
-            } catch (IOException e) {
-                e.printStackTrace();
+                zipWorldFolder()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
 
-    private void zipWorldFolder() throws IOException {
-        File worldFolder = getWorldFolder();
-        File backupFile = getBackupFile();
-        ZipFileUtil.zipDirectory(worldFolder, backupFile);
-    }
+    private val worldFolder get() = File(Bukkit.getWorldContainer(), worldName)
+    private val backupFile get() = File(File(BedWars.plugin.dataFolder, "Cache"), "$worldName.zip")
 
-    private File getWorldFolder() {
-        File worldContainer = Bukkit.getWorldContainer();
-        return new File(worldContainer, worldName);
-    }
+    private fun exists() = worldFolder.isDirectory()
 
-    private File getBackupFile() {
-        File backupFolder = InternalAdapter.backupFolder;
-        return new File(backupFolder, worldName + ".zip");
-    }
-
-    private boolean exists() {
-        File worldFolder = getWorldFolder();
-        return worldFolder.isDirectory();
+    @Throws(IOException::class)
+    private fun zipWorldFolder() {
+        ZipFileUtil.zipDirectory(worldFolder, backupFile)
     }
 }

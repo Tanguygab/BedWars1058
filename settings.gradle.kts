@@ -6,6 +6,7 @@ rootProject.name = "BedWars1058"
 include(":bedwars-api")
 include(":bedwars-plugin")
 
+include(":resetadapter-common")
 include(":resetadapter-aswm")
 include(":resetadapter-slime")
 include(":resetadapter-slimepaper")

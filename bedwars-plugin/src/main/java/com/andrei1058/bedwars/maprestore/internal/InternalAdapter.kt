@@ -17,299 +17,190 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
+package com.andrei1058.bedwars.maprestore.internal
 
-package com.andrei1058.bedwars.maprestore.internal;
+import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.api.arena.IArena
+import com.andrei1058.bedwars.api.configuration.ConfigPath
+import com.andrei1058.bedwars.api.server.ISetupSession
+import com.andrei1058.bedwars.api.server.RestoreAdapter
+import com.andrei1058.bedwars.api.server.ServerType
+import com.andrei1058.bedwars.api.util.FileUtil
+import com.andrei1058.bedwars.api.util.ZipFileUtil
+import com.andrei1058.bedwars.arena.Arena
+import com.andrei1058.bedwars.arena.VoidChunkGenerator
+import com.andrei1058.bedwars.maprestore.internal.files.WorldZipper
+import org.apache.commons.io.FileUtils
+import org.bukkit.WorldCreator
+import org.bukkit.plugin.Plugin
+import java.io.File
+import java.io.IOException
 
-import com.andrei1058.bedwars.BedWars;
-import com.andrei1058.bedwars.api.arena.IArena;
-import com.andrei1058.bedwars.api.configuration.ConfigPath;
-import com.andrei1058.bedwars.api.server.ISetupSession;
-import com.andrei1058.bedwars.api.server.RestoreAdapter;
-import com.andrei1058.bedwars.api.server.ServerType;
-import com.andrei1058.bedwars.api.util.FileUtil;
-import com.andrei1058.bedwars.api.util.ZipFileUtil;
-import com.andrei1058.bedwars.arena.Arena;
-import com.andrei1058.bedwars.arena.VoidChunkGenerator;
-import com.andrei1058.bedwars.maprestore.internal.files.WorldZipper;
-import org.apache.commons.io.FileUtils;
-import org.bukkit.*;
-import org.bukkit.plugin.Plugin;
+class InternalAdapter(plugin: Plugin) : RestoreAdapter<BedWars>(
+    plugin,
+    "BedWars1058",
+    "Internal Restore Adapter"
+) {
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import static com.andrei1058.bedwars.BedWars.config;
-import static com.andrei1058.bedwars.BedWars.plugin;
-
-@SuppressWarnings("CallToPrintStackTrace")
-public class InternalAdapter extends RestoreAdapter {
-
-    public static File backupFolder = new File(BedWars.plugin.getDataFolder() + "/Cache");
-    public InternalAdapter(Plugin plugin) {
-        super(plugin);
-    }
-
-    @Override
-    public void onEnable(IArena a) {
-        Bukkit.getScheduler().runTask(getOwner(), () -> {
-            if (Bukkit.getWorld(a.getWorldName()) != null) {
-                Bukkit.getScheduler().runTask(getOwner(), () -> {
-                    World w = Bukkit.getWorld(a.getWorldName());
-                    a.init(w);
-                });
-                return;
+    override fun onEnable(arena: IArena) {
+        run {
+            server.getWorld(arena.worldName)?.let {
+                arena.init(it)
+                return@run
             }
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                File bf = new File(backupFolder, a.getArenaName() + ".zip"), af = new File(Bukkit.getWorldContainer(), a.getArenaName());
-                if (bf.exists()) {
-                    FileUtil.delete(af);
-                }
+
+            run(async = true) {
+                val bf = File(backupFolder, "${arena.arenaName}.zip")
+                val af = File(server.worldContainer, arena.arenaName)
+                if (bf.exists()) { FileUtil.delete(af) }
 
                 if (!bf.exists()) {
-                    new WorldZipper(a.getArenaName(), true);
-                } else {
-                    try {
-                        ZipFileUtil.unzipFileIntoDirectory(bf, new File(Bukkit.getWorldContainer(), a.getWorldName()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    WorldZipper(arena.arenaName, true)
+                } else try {
+                    ZipFileUtil.unzipFileIntoDirectory(bf, File(server.worldContainer, arena.worldName))
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
 
-                deleteWorldTrash(a.getWorldName());
-
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    WorldCreator wc = new WorldCreator(a.getWorldName());
-                    wc.generateStructures(false);
-                    wc.generator(new VoidChunkGenerator());
-                    World w = Bukkit.createWorld(wc);
-                    if (w == null){
-                        throw new IllegalStateException("World should be null");
-                    }
-                    w.setKeepSpawnInMemory(true);
-                    w.setAutoSave(false);
-                });
-            });
-        });
+                deleteWorldTrash(arena.worldName, true)
+                run {
+                    val wc = WorldCreator(arena.worldName)
+                    wc.generateStructures(false)
+                    wc.generator(VoidChunkGenerator())
+                    val w = server.createWorld(wc)
+                    checkNotNull(w) { "World should be null" }
+                    w.keepSpawnInMemory = true
+                    w.isAutoSave = false
+                }
+            }
+        }
     }
 
-    @Override
-    public void onRestart(IArena a) {
-        Bukkit.getScheduler().runTask(getOwner(), () -> {
-            if (BedWars.getServerType() == ServerType.BUNGEE) {
-                if (Arena.getGamesBeforeRestart() == 0) {
-                    if (Arena.getArenas().isEmpty()) {
-                        plugin.getLogger().info("Dispatching command: " + config.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD));
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), config.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD));
+    override fun onRestart(arena: IArena) {
+        run {
+            if (api.serverType == ServerType.BUNGEE) {
+                if (api.arenaUtil.gamesBeforeRestart == 0) {
+                    if (api.arenaUtil.arenas.isEmpty()) {
+                        val command = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)
+                        log.info("Dispatching command: $command")
+                        server.dispatchCommand(server.consoleSender, command)
                     }
                 } else {
-                    if (Arena.getGamesBeforeRestart() != -1) {
-                        Arena.setGamesBeforeRestart(Arena.getGamesBeforeRestart() - 1);
-                    }
-                    Bukkit.unloadWorld(a.getWorldName(), false);
-                    if (Arena.canAutoScale(a.getArenaName())) {
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> new Arena(a.getArenaName(), null), 80L);
+                    if (api.arenaUtil.gamesBeforeRestart != -1) api.arenaUtil.gamesBeforeRestart -= 1
+                    server.unloadWorld(arena.worldName, false)
+                    if (api.arenaUtil.canAutoScale(arena.arenaName)) {
+                        run(delay = 80) { Arena(arena.arenaName, null) }
                     }
                 }
             } else {
-                Bukkit.unloadWorld(a.getWorldName(), false);
-                Bukkit.getScheduler().runTaskLater(plugin, () -> new Arena(a.getArenaName(), null), 80L);
+                server.unloadWorld(arena.worldName, false)
+                run(delay = 80) { Arena(arena.arenaName, null) }
             }
-            if (!a.getWorldName().equals(a.getArenaName())) {
-                deleteWorld(a.getWorldName());
+            if (arena.worldName != arena.arenaName) {
+                deleteWorld(arena.worldName)
             }
-        });
-    }
-
-    @Override
-    public void onDisable(IArena a) {
-        if(BedWars.isShuttingDown()) {
-            Bukkit.unloadWorld(a.getWorldName(), false);
-            return;
         }
-        Bukkit.getScheduler().runTask(getOwner(), () -> Bukkit.unloadWorld(a.getWorldName(), false));
     }
 
-    @Override
-    public void onSetupSessionStart(ISetupSession s) {
-        Bukkit.getScheduler().runTaskAsynchronously(getOwner(), () -> {
-            File bf = new File(backupFolder, s.getWorldName() + ".zip"), af = new File(Bukkit.getWorldContainer(), s.getWorldName());
+    override fun onSetupSessionStart(session: ISetupSession) {
+        run(async = true) {
+            val bf = File(backupFolder, session.worldName + ".zip")
+            val af = File(server.worldContainer, session.worldName)
             if (bf.exists()) {
-                FileUtil.delete(af);
+                FileUtil.delete(af)
                 try {
-                    ZipFileUtil.unzipFileIntoDirectory(bf, new File(Bukkit.getWorldContainer(), s.getWorldName()));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    ZipFileUtil.unzipFileIntoDirectory(bf, File(server.worldContainer, session.worldName))
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
             }
-            WorldCreator wc = new WorldCreator(s.getWorldName());
-            wc.generator(new VoidChunkGenerator());
-            wc.generateStructures(false);
-            Bukkit.getScheduler().runTask(getOwner(), () -> {
+            val wc = WorldCreator(session.worldName)
+            wc.generator(VoidChunkGenerator())
+            wc.generateStructures(false)
+            run {
                 try {
-                    File level = new File(Bukkit.getWorldContainer(), s.getWorldName() + "/region");
+                    val level = File(server.worldContainer, session.worldName + "/region")
                     if (level.exists()) {
-                        s.getPlayer().sendMessage(ChatColor.GREEN + "Loading " + s.getWorldName() + " from Bukkit worlds container.");
-                        deleteWorldTrash(s.getWorldName());
-                        World w = Bukkit.createWorld(wc);
-                        w.setKeepSpawnInMemory(true);
+                        session.message("Loading ${session.worldName} from Bukkit worlds container.")
+                        deleteWorldTrash(session.worldName, true)
+                        server.createWorld(wc)!!.keepSpawnInMemory = true
                     } else {
-                        try {
-                            s.getPlayer().sendMessage(ChatColor.GREEN + "Creating a new void map: " + s.getWorldName());
-                            World w = Bukkit.createWorld(wc);
-                            w.setKeepSpawnInMemory(true);
-                            Bukkit.getScheduler().runTaskLater(plugin, s::teleportPlayer, 20L);
-                        } catch (Exception ex){
-                            ex.printStackTrace();
-                            s.close();
-                        }
-                        return;
+                        session.message("Creating a new void map: ${session.worldName}")
+                        server.createWorld(wc)!!.keepSpawnInMemory = true
+                        run(delay = 20) { session.teleportPlayer() }
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    s.close();
-                    return;
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                    session.close()
+                    return@run
                 }
-                Bukkit.getScheduler().runTaskLater(plugin, s::teleportPlayer, 20L);
-            });
-        });
-    }
-
-    @Override
-    public void onSetupSessionClose(ISetupSession s) {
-        Bukkit.getScheduler().runTask(getOwner(), () -> {
-            Bukkit.getWorld(s.getWorldName()).save();
-            Bukkit.unloadWorld(s.getWorldName(), true);
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> new WorldZipper(s.getWorldName(), true));
-        });
-    }
-
-    @Override
-    public boolean isWorld(String name) {
-        return new File(Bukkit.getWorldContainer(), name + "/region").exists();
-    }
-
-    @Override
-    public void deleteWorld(String name) {
-        Bukkit.getScheduler().runTaskAsynchronously(getOwner(), () -> {
-            try {
-                FileUtils.deleteDirectory(new File(Bukkit.getWorldContainer(), name));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    @Override
-    public void cloneArena(String name1, String name2) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try {
-                FileUtils.copyDirectory(new File(Bukkit.getWorldContainer(), name1), new File(Bukkit.getWorldContainer(), name2));
-                deleteWorldTrash(name2);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
-    @Override
-    public List<String> getWorldsList() {
-        List<String> worlds = new ArrayList<>();
-        File dir = Bukkit.getWorldContainer();
-        if (dir.exists()) {
-            File[] fls = dir.listFiles();
-            for (File fl : Objects.requireNonNull(fls)) {
-                if (fl.isDirectory()) {
-                    File dat = new File(fl.getName() + "/region");
-                    if (dat.exists() && !fl.getName().startsWith("bw_temp")) {
-                        worlds.add(fl.getName());
-                    }
-                }
+                run(delay = 20) { session.teleportPlayer() }
             }
         }
-        return worlds;
     }
 
-    @Override
-    public void convertWorlds() {
-        File dir = new File(plugin.getDataFolder(), "/Arenas");
-        if (dir.exists()) {
-            List<File> files = new ArrayList<>();
-            File[] fls = dir.listFiles();
-            for (File fl : Objects.requireNonNull(fls)) {
-                if (fl.isFile()) {
-                    if (fl.getName().contains(".yml")) {
-                        files.add(fl);
-                    }
-                }
-            }
+    override fun onSetupSessionClose(session: ISetupSession) {
+        super.onSetupSessionClose(session)
+        run(async = true) { WorldZipper(session.worldName, true) }
+    }
 
-            // lowerCase arena names - new 1.14 standard
-            File folder, newName;
+    override fun isWorld(name: String) = File(server.worldContainer, "$name/region").exists()
 
-            List<File> toRemove = new ArrayList<>(), toAdd = new ArrayList<>();
-            for (File file : files) {
-                if (!file.getName().equals(file.getName().toLowerCase())) {
-                    newName = new File(dir.getPath() + "/" + file.getName().toLowerCase());
-                    if (!file.renameTo(newName)) {
-                        toRemove.add(file);
-                        BedWars.plugin.getLogger().severe("Could not rename " + file.getName() + " to " + file.getName().toLowerCase() + "! Please do it manually!");
-                    } else {
-                        toAdd.add(newName);
-                        toRemove.add(file);
-                    }
-                    folder = new File(plugin.getServer().getWorldContainer(), file.getName().replace(".yml", ""));
-                    if (folder.exists()) {
-                        if (!folder.getName().equals(folder.getName().toLowerCase())) {
-                            if (!folder.renameTo(new File(plugin.getServer().getWorldContainer().getPath() + "/" + folder.getName().toLowerCase()))) {
-                                BedWars.plugin.getLogger().severe("Could not rename " + folder.getName() + " folder to " + folder.getName().toLowerCase() + "! Please do it manually!");
-                                toRemove.add(file);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
-            for (File f : toRemove) {
-                files.remove(f);
-            }
-
-            files.addAll(toAdd);
+    override fun deleteWorld(name: String) = run(async = true) {
+        try {
+            FileUtils.deleteDirectory(File(server.worldContainer, name))
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
-        Bukkit.getScheduler().runTaskAsynchronously(getOwner(), () -> {
-            File[] files = Bukkit.getWorldContainer().listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    if (f != null && f.isDirectory()) {
-                        if (f.getName().contains("bw_temp_")) {
-                            deleteWorld(f.getName());
-                        }
+    }
+
+    override fun cloneArena(name1: String, name2: String) = run(async = true) {
+        try {
+            FileUtils.copyDirectory(
+                File(server.worldContainer, name1),
+                File(server.worldContainer, name2)
+            )
+            deleteWorldTrash(name2, true)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    override val worldsList: List<String> get() {
+            val dir = server.worldContainer
+            if (dir.exists()) {
+                val worlds = mutableListOf<String>()
+                for (fl in dir.listFiles()!!) {
+                    if (!fl.isDirectory) continue
+                    val dat = File("${fl.name}/region")
+                    if (dat.exists() && !fl.name.startsWith("bw_temp")) {
+                        worlds.add(fl.name)
                     }
                 }
             }
-        });
-    }
+            return emptyList()
+        }
 
-    @Override
-    public String getDisplayName() {
-        return "Internal Restore Adapter";
-    }
+    override fun convertWorlds() {
+        val (directory, files) = getWorldFiles()
 
-    private void deleteWorldTrash(String world) {
-        for (File f : new File[]{new File(Bukkit.getWorldContainer(), world + "/level.dat"),
-                new File(Bukkit.getWorldContainer(), world + "/level.dat_mcr"),
-                new File(Bukkit.getWorldContainer(), world + "/level.dat_old"),
-                new File(Bukkit.getWorldContainer(), world + "/session.lock"),
-                new File(Bukkit.getWorldContainer(), world + "/uid.dat")}) {
-            if (f.exists()) {
-                if (!f.delete()) {
-                    getOwner().getLogger().warning("Could not delete: " + f.getPath());
-                    getOwner().getLogger().warning("This may cause issues!");
-                }
+        // lowerCase arena names - new 1.14 standard
+        for (file in files) {
+            if (file.name == file.name.lowercase()) continue
+
+            val newName = File(directory.path + "/" + file.name.lowercase())
+            if (!file.renameTo(newName)) {
+                log.severe("Could not rename ${file.name} to ${file.name.lowercase()}! Please do it manually!")
+            }
+
+            val folder = File(plugin.server.worldContainer, file.name.removeSuffix(".yml"))
+            if (!folder.exists()) continue
+            val name = folder.name
+            if (name != name.lowercase() || !folder.renameTo(File("${plugin.server.worldContainer.path}/$name".lowercase()))) {
+                log.severe("Could not rename $name folder to " + name.lowercase() + "! Please do it manually!")
+                continue
             }
         }
+        deleteTempWorlds()
     }
 }

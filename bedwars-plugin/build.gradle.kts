@@ -7,6 +7,8 @@ dependencies {
     compileOnly(libs.spigot.api)
     api(libs.bstats)
     api(project(":bedwars-api"))
+
+    api(project(":resetadapter-common"))
     api(project(":resetadapter-slime"))
     api(project(":resetadapter-slimepaper"))
     api(project(":resetadapter-aswm"))

@@ -17,144 +17,180 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
+package com.andrei1058.bedwars.api.server
 
-package com.andrei1058.bedwars.api.server;
+import com.andrei1058.bedwars.api.BedWars
+import com.andrei1058.bedwars.api.arena.IArena
+import com.andrei1058.bedwars.api.configuration.ConfigPath
+import org.apache.commons.io.FileUtils
+import org.bukkit.ChatColor
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.World
+import org.bukkit.block.Block
+import org.bukkit.entity.Item
+import org.bukkit.plugin.Plugin
+import org.bukkit.util.Vector
+import java.io.File
+import java.io.IOException
+import kotlin.math.max
+import kotlin.math.min
 
-import com.andrei1058.bedwars.api.arena.IArena;
-import com.andrei1058.bedwars.api.configuration.ConfigPath;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Item;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.function.Consumer;
-
-public abstract class RestoreAdapter {
-
-    private final Plugin plugin;
-
-    /**
-     * @param owner adapter owner.
-     */
-    public RestoreAdapter(Plugin owner) {
-        this.plugin = owner;
-    }
-
-    /**
-     * Get adapter owner.
-     */
-    public Plugin getOwner() {
-        return plugin;
-    }
+abstract class RestoreAdapter<T>(val owner: Plugin, protected val pluginName: String, val displayName: String) {
+    protected val server get() = owner.server
+    @Suppress("UNCHECKED_CAST")
+    protected val plugin = server.pluginManager.getPlugin(pluginName) as T
+    protected val api = server.servicesManager.getRegistration(BedWars::class.java)!!.provider
+    protected val log = owner.logger
+    protected val backupFolder = File(owner.dataFolder, "Cache")
 
     /**
      * Load the world.
      * Arenas will be initialized automatically based on WorldLoadEvent.
      */
-    public abstract void onEnable(IArena a);
+    abstract fun onEnable(arena: IArena)
 
     /**
      * Restore the world.
      * call new Arena when it's done.
      */
-    public abstract void onRestart(IArena a);
+    abstract fun onRestart(arena: IArena)
 
     /**
      * Unload the world.
      * This is usually used for /bw unloadArena name
      */
-    public abstract void onDisable(IArena a);
+    open fun onDisable(arena: IArena) {
+        run { server.unloadWorld(arena.worldName, false) }
+    }
 
     /**
      * Load the world for setting it up.
      */
-    public abstract void onSetupSessionStart(ISetupSession s);
+    abstract fun onSetupSessionStart(session: ISetupSession)
 
     /**
      * Unload the world.
      */
-    public abstract void onSetupSessionClose(ISetupSession s);
+    open fun onSetupSessionClose(session: ISetupSession) {
+        run {
+            server.getWorld(session.worldName)?.save()
+            server.unloadWorld(session.worldName, true)
+        }
+    }
+
 
     /**
      * Remove lobby blocks.
      */
-    public void onLobbyRemoval(@NotNull IArena a) {
-        this.foreachBlockInRegion(
-                a.getConfig().getArenaLoc(ConfigPath.ARENA_WAITING_POS1),
-                a.getConfig().getArenaLoc(ConfigPath.ARENA_WAITING_POS2),
-                (block) -> block.setType(Material.AIR)
-        );
+    fun onLobbyRemoval(arena: IArena) {
+        foreachBlockInRegion(
+            arena.config.getArenaLoc(ConfigPath.ARENA_WAITING_POS1),
+            arena.config.getArenaLoc(ConfigPath.ARENA_WAITING_POS2)
+        ) { it.type = Material.AIR }
 
-        Bukkit.getScheduler().runTaskLater(getOwner(), () -> clearItems(a.getWorld()), 15L);
+        run(delay = 15L) { clearItems(arena.getWorld()) }
     }
 
     /**
      * Check if given world exists.
      */
-    public abstract boolean isWorld(String name);
+    abstract fun isWorld(name: String): Boolean
 
     /**
      * Delete a world.
      */
-    public abstract void deleteWorld(String name);
+    abstract fun deleteWorld(name: String)
 
     /**
      * Clone an arena world.
      */
-    public abstract void cloneArena(String name1, String name2);
+    abstract fun cloneArena(name1: String, name2: String)
 
     /**
      * Get world container.
      */
-    public abstract List<String> getWorldsList();
+    abstract val worldsList: List<String>
 
     /**
      * Convert worlds if it is necessary before loading them.
      * Let them load on BedWars1058 main Thread, so they will be converted before getting loaded.
      */
-    public abstract void convertWorlds();
+    abstract fun convertWorlds()
 
-    public abstract String getDisplayName();
+    private fun foreachBlockInRegion(corner1: Location?, corner2: Location?, consumer: (Block) -> Unit) {
+        if (null == corner1 || null == corner2) return
 
-    public void foreachBlockInRegion(
-            @Nullable Location corner1, @Nullable Location corner2,
-            @NotNull Consumer<Block> consumer
-            ) {
-        if (null == corner1 || null == corner2) {
-            return;
-        }
+        val min = Vector(
+            min(corner1.blockX, corner2.blockX),
+            min(corner1.blockY, corner2.blockY),
+            min(corner1.blockZ, corner2.blockZ)
+        )
 
-        Vector min = new Vector(
-                Math.min(corner1.getBlockX(), corner2.getBlockX()),
-                Math.min(corner1.getBlockY(), corner2.getBlockY()),
-                Math.min(corner1.getBlockZ(), corner2.getBlockZ())
-        );
+        val max = Vector(
+            max(corner1.blockX, corner2.blockX),
+            max(corner1.blockY, corner2.blockY),
+            max(corner1.blockZ, corner2.blockZ)
+        )
 
-        Vector max = new Vector(
-                Math.max(corner1.getBlockX(), corner2.getBlockX()),
-                Math.max(corner1.getBlockY(), corner2.getBlockY()),
-                Math.max(corner1.getBlockZ(), corner2.getBlockZ())
-        );
-
-        for (int x = min.getBlockX(); x < max.getBlockX(); x++) {
-            for (int y = min.getBlockY(); y < max.getBlockY(); y++) {
-                for (int z = min.getBlockZ(); z < max.getBlockZ(); z++) {
-                    consumer.accept(corner1.getWorld().getBlockAt(x, y, z));
+        for (x in min.blockX..<max.blockX) {
+            for (y in min.blockY..<max.blockY) {
+                for (z in min.blockZ..<max.blockZ) {
+                    consumer(corner1.world!!.getBlockAt(x, y, z))
                 }
             }
         }
     }
 
-    public void clearItems(@NotNull World world) {
-        world.getEntities().forEach(e -> {
-            if (e instanceof Item) e.remove();
-        });
+    private fun clearItems(world: World) {
+        world.entities.forEach { (it as? Item)?.remove() }
+    }
+
+    protected fun run(async: Boolean = false, delay: Long = 0, run: Runnable) {
+        if (api.isShuttingDown) return
+        if (async) {
+            if (delay == 0L) server.scheduler.runTaskAsynchronously(owner, run)
+            server.scheduler.runTaskLaterAsynchronously(owner, run, delay)
+            return
+        }
+        if (delay == 0L) server.scheduler.runTask(owner, run)
+        server.scheduler.runTaskLater(owner, run, delay)
+    }
+
+    protected fun ISetupSession.message(message: String, success: Boolean = true)
+    = run { player.sendMessage("${if (success) ChatColor.GREEN else ChatColor.RED}$message") }
+
+    protected fun getWorldFiles(): Pair<File, Array<File>> {
+        val directory = File(owner.dataFolder, "/Arenas")
+        val files = directory.listFiles { it.isFile && it.name.endsWith(".yml") }
+        return Pair(directory, files ?: emptyArray())
+    }
+
+    protected fun deleteTempWorlds() = run(async = true) {
+        val files = server.worldContainer.listFiles() ?: return@run
+        for (f in files) {
+            if (f == null || !f.isDirectory || "bw_temp_" !in f.name) continue
+            try {
+                FileUtils.deleteDirectory(f)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    protected fun deleteWorldTrash(world: String, levelDat: Boolean = false) {
+        for (name in arrayOf(
+            "level.dat",
+            "level.dat_mcr",
+            "level.dat_old",
+            "session.lock",
+            "uid.dat"
+        )) {
+            if (name == "level.dat" && levelDat) continue
+            val file = File(server.worldContainer, "$world/$name")
+            if (!file.exists() || file.delete()) continue
+            log.warning("Could not delete: ${file.path}")
+            log.warning("This may cause issues!")
+        }
     }
 }

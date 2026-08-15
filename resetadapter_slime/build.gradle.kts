@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
     compileOnly(project(":bedwars-api"))
+    compileOnly(project(":resetadapter-common"))
     compileOnly(libs.spigot.api)
     compileOnly(libs.swm)
 }

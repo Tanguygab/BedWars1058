@@ -13,6 +13,7 @@ slf4j = "2.0.7"
 hikaricp = "5.0.1"
 bstats = "3.0.2"
 
+flow-nbt = "2.0.2"
 swm = "2.2.1"
 aswm = "1.20-R0.1-SNAPSHOT"
 
@@ -57,6 +58,7 @@ slf4j = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
 bstats = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
 
+flow-nbt = { module = "com.flowpowered:flow-nbt", version.ref = "flow-nbt" }
 swm = { module = "com.grinderwolf:slimeworldmanager-api", version.ref = "swm" }
 aswm = { module = "com.infernalsuite.aswm:api", version.ref = "aswm" }
 

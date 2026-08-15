@@ -4,9 +4,8 @@ plugins {
 
 dependencies {
     compileOnly(project(":bedwars-api"))
-    compileOnly(project(":resetadapter-common"))
     compileOnly(libs.spigot.api)
-    compileOnly(libs.aswm)
+    compileOnly(libs.flow.nbt)
 }
 
-description = "resetadapter-slimepaper"
+description = "resetadapter-slime"

@@ -1,83 +1,78 @@
-package com.andrei1058.bedwars.api.util;
+package com.andrei1058.bedwars.api.util
 
-import java.io.*;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
-public final class ZipFileUtil {
-    public static void zipDirectory(File dir, File zipFile) throws IOException {
-        FileOutputStream fout = new FileOutputStream(zipFile);
-        ZipOutputStream zout = new ZipOutputStream(fout);
-        zipSubDirectory("", dir, zout);
-        zout.close();
-    }
-
-    private static void zipSubDirectory(String basePath, File dir, ZipOutputStream zout) throws IOException {
-        byte[] buffer = new byte[4096];
-        File[] files = dir.listFiles();
-        if (files == null) return;
-        for (File file : files) {
-            if (file.isDirectory()) {
-                String path = basePath + file.getName() + "/";
-                zout.putNextEntry(new ZipEntry(path));
-                zipSubDirectory(path, file, zout);
-                zout.closeEntry();
-            } else {
-                FileInputStream fin = new FileInputStream(file);
-                zout.putNextEntry(new ZipEntry(basePath + file.getName()));
-                int length;
-                while ((length = fin.read(buffer)) > 0) {
-                    zout.write(buffer, 0, length);
-                }
-                zout.closeEntry();
-                fin.close();
-            }
+object ZipFileUtil {
+    @Throws(IOException::class)
+    fun zipDirectory(dir: File, zipFile: File) {
+        ZipOutputStream(FileOutputStream(zipFile)).use {
+            zipSubDirectory("", dir, it)
         }
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void unzipFileIntoDirectory(File file, File jiniHomeParentDir) throws IOException {
-        if (!file.exists()) return;
-        @SuppressWarnings("resource")
-        ZipFile zipFile = new ZipFile(file);
-        Enumeration<?> files = zipFile.entries();
-        File f;
-        FileOutputStream fos = null;
+    @Throws(IOException::class)
+    private fun zipSubDirectory(basePath: String?, dir: File, out: ZipOutputStream) {
+        val files = dir.listFiles() ?: return
+
+        val buffer = ByteArray(4096)
+        for (file in files) {
+            if (file.isDirectory) {
+                val path = basePath + file.name + "/"
+                out.putNextEntry(ZipEntry(path))
+                zipSubDirectory(path, file, out)
+                out.closeEntry()
+                continue
+            }
+
+            out.putNextEntry(ZipEntry(basePath + file.name))
+            var length: Int
+            FileInputStream(file).use { stream ->
+                while (stream.read(buffer).also { length = it } > 0) {
+                    out.write(buffer, 0, length)
+                }
+                stream.close()
+            }
+            out.closeEntry()
+        }
+    }
+
+    @Throws(IOException::class)
+    fun unzipFileIntoDirectory(file: File, jiniHomeParentDir: File) {
+        if (!file.exists()) return
+
+        val buffer = ByteArray(1024)
+        val zipFile = ZipFile(file)
+        val files = zipFile.entries()
 
         while (files.hasMoreElements()) {
             try {
-                ZipEntry entry = (ZipEntry) files.nextElement();
-                InputStream eis = zipFile.getInputStream(entry);
-                byte[] buffer = new byte[1024];
-                int bytesRead;
+                val entry = files.nextElement() as ZipEntry
+                val `in` = zipFile.getInputStream(entry)
 
-                f = new File(jiniHomeParentDir.getAbsolutePath(), entry.getName());
+                val file = File(jiniHomeParentDir.absolutePath, entry.name)
 
-                if (entry.isDirectory()) {
-                    f.mkdirs();
-                    continue;
-                } else {
-                    f.getParentFile().mkdirs();
-                    f.createNewFile();
+                if (entry.isDirectory) {
+                    file.mkdirs()
+                    continue
                 }
 
-                fos = new FileOutputStream(f);
+                file.parentFile.mkdirs()
+                file.createNewFile()
 
-                while ((bytesRead = eis.read(buffer)) != -1) {
-                    fos.write(buffer, 0, bytesRead);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (fos != null) {
-                    try {
-                        fos.close();
-                    } catch (IOException ignored) {
-                        // ignore
+                FileOutputStream(file).use { stream ->
+                    var length: Int
+                    while (`in`.read(buffer).also { length = it } != -1) {
+                        stream.write(buffer, 0, length)
                     }
                 }
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }

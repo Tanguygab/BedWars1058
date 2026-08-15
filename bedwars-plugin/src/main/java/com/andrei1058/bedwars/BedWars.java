@@ -542,13 +542,13 @@ public class BedWars extends JavaPlugin {
             int minor = Integer.parseInt(versionString[1]);
             int release = versionString.length > 2 ? Integer.parseInt(versionString[2]) : 0;
 
-            String adapterPath;
+            String adapterPath = "com.andrei1058.bedwars.arena.mapreset.slime.";
             if (major == 2 && minor == 2 && release == 1) {
-                adapterPath = "com.andrei1058.bedwars.arena.mapreset.slime.SlimeAdapter";
+                adapterPath += "SlimeAdapter";
             } else if (major == 2 && minor == 8 && release == 0) {
-                adapterPath = "com.andrei1058.bedwars.arena.mapreset.slime.AdvancedSlimeAdapter";
+                adapterPath += "AdvancedSlimeAdapter";
             } else if (major > 2 || major == 2 && minor >= 10) {
-                adapterPath = "com.andrei1058.bedwars.arena.mapreset.slime.SlimePaperAdapter";
+                adapterPath += "SlimePaperAdapter";
             } else {
                 return false;
             }
@@ -556,7 +556,7 @@ public class BedWars extends JavaPlugin {
             Constructor<?> constructor = Class.forName(adapterPath).getConstructor(Plugin.class);
             getLogger().info("Loading restore adapter: " + adapterPath + " ...");
 
-            RestoreAdapter candidate = (RestoreAdapter) constructor.newInstance(this);
+            RestoreAdapter<?> candidate = (RestoreAdapter<?>) constructor.newInstance(this);
             api.setRestoreAdapter(candidate);
             getLogger().info("Hook into " + candidate.getDisplayName() + " as restore adapter.");
             return true;
