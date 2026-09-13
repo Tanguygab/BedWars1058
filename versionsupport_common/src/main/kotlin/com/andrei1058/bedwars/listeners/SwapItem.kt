@@ -19,23 +19,16 @@
  */
 package com.andrei1058.bedwars.listeners
 
-import com.andrei1058.bedwars.api.arena.GameState
-import com.andrei1058.bedwars.support.version.common.VersionCommon
+import com.andrei1058.bedwars.api.BedWars
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 
 // Prevent item swap.
 class SwapItem : Listener {
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun itemSwap(e: PlayerSwapHandItemsEvent) {
-        if (e.isCancelled) return
-        val player = e.player
-        val util = VersionCommon.api.arenaUtil
-
-        if (util.isPlaying(player)) {
-            if (util.getArenaByPlayer(player).status != GameState.playing)
-                e.isCancelled = true
-        } else if (util.isSpectating(player)) e.isCancelled = true
+        if (BedWars.INSTANCE.arenaManager.isInArena(e.player))
+            e.isCancelled = true
     }
 }

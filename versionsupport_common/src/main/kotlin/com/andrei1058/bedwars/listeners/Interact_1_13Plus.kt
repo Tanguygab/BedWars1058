@@ -34,7 +34,7 @@ class Interact_1_13Plus : Listener {
         if (e.isCancelled || e.getAction() != Action.RIGHT_CLICK_BLOCK) return
         val block = e.clickedBlock ?: return
         val api = VersionCommon.api
-        if (block.world.name != api.lobbyWorld && api.arenaUtil.getArenaByPlayer(e.player) == null) return
+        if (block.world.name != api.lobbyWorld && api.arenaManager.getArena(e.player) == null) return
 
         if (block.type != Material.CHIPPED_ANVIL &&
             block.type != Material.DAMAGED_ANVIL
@@ -42,7 +42,7 @@ class Interact_1_13Plus : Listener {
 
         if (
             api.configs.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_ANVIL)
-            || api.arenaUtil.isSpectating(e.player)
+            || api.arenaManager.isSpectating(e.player)
         ) e.isCancelled = true
     }
 }

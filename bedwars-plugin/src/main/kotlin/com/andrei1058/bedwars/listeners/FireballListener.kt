@@ -1,130 +1,92 @@
-package com.andrei1058.bedwars.listeners;
+package com.andrei1058.bedwars.listeners
 
-import com.andrei1058.bedwars.api.arena.IArena;
-import com.andrei1058.bedwars.api.configuration.ConfigPath;
-import com.andrei1058.bedwars.arena.Arena;
-import com.andrei1058.bedwars.arena.LastHit;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.projectiles.ProjectileSource;
-import org.bukkit.util.Vector;
+import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.api.configuration.ConfigPath
+import com.andrei1058.bedwars.arena.LastHit
+import org.bukkit.entity.Fireball
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.ExplosionPrimeEvent
+import org.bukkit.event.entity.ProjectileHitEvent
 
-import java.util.*;
+class FireballListener(private val plugin: BedWars) : Listener {
+    private val fireballExplosionSize = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE)
+    private val fireballMakeFire = BedWars.config.getBoolean(ConfigPath.GENERAL_FIREBALL_MAKE_FIRE)
+    private val fireballHorizontal = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL) * -1
+    private val fireballVertical = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_VERTICAL)
 
-import static com.andrei1058.bedwars.BedWars.config;
-import static com.andrei1058.bedwars.BedWars.getAPI;
-
-public class FireballListener implements Listener {
-
-    private final double fireballExplosionSize;
-    private final boolean fireballMakeFire;
-    private final double fireballHorizontal;
-    private final double fireballVertical;
-
-    private final double damageSelf;
-    private final double damageEnemy;
-    private final double damageTeammates;
-
-    public FireballListener() {
-        this.fireballExplosionSize = config.getYml().getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE);
-        this.fireballMakeFire = config.getYml().getBoolean(ConfigPath.GENERAL_FIREBALL_MAKE_FIRE);
-        this.fireballHorizontal = config.getYml().getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL) * -1;
-        this.fireballVertical = config.getYml().getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_VERTICAL);
-
-        this.damageSelf = config.getYml().getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_SELF);
-        this.damageEnemy = config.getYml().getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_ENEMY);
-        this.damageTeammates = config.getYml().getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_TEAMMATES);
-    }
+    private val damageSelf = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_SELF)
+    private val damageEnemy = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_ENEMY)
+    private val damageTeammates = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_TEAMMATES)
 
     @EventHandler
-    public void fireballHit(ProjectileHitEvent e) {
-        if(!(e.getEntity() instanceof Fireball)) return;
-        Location location = e.getEntity().getLocation();
+    fun fireballHit(e: ProjectileHitEvent) {
+        val entity = e.entity
+        if (entity !is Fireball) return
+        val location = entity.location
 
-        ProjectileSource projectileSource = e.getEntity().getShooter();
-        if(!(projectileSource instanceof Player)) return;
-        Player source = (Player) projectileSource;
+        val shooter = entity.shooter
+        if (shooter !is Player) return
 
-        IArena arena = Arena.getArenaByPlayer(source);
+        val arena = plugin.arenaManager.getArena(shooter) ?: return
+        val team = arena.getTeam(shooter)
+        val world = location.world ?: return
+        val vector = location.toVector()
 
-        Vector vector = location.toVector();
-
-        World world = location.getWorld();
-
-        assert world != null;
-        Collection<Entity> nearbyEntities = world
-                .getNearbyEntities(location, fireballExplosionSize, fireballExplosionSize, fireballExplosionSize);
-        for(Entity entity : nearbyEntities) {
-            if(!(entity instanceof Player)) continue;
-            Player player = (Player) entity;
-            if(!getAPI().getArenaUtil().isPlaying(player)) continue;
+        val nearbyEntities = world.getNearbyEntities(location, fireballExplosionSize, fireballExplosionSize, fireballExplosionSize)
+        for (player in nearbyEntities) {
+            if (player !is Player) continue
+            if (!plugin.arenaManager.isPlaying(player)) continue
 
 
-            Vector playerVector = player.getLocation().toVector();
-            Vector normalizedVector = vector.subtract(playerVector).normalize();
-            Vector horizontalVector = normalizedVector.multiply(fireballHorizontal);
-            double y = normalizedVector.getY();
-            if(y < 0 ) y += 1.5;
-            if(y <= 0.5) {
-                y = fireballVertical*1.5; // kb for not jumping
-            } else {
-                y = y*fireballVertical*1.5; // kb for jumping
-            }
-            player.setVelocity(horizontalVector.setY(y));
+            val playerVector = player.location.toVector()
+            val normalizedVector = vector.subtract(playerVector).normalize()
+            val horizontalVector = normalizedVector.multiply(fireballHorizontal)
 
-            LastHit lh = LastHit.getLastHit(player);
+            var y = normalizedVector.y
+            if (y < 0) y += 1.5
+
+            if (y <= 0.5) y = fireballVertical * 1.5 // kb for not jumping
+            else y *= fireballVertical * 1.5 // kb for jumping
+
+            player.velocity = horizontalVector.setY(y)
+
+            val lh = LastHit.getLastHit(player)
             if (lh != null) {
-                lh.setDamager(source);
-                lh.setTime(System.currentTimeMillis());
+                lh.damager = shooter
+                lh.time = System.currentTimeMillis()
             } else {
-                new LastHit(player, source, System.currentTimeMillis());
+                LastHit(player, shooter, System.currentTimeMillis())
             }
 
-            if(player.equals(source)) {
-                if(damageSelf > 0) {
-                    player.damage(damageSelf); // damage shooter
-                }
-            } else if(arena.getTeam(player).equals(arena.getTeam(source))) {
-                if(damageTeammates > 0) {
-                    player.damage(damageTeammates); // damage teammates
-                }
-            } else {
-                if(damageEnemy > 0) {
-                    player.damage(damageEnemy); // damage enemies
-                }
+            val target = when {
+                player == shooter -> damageSelf // damage shooter
+                arena.getTeam(player) == team -> damageTeammates // damage teammates
+                else -> damageEnemy // damage enemies
             }
+
+            if (target > 0) player.damage(target)
         }
     }
 
-
     @EventHandler
-    public void fireballDirectHit(EntityDamageByEntityEvent e) {
-        if(!(e.getDamager() instanceof Fireball)) return;
-        if(!(e.getEntity() instanceof Player)) return;
+    fun fireballDirectHit(e: EntityDamageByEntityEvent) {
+        if (e.damager !is Fireball) return
+        val player = e.entity
+        if (player !is Player) return
 
-        if(Arena.getArenaByPlayer((Player) e.getEntity()) == null) return;
-
-        e.setCancelled(true);
+        if (plugin.arenaManager.getArena(player) == null) return
+        e.isCancelled = true
     }
 
     @EventHandler
-    public void fireballPrime(ExplosionPrimeEvent e) {
-        if(!(e.getEntity() instanceof Fireball)) return;
-        ProjectileSource shooter = ((Fireball)e.getEntity()).getShooter();
-        if(!(shooter instanceof Player)) return;
-        Player player = (Player) shooter;
+    fun fireballPrime(e: ExplosionPrimeEvent) {
+        val shooter = (e.entity as? Fireball)?.shooter
+        if (shooter !is Player) return
 
-        if(Arena.getArenaByPlayer(player) == null) return;
-
-        e.setFire(fireballMakeFire);
+        if (plugin.arenaManager.getArena(shooter) == null) return
+        e.fire = fireballMakeFire
     }
-
 }

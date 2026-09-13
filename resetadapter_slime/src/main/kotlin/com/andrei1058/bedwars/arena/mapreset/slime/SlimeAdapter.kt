@@ -43,7 +43,7 @@ open class SlimeAdapter(
 
     override fun loadWorld(arena: IArena, spawn: List<String>) {
         // Note that this method should be called asynchronously
-        var world = plugin.loadWorld(loader, arena.arenaName, true, buildPropertyMap(spawn))
+        var world = plugin.loadWorld(loader, arena.name, true, buildPropertyMap(spawn))
         if (api.serverType == ServerType.BUNGEE && api.isAutoScale) {
             world = world.clone(arena.worldName)
         }
@@ -60,24 +60,24 @@ open class SlimeAdapter(
         if (api.serverType != ServerType.BUNGEE) {
             run {
                 server.unloadWorld(arena.worldName, false)
-                run(delay = 80) { api.arenaUtil.loadArena(arena.arenaName, null) }
+                run(delay = 80) { api.arenaManager.loadArena(arena.name) }
             }
             return
         }
-        if (api.arenaUtil.gamesBeforeRestart == 0) {
-            if (api.arenaUtil.arenas.size == 1 && api.arenaUtil.arenas[0].status == GameState.restarting) {
-                val command = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)
+        if (api.arenaManager.gamesBeforeRestart == 0) {
+            if (api.arenaManager.arenas.values.firstOrNull()?.status == GameState.RESTARTING) {
+                val command = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)!!
                 log.info("Dispatching command: $command")
                 server.dispatchCommand(server.consoleSender, command)
             }
             return
         }
 
-        if (api.arenaUtil.gamesBeforeRestart != -1) api.arenaUtil.gamesBeforeRestart -= 1
+        if (api.arenaManager.gamesBeforeRestart != -1) api.arenaManager.gamesBeforeRestart -= 1
         run {
             server.unloadWorld(arena.worldName, false)
-            if (api.arenaUtil.canAutoScale(arena.arenaName)) {
-                run(delay = 80) { api.arenaUtil.loadArena(arena.arenaName, null) }
+            if (api.arenaManager.canAutoScale(arena.name)) {
+                run(delay = 80) { api.arenaManager.loadArena(arena.name) }
             }
         }
     }
@@ -85,7 +85,7 @@ open class SlimeAdapter(
     override fun onSetupSessionStart(session: ISetupSession) {
         run(async = true) {
             val sLoader = loader
-            val spm = buildPropertyMap(session.config.getString("waiting.Loc").split(","))
+            val spm = buildPropertyMap(session.config.getString("waiting.Loc")!!.split(","))
             try {
                 if (server.getWorld(session.worldName) != null) {
                     run { server.unloadWorld(session.worldName, false) }

@@ -17,126 +17,104 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
+package com.andrei1058.bedwars.listeners
 
-package com.andrei1058.bedwars.listeners;
+import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.api.arena.GameState
+import com.andrei1058.bedwars.api.configuration.ConfigPath
+import com.andrei1058.bedwars.api.server.ServerType
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.entity.CreatureSpawnEvent
+import org.bukkit.event.entity.FoodLevelChangeEvent
+import org.bukkit.event.entity.ItemSpawnEvent
+import org.bukkit.event.player.PlayerItemConsumeEvent
+import org.bukkit.event.weather.WeatherChangeEvent
 
-import com.andrei1058.bedwars.api.arena.GameState;
-import com.andrei1058.bedwars.api.arena.IArena;
-import com.andrei1058.bedwars.api.configuration.ConfigPath;
-import com.andrei1058.bedwars.api.server.ServerType;
-import com.andrei1058.bedwars.arena.Arena;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.event.weather.WeatherChangeEvent;
-
-import static com.andrei1058.bedwars.BedWars.*;
-
-public class HungerWeatherSpawn implements Listener {
-
-    private final boolean hungerWaiting;
-    private final boolean hungerIngame;
-
-    public HungerWeatherSpawn() {
-        hungerWaiting = config.getYml().getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_WAITING);
-        hungerIngame = config.getYml().getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_INGAME);
-    }
+class HungerWeatherSpawn(private val plugin: BedWars) : Listener {
+    private val hungerWaiting = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_WAITING)
+    private val hungerIngame = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_INGAME)
 
     @EventHandler
-    public void onFoodChange(FoodLevelChangeEvent e) {
-        if(e.isCancelled()) return;
-        Player player = (Player) e.getEntity();
-        IArena arena = Arena.getArenaByPlayer(player);
+    fun onFoodChange(e: FoodLevelChangeEvent) {
+        if (e.isCancelled) return
+        val player = e.entity as? Player ?: return
+        val arena = plugin.arenaManager.getArena(player)
 
-        // Dont cancel hunger for shared mode outside of arena
-        if(arena == null && getServerType() == ServerType.SHARED) return;
+        // Don't cancel hunger for shared mode outside of arena
+        if (arena == null && BedWars.serverType == ServerType.SHARED) return
 
-        // Cancel hunger in MULTIARENA lobby
-        if(arena == null) {
-            e.setCancelled(true);
-            return;
+        // Cancel hunger in MULTIARENA lobby and for spectators
+        if (arena == null || arena.isSpectator(player)) {
+            e.isCancelled = true
+            return
         }
 
-        // Cancel hunger for spectators
-        if(arena.isSpectator(player)) {
-            e.setCancelled(true);
-            return;
-        }
+        e.isCancelled = when (arena.status) {
+            GameState.WAITING,
+            GameState.STARTING,
+            GameState.RESTARTING -> !hungerWaiting
 
-        switch(arena.getStatus()) {
-            case waiting:
-            case starting:
-            case restarting:
-                e.setCancelled(!hungerWaiting);
-                break;
-            case playing:
-                e.setCancelled(!hungerIngame);
-                break;
+            GameState.PLAYING -> !hungerIngame
         }
     }
 
     @EventHandler
-    public void onWeatherChange(WeatherChangeEvent e) {
-        if (e.toWeatherState()) {
-            if (getServerType() == ServerType.SHARED) {
-                if (Arena.getArenaByIdentifier(e.getWorld().getName()) != null) {
-                    e.setCancelled(true);
-                }
-            } else {
-                e.setCancelled(true);
-            }
+    fun onWeatherChange(e: WeatherChangeEvent) {
+        if (!e.toWeatherState()) return
+
+        if (BedWars.serverType != ServerType.SHARED) {
+            e.isCancelled = true
+            return
+        }
+
+        if (plugin.arenaManager.getArenaByWorld(e.world.name) != null) {
+            e.isCancelled = true
+        }
+    }
+
+    @EventHandler //Used to prevent creature spawn
+    fun onCreatureSpawn(e: CreatureSpawnEvent) {
+        if (e.spawnReason == CreatureSpawnEvent.SpawnReason.CUSTOM) return
+
+        if (BedWars.serverType == ServerType.BUNGEE) {
+            e.isCancelled = true
+            return
+        }
+
+        if (plugin.arenaManager.getArenaByWorld(e.entity.world.name) != null) {
+            e.isCancelled = true
         }
     }
 
     @EventHandler
-    //Used to prevent creature spawn
-    public void onCreatureSpawn(CreatureSpawnEvent e) {
-        if (e.getSpawnReason() != CreatureSpawnEvent.SpawnReason.CUSTOM) {
-            if (getServerType() != ServerType.BUNGEE) {
-                if (Arena.getArenaByIdentifier(e.getEntity().getWorld().getName()) != null) {
-                    e.setCancelled(true);
-                }
-            } else {
-                e.setCancelled(true);
-            }
-        }
-    }
-
-    @EventHandler
-    public void onDrink(PlayerItemConsumeEvent e) {
-        IArena a = Arena.getArenaByPlayer(e.getPlayer());
-        if (a == null) return;
+    fun onDrink(e: PlayerItemConsumeEvent) {
+        val player = e.player
+        val arenaManager = plugin.arenaManager
+        arenaManager.getArena(e.player) ?: return
         /* remove empty bottle */
-        switch (e.getItem().getType()) {
-            case GLASS_BOTTLE:
-                nms.minusAmount(e.getPlayer(), e.getItem(), 1);
-                break;
-            case MILK_BUCKET:
-                e.setCancelled(true);
-                nms.minusAmount(e.getPlayer(), e.getItem(), 1);
-                int task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    Arena.magicMilk.remove(e.getPlayer().getUniqueId());
-                    debug("PlayerItemConsumeEvent player " + e.getPlayer() + " was removed from magicMilk");
-                }, 20 * 30L).getTaskId();
-                Arena.magicMilk.put(e.getPlayer().getUniqueId(), task);
-                break;
+        when (e.item.type) {
+            Material.GLASS_BOTTLE -> BedWars.nms.minusAmount(player, e.item, 1)
+            Material.MILK_BUCKET -> {
+                e.isCancelled = true
+                BedWars.nms.minusAmount(player, e.item, 1)
+                val task = plugin.server.scheduler.runTaskLater(plugin, Runnable {
+                    arenaManager.magicMilk.remove(player.uniqueId)
+                    BedWars.debug("PlayerItemConsumeEvent player $player was removed from magicMilk")
+                }, 20 * 30L).taskId
+                arenaManager.magicMilk[player.uniqueId] = task
+            }
+            else -> {}
         }
     }
 
-    @EventHandler
-    //Prevent item spawning, issue #60
-    public void onItemSpawn(ItemSpawnEvent e) {
-        Location l = e.getEntity().getLocation();
-        IArena a = Arena.getArenaByIdentifier(l.getWorld().getName());
-        if (a == null) return;
-        if (a.getStatus() != GameState.playing) {
-            e.setCancelled(true);
-        }
+    @EventHandler //Prevent item spawning, issue #60
+    fun onItemSpawn(e: ItemSpawnEvent) {
+        val location = e.entity.location.world ?: return
+        val arena = plugin.arenaManager.getArenaByWorld(location.name) ?: return
+        if (arena.status == GameState.PLAYING) return
+        e.isCancelled = true
     }
 }

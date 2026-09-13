@@ -38,8 +38,12 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftTNTPrimed
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack
-import org.bukkit.entity.*
 import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.Fireball
+import org.bukkit.entity.LivingEntity
+import org.bukkit.entity.Player
+import org.bukkit.entity.TNTPrimed
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -64,36 +68,38 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
 
     private fun String.toComponent() = IChatBaseComponent.ChatSerializer.a("{\"text\": \"$this\"}")
 
-    override fun sendTitle(p: Player, title: String?, subtitle: String?, fadeIn: Int, stay: Int, fadeOut: Int) {
-        if (!title.isNullOrEmpty()) p.sendPackets(
+    override fun sendTitle(player: Player, title: String?, subtitle: String?, fadeIn: Int, stay: Int, fadeOut: Int) {
+        if (!title.isNullOrEmpty()) player.sendPackets(
             PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, title.toComponent()),
             PacketPlayOutTitle(fadeIn, stay, fadeOut)
         )
-        if (subtitle != null) p.sendPackets(
+        if (subtitle != null) player.sendPackets(
             PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, subtitle.toComponent()),
             PacketPlayOutTitle(fadeIn, stay, fadeOut)
         )
     }
-    override fun playAction(p: Player, text: String) {
-        p.sendPackets(PacketPlayOutChat(text.toComponent(), 2.toByte()))
+    override fun playAction(player: Player, text: String) {
+        player.sendPackets(PacketPlayOutChat(text.toComponent(), 2.toByte()))
     }
 
-    override fun spigotHidePlayer(victim: Player, receiver: Player) = receiver.hidePlayer(victim)
-    override fun spigotShowPlayer(victim: Player, receiver: Player) = receiver.showPlayer(victim)
+    override fun getItemInHand(player: Player) = player.itemInHand ?: ItemStack(Material.AIR)
+
+    override fun hidePlayer(victim: Player, receiver: Player) = receiver.hidePlayer(victim)
+    override fun showPlayer(victim: Player, receiver: Player) = receiver.showPlayer(victim)
 
     override fun hideEntity(entity: Entity, player: Player) = player.sendPackets(PacketPlayOutEntityDestroy(entity.entityId))
 
     private val air = ItemStack(Material.AIR).nms
 
-    private fun getItem(stack: ItemStack?) = stack?.nms?.item
-    override fun isArmor(itemStack: ItemStack?) = getItem(itemStack) is ItemArmor
-    override fun isTool(itemStack: ItemStack?) = getItem(itemStack) is ItemTool
-    override fun isSword(itemStack: ItemStack?) = getItem(itemStack) is ItemSword
-    override fun isAxe(itemStack: ItemStack?) = getItem(itemStack) is ItemAxe
-    override fun isBow(itemStack: ItemStack?) = getItem(itemStack) is ItemBow
-    override fun isProjectile(itemStack: ItemStack?) = getItem(itemStack) is IProjectile
+    private fun getItem(stack: ItemStack) = stack.nms.item
+    override fun isArmor(item: ItemStack) = getItem(item) is ItemArmor
+    override fun isTool(item: ItemStack) = getItem(item) is ItemTool
+    override fun isSword(item: ItemStack) = getItem(item) is ItemSword
+    override fun isAxe(item: ItemStack) = getItem(item) is ItemAxe
+    override fun isBow(item: ItemStack) = getItem(item) is ItemBow
+    override fun isProjectile(item: ItemStack) = getItem(item) is IProjectile
 
-    override fun getDamage(i: ItemStack?) = i?.nms?.tag?.getDouble("generic.attackDamage") ?: 0.0
+    override fun getDamage(item: ItemStack) = item.nms.tag?.getDouble("generic.attackDamage") ?: 0.0
 
     override fun isInvisibilityPotion(item: ItemStack): Boolean {
         if (item.type != Material.POTION) return false
@@ -111,19 +117,19 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
     }
 
     // Avoids string search
-    override fun isGlass(type: Material?) = type == Material.GLASS || type == Material.STAINED_GLASS
+    override fun isGlass(type: Material) = type == Material.GLASS || type == Material.STAINED_GLASS
 
-    override fun setCollide(player: Player, arena: IArena?, value: Boolean) {
+    override fun setCollide(player: Player, arena: IArena, value: Boolean) {
         player.spigot().collidesWithEntities = value
     }
 
-    override fun minusAmount(p: Player, item: ItemStack, amount: Int) {
+    override fun minusAmount(player: Player, item: ItemStack, amount: Int) {
         if (item.amount - amount <= 0) {
-            p.inventory.removeItem(item)
+            player.inventory.removeItem(item)
             return
         }
         item.amount -= amount
-        p.updateInventory()
+        player.updateInventory()
     }
 
     override fun spawnVillager(location: Location) {
@@ -144,8 +150,8 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
         )
     }
 
-    override fun voidKill(p: Player) {
-        (p as CraftPlayer).handle.damageEntity(DamageSource.OUT_OF_WORLD, 1000f)
+    override fun voidKill(player: Player) {
+        (player as CraftPlayer).handle.damageEntity(DamageSource.OUT_OF_WORLD, 1000f)
     }
 
     override fun hideArmor(victim: Player, receiver: Player) {
@@ -176,12 +182,11 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
 
     @Suppress("DEPRECATION")
     override fun setBlockTeamColor(block: org.bukkit.block.Block, teamColor: TeamColor) {
-        block.data = teamColor.itemByte()
+        block.data = teamColor.byte
     }
 
-    override fun colourItem(item: ItemStack?, team: ITeam): ItemStack? {
-        if (item == null) return null
-        val color = team.getColor().itemByte().toShort()
+    override fun colourItem(item: ItemStack, team: ITeam): ItemStack {
+        val color = team.color.byte.toShort()
         val type = when (item.type) {
             Material.WOOL, Material.STAINED_CLAY, Material.STAINED_GLASS -> item.type
             Material.GLASS -> Material.STAINED_GLASS
@@ -193,11 +198,11 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
     override fun createItemStack(material: String, amount: Int, data: Short) = try {
         ItemStack(Material.valueOf(material), amount, data)
     } catch (_: Exception) {
-        plugin.logger.severe("$material is not a valid ${getName()} material!")
+        plugin.logger.severe("$material is not a valid $name material!")
         ItemStack(Material.BEDROCK)
     }
 
-    override fun isPlayerHead(material: String, data: Int) = material == "SKULL_ITEM" && data == 3
+    override fun isPlayerHead(material: Material, data: Int) = material == Material.SKULL_ITEM && data == 3
     override fun materialFireball() = Material.FIREBALL
     override fun materialPlayerHead() = Material.SKULL_ITEM
     override fun materialSnowball() = Material.SNOW_BALL
@@ -211,19 +216,19 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
     override fun materialCake() = Material.CAKE_BLOCK
     override fun materialCraftingTable() = Material.WORKBENCH
     override fun materialEnchantingTable() = Material.ENCHANTMENT_TABLE
-    override fun isBed(material: Material?) = material == Material.BED_BLOCK || material == Material.BED
+    override fun isBed(material: Material) = material == Material.BED_BLOCK || material == Material.BED
     override fun woolMaterial() = Material.WOOL
 
     @Suppress("DEPRECATION")
-    override fun itemStackDataCompare(i: ItemStack, data: Short) = i.data.data.toShort() == data
+    override fun itemStackDataCompare(item: ItemStack, data: Short) = item.data.data.toShort() == data
 
     @Suppress("DEPRECATION")
-    override fun setJoinSignBackgroundBlockData(block: BlockState, data: Byte) {
-        block.block.getRelative((block.data as Sign).attachedFace).setData(data, true)
+    override fun setJoinSignBackgroundBlockData(state: BlockState, data: Byte) {
+        state.block.getRelative((state.data as Sign).attachedFace).setData(data, true)
     }
 
-    override fun setJoinSignBackground(b: BlockState, material: Material) {
-        b.location.block.getRelative((b.data as Sign).attachedFace).type = material
+    override fun setJoinSignBackground(state: BlockState, material: Material) {
+        state.location.block.getRelative((state.data as Sign).attachedFace).type = material
     }
 
     override fun getPlayerHead(player: Player, copyTagFrom: ItemStack?): ItemStack {
@@ -235,13 +240,13 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
         return head
     }
 
-    override fun sendPlayerSpawnPackets(respawned: Player?, arena: IArena?) {
-        if (respawned == null || arena == null || !arena.isPlayer(respawned)) return
+    override fun sendPlayerSpawnPackets(player: Player, arena: IArena) {
+        if (!arena.isPlayer(player)) return
 
         // if method was used when the player was still in re-spawning screen
-        if (arena.respawnSessions.containsKey(respawned)) return
+        if (arena.respawnSessions.containsKey(player)) return
 
-        val entityPlayer = (respawned as CraftPlayer).handle
+        val entityPlayer = (player as CraftPlayer).handle
         val show = PacketPlayOutNamedEntitySpawn(entityPlayer)
         val playerVelocity = PacketPlayOutEntityVelocity(entityPlayer)
         val head = PacketPlayOutEntityHeadRotation(entityPlayer, getCompressedAngle(entityPlayer.yaw))
@@ -250,13 +255,12 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
         val armor = (1 .. 4).map { PacketPlayOutEntityEquipment(entityPlayer.id, it, entityPlayer.inventory.armorContents[it-1]) }.toTypedArray()
 
         for (p in arena.players) {
-            if (p == null) continue
-            if (p == respawned) continue
+            if (p == player) continue
             // if p is in re-spawning screen continue
             if (arena.respawnSessions.containsKey(p)) continue
 
             val boundTo = (p as CraftPlayer).handle
-            if (p.world == respawned.world && respawned.location.distance(p.location) <= arena.getRenderDistance()) {
+            if (p.world == player.world && player.location.distance(p.location) <= arena.renderDistance) {
                 // send respawned player to regular players
 
                 p.sendPackets(*armor, hand1, head, show, playerVelocity)
@@ -264,23 +268,22 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
                 // send nearby players to respawned player
                 // if the player has invisibility hide armor
                 if (p.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                    hideArmor(p, respawned)
+                    hideArmor(p, player)
                 } else {
-                    respawned.sendPackets(
+                    player.sendPackets(
                         PacketPlayOutNamedEntitySpawn(boundTo),
                         PacketPlayOutEntityVelocity(boundTo),
                         PacketPlayOutEntityHeadRotation(boundTo, getCompressedAngle(boundTo.yaw))
                     )
-                    showArmor(p, respawned)
+                    showArmor(p, player)
                 }
             }
         }
 
         for (spectator in arena.spectators) {
-            if (spectator == null) continue
-            if (spectator == respawned) continue
-            respawned.hidePlayer(spectator)
-            if (spectator.world == respawned.world && respawned.location.distance(spectator.location) <= arena.renderDistance) {
+            if (spectator == player) continue
+            player.hidePlayer(spectator)
+            if (spectator.world == player.world && player.location.distance(spectator.location) <= arena.renderDistance) {
                 // send respawned player to spectator
 
                 spectator.sendPackets(
@@ -297,7 +300,7 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
         itemMeta.spigot().isUnbreakable = true
     }
 
-    override fun getMainLevel() = (MinecraftServer.getServer() as DedicatedServer).propertyManager.properties.getProperty("level-name")!!
+    override val mainLevel: String = (MinecraftServer.getServer() as DedicatedServer).propertyManager.properties.getProperty("level-name")
 
     override fun setFireballDirection(fireball: Fireball, vector: Vector) = (fireball as CraftFireball).handle.run {
         dirX = vector.x * 0.1
@@ -327,10 +330,10 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
     }
 
     @Suppress("DEPRECATION")
-    override fun placeLadder(b: org.bukkit.block.Block, x: Int, y: Int, z: Int, a: IArena, ladderData: Int) {
-        b.getRelative(x, y, z).type = Material.LADDER
-        b.getRelative(x, y, z).data = ladderData.toByte()
-        a.addPlacedBlock(b.getRelative(x, y, z))
+    override fun placeLadder(block: org.bukkit.block.Block, x: Int, y: Int, z: Int, arena: IArena, ladderData: Int) {
+        block.getRelative(x, y, z).type = Material.LADDER
+        block.getRelative(x, y, z).data = ladderData.toByte()
+        arena.addPlacedBlock(block.getRelative(x, y, z))
     }
 
     override fun playVillagerEffect(player: Player, location: Location) {
@@ -351,10 +354,10 @@ class v1_8_R3(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name,
         item.tag = tag
         return CraftItemStack.asBukkitCopy(item)
     }
-    override fun setTag(itemStack: ItemStack, key: String?, value: String?): ItemStack {
-        val tag = itemStack.tag ?: NBTTagCompound()
+    override fun setTag(item: ItemStack, key: String?, value: String?): ItemStack {
+        val tag = item.tag ?: NBTTagCompound()
         tag.setString(key, value)
-        return itemStack.setTag(tag)
+        return item.setTag(tag)
     }
     override fun copyTag(from: ItemStack?, to: ItemStack): ItemStack {
         return to.setTag(from?.tag ?: return to)

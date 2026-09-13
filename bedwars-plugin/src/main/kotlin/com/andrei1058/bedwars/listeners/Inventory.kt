@@ -17,135 +17,87 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
+package com.andrei1058.bedwars.listeners
 
-package com.andrei1058.bedwars.listeners;
+import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.api.arena.GameState
+import com.andrei1058.bedwars.api.events.gameplay.GameStateChangeEvent
+import com.andrei1058.bedwars.api.language.Language
+import com.andrei1058.bedwars.api.language.Messages
+import com.andrei1058.bedwars.api.server.ServerType
+import com.andrei1058.bedwars.api.server.SetupType
+import com.andrei1058.bedwars.arena.SetupSession
+import org.bukkit.ChatColor
+import org.bukkit.Material
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.inventory.ClickType
+import org.bukkit.event.inventory.InventoryAction
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryType
+import org.bukkit.inventory.ItemStack
+import org.bukkit.potion.PotionEffectType
 
-import com.andrei1058.bedwars.BedWars;
-import com.andrei1058.bedwars.api.arena.GameState;
-import com.andrei1058.bedwars.api.arena.IArena;
-import com.andrei1058.bedwars.api.events.gameplay.GameStateChangeEvent;
-import com.andrei1058.bedwars.api.language.Language;
-import com.andrei1058.bedwars.api.language.Messages;
-import com.andrei1058.bedwars.api.server.ServerType;
-import com.andrei1058.bedwars.api.server.SetupType;
-import com.andrei1058.bedwars.arena.Arena;
-import com.andrei1058.bedwars.arena.SetupSession;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffectType;
-
-import java.util.Objects;
-
-import static com.andrei1058.bedwars.BedWars.nms;
-import static org.bukkit.event.inventory.InventoryAction.HOTBAR_SWAP;
-import static org.bukkit.event.inventory.InventoryAction.MOVE_TO_OTHER_INVENTORY;
-
-public class Inventory implements Listener {
-
+class Inventory(private val plugin: BedWars) : Listener {
     @EventHandler
-    public void onClose(InventoryCloseEvent e) {
-        Player p = (Player) e.getPlayer();
-        if (nms.getInventoryName(e).equalsIgnoreCase(SetupSession.getInvName())) {
-            SetupSession ss = SetupSession.getSession(p.getUniqueId());
-            if (ss != null) {
-                if (ss.getSetupType() == null)
-                    ss.cancel();
-            }
-        }
+    fun onClose(e: InventoryCloseEvent) {
+        val player = e.player as? Player ?: return
+        if (BedWars.nms.getInventoryName(e) != SetupSession.INVENTORY_NAME) return
+
+        val ss = SetupSession.getSession(player.uniqueId) ?: return
+        if (ss.setupType == null) ss.cancel()
     }
 
     /**
      * Manage command-items when clicked in inventory
      */
     @EventHandler
-    public void onCommandItemClick(InventoryClickEvent e) {
+    fun onCommandItemClick(e: InventoryClickEvent) {
         //block moving from hotBar
-        if (e.getAction() == HOTBAR_SWAP && e.getClick() == ClickType.NUMBER_KEY) {
-            if (e.getHotbarButton() > -1) {
-                ItemStack i = e.getWhoClicked().getInventory().getItem(e.getHotbarButton());
-                if (i != null) {
-                    if (isCommandItem(i)) {
-                        e.setCancelled(true);
-                        return;
-                    }
-                }
+        if (e.action == InventoryAction.HOTBAR_SWAP && e.click == ClickType.NUMBER_KEY && e.hotbarButton > -1) {
+            val item = e.whoClicked.inventory.getItem(e.hotbarButton)
+            if (item != null && isCommandItem(item)) {
+                e.isCancelled = true
+                return
             }
         }
 
         //block moving cursor item outside
-        if (e.getCursor() != null) {
-            if (e.getCursor().getType() != Material.AIR) {
-                if (e.getClickedInventory() == null) {
-                    if (isCommandItem(e.getCursor())) {
-                        e.getWhoClicked().closeInventory();
-                        e.setCancelled(true);
-                    }
-                } else if (e.getClickedInventory().getType() != e.getWhoClicked().getInventory().getType()) {
-                    if (isCommandItem(e.getCursor())) {
-                        e.getWhoClicked().closeInventory();
-                        e.setCancelled(true);
-                    }
-                } else {
-                    if (isCommandItem(e.getCursor())) e.setCancelled(true);
-                }
-            }
-        }
+        testItem(e, e.cursor)
 
+        val item = e.currentItem
         //block moving current item outside
-        if (e.getCurrentItem() != null) {
-            if (e.getCurrentItem().getType() != Material.AIR) {
-                if (e.getClickedInventory() == null) {
-                    if (isCommandItem(e.getCurrentItem())) {
-                        e.getWhoClicked().closeInventory();
-                        e.setCancelled(true);
-                    }
-                } else if (e.getClickedInventory().getType() != e.getWhoClicked().getInventory().getType()) {
-                    if (isCommandItem(e.getCurrentItem())) {
-                        e.getWhoClicked().closeInventory();
-                        e.setCancelled(true);
-                    }
-                } else {
-                    if (isCommandItem(e.getCurrentItem())) e.setCancelled(true);
-                }
-            }
-        }
+        testItem(e, item)
 
         //block moving with shift
-        if (e.getAction() == MOVE_TO_OTHER_INVENTORY) {
-            if (isCommandItem(e.getCurrentItem())) e.setCancelled(true);
-        }
+        if (e.action != InventoryAction.MOVE_TO_OTHER_INVENTORY) return
+        if (item != null && isCommandItem(item)) e.isCancelled = true
+    }
+
+    private fun testItem(e: InventoryClickEvent, item: ItemStack?) {
+        if (item == null || item.type == Material.AIR) return
+        if (!isCommandItem(item)) return
+        e.isCancelled = true
+        val player = e.whoClicked
+        if (e.clickedInventory?.type != player.inventory.type)
+            player.closeInventory()
     }
 
     @EventHandler
-    public void onClick(InventoryClickEvent e) {
-
+    fun onClick(e: InventoryClickEvent) {
         //issue #225
-        if (e.getSlotType() == InventoryType.SlotType.ARMOR) {
-            if (Arena.getArenaByPlayer((Player) e.getWhoClicked()) != null) {
-                if (e.getWhoClicked().hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                    e.getWhoClicked().closeInventory();
-                    for (Player pl : e.getWhoClicked().getWorld().getPlayers()) {
-                        BedWars.nms.hideArmor((Player) e.getWhoClicked(), pl);
-                    }
-                }
-            }
+        val player = e.whoClicked as? Player ?: return
+        val arena = plugin.arenaManager.getArena(player)
+
+        if (e.slotType == InventoryType.SlotType.ARMOR && arena != null && player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+            player.closeInventory()
+            player.world.players.forEach { BedWars.nms.hideArmor(player, it) }
         }
 
-        if (e.getCurrentItem() == null) return;
-        if (e.getCurrentItem().
-
-                getType() == Material.AIR) return;
-
-        Player p = (Player) e.getWhoClicked();
-        ItemStack i = e.getCurrentItem();
+        val item = e.currentItem ?: return
+        if (item.type == Material.AIR) return
 
         /*//Prevent moving of command items
         if (nms.isCustomBedWarsItem(i)) {
@@ -161,73 +113,66 @@ public class Inventory implements Listener {
                 }
             }
         }*/
-
-        IArena a = Arena.getArenaByPlayer(p);
-        if (a != null) {
-
+        if (arena != null) {
             //Prevent players from moving items in stats GUI
-            if (nms.getInventoryName(e).equals(Language.getMsg(p, Messages.PLAYER_STATS_GUI_INV_NAME).replace("{playername}", p.getName()).replace("{player}", p.getDisplayName()))) {
-                e.setCancelled(true);
-                return;
+            if (BedWars.nms.getInventoryName(e) == Language
+                .getMsg(player, Messages.PLAYER_STATS_GUI_INV_NAME)
+                .replace("{playername}", player.name)
+                .replace("{player}", player.displayName)
+            ) {
+                e.isCancelled = true
+                return
             }
 
             /* Make it so they can't toggle their armor */
-            if (e.getSlotType() == InventoryType.SlotType.ARMOR) {
-                e.setCancelled(true);
-                return;
+            if (e.slotType == InventoryType.SlotType.ARMOR) {
+                e.isCancelled = true
+                return
             }
         }
 
-        if (!i.hasItemMeta()) return;
-        if (!i.getItemMeta().hasDisplayName()) return;
-        if (BedWars.getServerType() == ServerType.MULTIARENA) {
-            if (e.getWhoClicked().getLocation().getWorld().getName().equalsIgnoreCase(BedWars.getLobbyWorld())) {
-                e.setCancelled(true);
-            }
+        if (!item.hasItemMeta() || !item.itemMeta!!.hasDisplayName()) return
+        if (BedWars.serverType == ServerType.MULTIARENA && player.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true)) {
+            e.isCancelled = true
         }
 
         /* Check setup gui items */
-        if (SetupSession.isInSetupSession(p.getUniqueId()) && nms.getInventoryName(e).equalsIgnoreCase(SetupSession.getInvName())) {
-            SetupSession ss = SetupSession.getSession(p.getUniqueId());
-            if (e.getSlot() == SetupSession.getAdvancedSlot()) {
-                Objects.requireNonNull(ss).setSetupType(SetupType.ADVANCED);
-            } else if (e.getSlot() == SetupSession.getAssistedSlot()) {
-                Objects.requireNonNull(ss).setSetupType(SetupType.ASSISTED);
+        val ss = SetupSession.getSession(player.uniqueId)
+        if (ss != null && BedWars.nms.getInventoryName(e) == SetupSession.INVENTORY_NAME) {
+            ss.setupType = when (e.slot) {
+                SetupSession.ADVANCED_SLOT -> SetupType.ADVANCED
+                SetupSession.ASSISTED_SLOT -> SetupType.ASSISTED
+                else -> ss.setupType
             }
-            if (!Objects.requireNonNull(ss).startSetup()) {
-                ss.getPlayer().sendMessage(ChatColor.RED + "Could not start setup session. Pleas check the console.");
+            if (!ss.startSetup()) {
+                ss.player.sendMessage("${ChatColor.RED}Could not start setup session. Pleas check the console.")
             }
-            p.closeInventory();
-            return;
+            player.closeInventory()
+            return
         }
 
-        if (a != null) {
-            if (a.isSpectator(p)) {
-                e.setCancelled(true);
-                //noinspection UnnecessaryReturnStatement
-                return;
-            }
-        }
-    }
-
-    /**
-     * Check if an item is command-item
-     */
-    private static boolean isCommandItem(ItemStack i) {
-        if (i == null) return false;
-        if (i.getType() == Material.AIR) return false;
-        if (nms.isCustomBedWarsItem(i)) {
-            String[] customData = nms.getCustomData(i).split("_");
-            if (customData.length >= 2) {
-                return customData[0].equals("RUNCOMMAND");
-            }
-        }
-        return false;
+        if (arena == null || !arena.isSpectator(player)) return
+        e.isCancelled = true
+        return
     }
 
     @EventHandler
-    public void onGameEnd(GameStateChangeEvent e) {
-        if(e.getNewState() != GameState.restarting) return;
-        e.getArena().getPlayers().forEach(Player::closeInventory); // close any open guis when the game ends (e.g. shop)
+    fun onGameEnd(e: GameStateChangeEvent) {
+        if (e.newState != GameState.RESTARTING) return
+        // close any open guis when the game ends (e.g. shop)
+        e.arena.players.forEach { it.closeInventory() }
+    }
+
+    companion object {
+        /**
+         * Check if an item is command-item
+         */
+        private fun isCommandItem(item: ItemStack): Boolean {
+            if (item.type == Material.AIR) return false
+            if (!BedWars.nms.isCustomBedWarsItem(item)) return false
+
+            val customData = BedWars.nms.getCustomData(item)!!.split("_")
+            return customData.size >= 2 && customData[0] == "RUNCOMMAND"
+        }
     }
 }

@@ -45,7 +45,7 @@ object ItemDropPickListener {
             player.location.world!!.name.equals(VersionCommon.api.lobbyWorld, ignoreCase = true)
 
     internal fun checkArena(arena: IArena, player: Player) = !arena.isPlayer(player) ||
-        arena.getStatus() != GameState.playing ||
+        arena.status != GameState.PLAYING ||
         arena.respawnSessions.containsKey(player)
 
     /**
@@ -55,7 +55,7 @@ object ItemDropPickListener {
         if (player !is Player) return false
         if (checkServerType(player)) return true
 
-        val arena = VersionCommon.api.getArenaUtil().getArenaByPlayer(player) ?: return false
+        val arena = VersionCommon.api.arenaManager.getArena(player) ?: return false
 
         if (checkArena(arena, player)) return true
 
@@ -64,17 +64,17 @@ object ItemDropPickListener {
             return false
         }
 
-        if (VersionCommon.api.getVersionSupport().isBed(item.itemStack.type)) {
+        if (VersionCommon.api.versionSupport.isBed(item.itemStack.type)) {
             item.remove()
             return true
         }
 
         if (item.itemStack.hasItemMeta() &&
             item.itemStack.itemMeta!!.hasDisplayName() &&
-            "custom" in item.itemStack.itemMeta!!.displayName
+            item.itemStack.itemMeta!!.displayName.startsWith("custom")
         ) {
             //Call ore pick up event
-            if (VersionCommon.api.afkUtil.isPlayerAFK(player.player)) return true //Cancel event if player is afk
+            if (VersionCommon.api.afkManager.isAFK(player)) return true //Cancel event if player is afk
 
             val event = PlayerGeneratorCollectEvent(player, item, arena)
             Bukkit.getPluginManager().callEvent(event)
@@ -92,7 +92,7 @@ object ItemDropPickListener {
         if (player !is Player) return false
         if (checkServerType(player)) return true
 
-        val arena = VersionCommon.api.arenaUtil.getArenaByPlayer(player) ?: return false
+        val arena = VersionCommon.api.arenaManager.getArena(player) ?: return false
         return checkArena(arena, player) || item.itemStack.type == Material.COMPASS
     }
 
@@ -132,7 +132,7 @@ object ItemDropPickListener {
     class ArrowCollect : Listener {
         @EventHandler
         fun onArrowPick(e: PlayerPickupArrowEvent) {
-            if (VersionCommon.api.arenaUtil.isSpectating(e.player)) e.isCancelled = true
+            if (VersionCommon.api.arenaManager.isSpectating(e.player)) e.isCancelled = true
         }
     }
 }

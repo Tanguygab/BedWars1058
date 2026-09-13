@@ -10,11 +10,11 @@ import org.bukkit.entity.LivingEntity
 abstract class DespawnableProviderCommon<T: LivingEntity>(val type: DespawnableType) {
 
     fun getDisplayName(attr: DespawnableAttributes, team: ITeam): String {
-        val lang = Language.getDefaultLanguage()
+        val lang = Language.defaultLanguage
         return lang.m(type.displayName)
             .replace("{despawn}", attr.despawnSeconds.toString())
             .replace("{health}", (lang.m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH) + " ").repeat(10))
-            .replace("{TeamColor}", team.getColor().chat().toString())
+            .replace("{TeamColor}", team.color.chat.toString())
     }
 
     abstract fun spawn(attr: DespawnableAttributes, location: Location, team: ITeam, api: VersionSupport): T

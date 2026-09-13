@@ -17,114 +17,89 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
+package com.andrei1058.bedwars.listeners
 
-package com.andrei1058.bedwars.listeners;
+import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.api.arena.IArena
+import com.andrei1058.bedwars.api.configuration.ConfigPath
+import com.andrei1058.bedwars.api.language.Language
+import com.andrei1058.bedwars.api.server.ServerType
+import com.andrei1058.bedwars.arena.LastHit
+import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.arena.team.BedWarsTeam
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.CooldownCommand
+import org.bukkit.entity.Player
+import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerChangedWorldEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
-import com.andrei1058.bedwars.BedWars;
-import com.andrei1058.bedwars.api.arena.IArena;
-import com.andrei1058.bedwars.api.configuration.ConfigPath;
-import com.andrei1058.bedwars.api.language.Language;
-import com.andrei1058.bedwars.api.server.ServerType;
-import com.andrei1058.bedwars.arena.Arena;
-import com.andrei1058.bedwars.arena.LastHit;
-import com.andrei1058.bedwars.arena.SetupSession;
-import com.andrei1058.bedwars.arena.team.BedWarsTeam;
-import com.andrei1058.bedwars.commands.bedwars.subcmds.regular.CmdStats;
-import com.andrei1058.bedwars.sidebar.SidebarService;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.UUID;
-
-import static com.andrei1058.bedwars.BedWars.*;
-
-public class QuitAndTeleportListener implements Listener {
-
+class QuitAndTeleportListener(private val plugin: BedWars) : Listener {
     @EventHandler
-    public void onLeave(@NotNull PlayerQuitEvent e) {
-        Player p = e.getPlayer();
+    fun onLeave(e: PlayerQuitEvent) {
+        val player = e.player
         // Remove from arena
-        IArena a = Arena.getArenaByPlayer(p);
-        if (a != null) {
-            if (a.isPlayer(p)) {
-                a.removePlayer(p, true);
-            } else if (a.isSpectator(p)) {
-                a.removeSpectator(p, true);
+        plugin.arenaManager.getArena(player)?.remove(player)
+
+        //Save preferred language
+        val uuid = player.uniqueId
+        if (uuid in Language.langByPlayer) {
+            BedWars.plugin.run(async = true) {
+                var iso = Language.langByPlayer[uuid]!!.iso
+                if (Language.isLanguageExist(iso)) {
+                    if (iso in BedWars.config.getStringList(ConfigPath.GENERAL_CONFIGURATION_DISABLED_LANGUAGES))
+                        iso = Language.defaultLanguage.iso
+                    BedWars.remoteDatabase.setLanguage(uuid, iso)
+                }
+                Language.langByPlayer.remove(uuid)
             }
         }
 
-        //Save preferred language
-        if (Language.getLangByPlayer().containsKey(p.getUniqueId())) {
-            final UUID u = p.getUniqueId();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                String iso = Language.getLangByPlayer().get(p.getUniqueId()).getIso();
-                if (Language.isLanguageExist(iso)) {
-                    if (BedWars.config.getYml().getStringList(ConfigPath.GENERAL_CONFIGURATION_DISABLED_LANGUAGES).contains(iso))
-                        iso = Language.getDefaultLanguage().getIso();
-                    BedWars.getRemoteDatabase().setLanguage(u, iso);
-                }
-                Language.getLangByPlayer().remove(p.getUniqueId());
-            });
-        }
-
-        if (getServerType() != ServerType.SHARED) {
-            e.setQuitMessage(null);
+        if (BedWars.serverType != ServerType.SHARED) {
+            e.quitMessage = null
         }
         // Manage internal parties
-        if (getParty().isInternal()) {
-            if (getParty().hasParty(p)) {
-                getParty().removeFromParty(p);
+        val party = BedWars.party
+        if (party.isInternal) {
+            if (party.hasParty(player)) {
+                party.removeFromParty(player)
             }
         }
         // Check if was doing a setup and remove the session
-        SetupSession ss = SetupSession.getSession(p.getUniqueId());
-        if (ss != null) {
-            ss.cancel();
-        }
+        val ss = SetupSession.getSession(uuid)
+        ss?.cancel()
 
-        SidebarService.getInstance().remove(e.getPlayer());
+        plugin.scoreboardManager.remove(player)
 
-        BedWarsTeam.reSpawnInvulnerability.remove(e.getPlayer().getUniqueId());
+        BedWarsTeam.reSpawnInvulnerability.remove(uuid)
 
-        LastHit lh = LastHit.getLastHit(p);
-        if (lh != null) {
-            lh.remove();
-        }
+        LastHit.getLastHit(player)?.remove()
 
-        CmdStats.getStatsCoolDown().remove(e.getPlayer().getUniqueId());
+        MainCommand.INSTANCE.subCommands
+            .filterIsInstance<CooldownCommand>()
+            .forEach { it.removeCooldown(uuid) }
     }
 
     /**
      * Handle players teleported outside.
      */
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onWorldChange(@NotNull PlayerChangedWorldEvent e) {
-
+    fun onWorldChange(e: PlayerChangedWorldEvent) {
         // if player was teleported outside arena
-        IArena arena = Arena.getArenaByPlayer(e.getPlayer());
 
-        if (null == arena) {
-            return;
-        }
+        val player = e.player
+        val arena = plugin.arenaManager.getArena(player) ?: return
 
-        if (e.getPlayer().getWorld().getName().equals(arena.getWorldName())) {
-            return;
-        }
+        if (player.world.name == arena.worldName) return
 
-        if (arena.isPlayer(e.getPlayer())) {
-            // it will teleport you to the lobby world or cached location
-            arena.removePlayer(e.getPlayer(), false);
-        }
+        // it will teleport you to the lobby world or cached location
+        arena.remove(player)
+    }
 
-        if (arena.isSpectator(e.getPlayer())) {
-            // it will teleport you to the lobby world or cached location
-            arena.removeSpectator(e.getPlayer(), false);
-        }
+    fun IArena.remove(player: Player) {
+        if (isPlayer(player)) removePlayer(player, false)
+        if (isSpectator(player)) removeSpectator(player, false)
     }
 }

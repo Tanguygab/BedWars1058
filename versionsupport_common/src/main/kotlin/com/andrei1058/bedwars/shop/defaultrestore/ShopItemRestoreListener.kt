@@ -45,8 +45,8 @@ object ShopItemRestoreListener {
     fun managePickup(item: Item, player: LivingEntity) {
         if (player !is Player) return
 
-        val arena = VersionCommon.api.arenaUtil.getArenaByPlayer(player) ?: return
-        if (arena.status != GameState.playing || !arena.isPlayer(player)) return
+        val arena = VersionCommon.api.arenaManager.getArena(player) ?: return
+        if (arena.status != GameState.PLAYING || !arena.isPlayer(player)) return
 
         val versionSupport = VersionCommon.api.versionSupport
         if (!versionSupport.isSword(item.itemStack)) return
@@ -75,8 +75,8 @@ object ShopItemRestoreListener {
     private fun manageDrop(player: Entity, item: Item): Boolean {
         if (player !is Player) return false
 
-        val arena = VersionCommon.api.arenaUtil.getArenaByPlayer(player) ?: return false
-        if (arena.status != GameState.playing || !arena.isPlayer(player)) return false
+        val arena = VersionCommon.api.arenaManager.getArena(player) ?: return false
+        if (arena.status != GameState.PLAYING || !arena.isPlayer(player)) return false
 
         val versionSupport = VersionCommon.api.versionSupport
         if (versionSupport.isCustomBedWarsItem(item.itemStack)
@@ -87,7 +87,7 @@ object ShopItemRestoreListener {
             return player.inventory.none { it != null && versionSupport.isSword(it) && versionSupport.getDamage(it) >= damage }
         } else {
             if (player.inventory.none { it != null && versionSupport.isSword(it) })
-                arena.getTeam(player).defaultSword(player, true)
+                arena.getTeam(player)!!.defaultSword(player)
         }
         return false
     }
@@ -104,7 +104,7 @@ object ShopItemRestoreListener {
     // 1.11 or older
     class PlayerPickup : Listener {
         @EventHandler
-        fun onDrop(@Suppress("DEPRECATION") e: PlayerPickupItemEvent) {
+        fun onPickUp(@Suppress("DEPRECATION") e: PlayerPickupItemEvent) {
             managePickup(e.item, e.player)
         }
     }
@@ -120,7 +120,7 @@ object ShopItemRestoreListener {
     // 1.12 or newer
     class EntityPickup : Listener {
         @EventHandler
-        fun onDrop(e: EntityPickupItemEvent) {
+        fun onPickUp(e: EntityPickupItemEvent) {
             managePickup(e.item, e.entity)
         }
     }
@@ -134,12 +134,10 @@ object ShopItemRestoreListener {
         fun onInventoryClose(e: InventoryCloseEvent) {
             if (e.inventory.type == InventoryType.PLAYER) return
 
-            val arenaUtil = VersionCommon.api.arenaUtil
-            val player = e.player
-            if (arenaUtil.getArenaByPlayer(player as Player) == null) return
-
-            val arena = arenaUtil.getArenaByPlayer(player)
-            if (arena.status != GameState.playing || !arena.isPlayer(player)) return
+            val arenaManager = VersionCommon.api.arenaManager
+            val player = e.player as? Player ?: return
+            val arena = arenaManager.getArena(player) ?: return
+            if (arena.status != GameState.PLAYING || !arena.isPlayer(player)) return
 
             var sword = false
             for (item in player.inventory) {
@@ -149,8 +147,8 @@ object ShopItemRestoreListener {
 
             if (sword) return
             val team = arena.getTeam(player)
-            if (team != null && !arena.isReSpawning(player)) {
-                team.defaultSword(player, true)
+            if (team != null && !arena.isRespawning(player)) {
+                team.defaultSword(player)
             }
         }
     }

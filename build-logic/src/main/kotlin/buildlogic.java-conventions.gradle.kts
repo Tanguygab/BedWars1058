@@ -38,6 +38,9 @@ repositories {
     }
     maven("https://repo.titanvale.net/releases") {
         name = "FlowNBT-repo"
+        content {
+            excludeGroup("org.spigotmc")
+        }
     }
     maven("https://repo.infernalsuite.com/repository/maven-snapshots/") {
         name = "AdvancedSlimeWorldManager-repo"
@@ -46,8 +49,6 @@ repositories {
 
 dependencies {
     compileOnly("net.md-5:bungeecord-chat:1.8-SNAPSHOT")
-    compileOnly("commons-io:commons-io:2.13.0")
-    compileOnly("org.jetbrains:annotations:24.0.1")
 }
 
 group = "com.andrei1058.bedwars"

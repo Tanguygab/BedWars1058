@@ -71,18 +71,18 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
         )
     }
 
-    private fun getItem(stack: ItemStack?) = stack?.nms?.item
-    override fun isArmor(itemStack: ItemStack?) = getItem(itemStack).let { it is ItemArmor || it is ItemElytra }
-    override fun isTool(itemStack: ItemStack?) = getItem(itemStack) is ItemTool
-    override fun isSword(itemStack: ItemStack?) = getItem(itemStack) is ItemSword
-    override fun isAxe(itemStack: ItemStack?) = getItem(itemStack) is ItemAxe
-    override fun isBow(itemStack: ItemStack?) = getItem(itemStack) is ItemBow
-    override fun isProjectile(itemStack: ItemStack?) = getItem(itemStack) is IProjectile
+    private fun getItem(stack: ItemStack) = stack.nms.item
+    override fun isArmor(item: ItemStack) = getItem(item).let { it is ItemArmor || it is ItemElytra }
+    override fun isTool(item: ItemStack) = getItem(item) is ItemTool
+    override fun isSword(item: ItemStack) = getItem(item) is ItemSword
+    override fun isAxe(item: ItemStack) = getItem(item) is ItemAxe
+    override fun isBow(item: ItemStack) = getItem(item) is ItemBow
+    override fun isProjectile(item: ItemStack) = getItem(item) is IProjectile
 
-    override fun getDamage(i: ItemStack?) = i?.nms?.tag?.getDouble("generic.attackDamage") ?: 0.0
+    override fun getDamage(item: ItemStack) = item.nms.tag?.getDouble("generic.attackDamage") ?: 0.0
 
-    override fun voidKill(p: Player) {
-        (p as CraftPlayer).handle.damageEntity(DamageSource.OUT_OF_WORLD, 1000f)
+    override fun voidKill(player: Player) {
+        (player as CraftPlayer).handle.damageEntity(DamageSource.OUT_OF_WORLD, 1000f)
     }
 
     override fun hideArmor(victim: Player, receiver: Player) {
@@ -110,7 +110,7 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
             for (z in -1..1) {
                 val bed = team.bed.clone().add(x.toDouble(), 0.0, z.toDouble()).block.state
                 if (bed is Bed) {
-                    bed.color = team.color.dye()
+                    bed.color = team.color.dye
                     bed.update()
                 }
             }
@@ -127,16 +127,16 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
 
     @Suppress("DEPRECATION")
     override fun setBlockTeamColor(block: org.bukkit.block.Block, teamColor: TeamColor) {
-        block.data = teamColor.itemByte()
+        block.data = teamColor.byte
     }
 
-    override fun colourItem(item: ItemStack?, team: ITeam): ItemStack? {
-        val type = when (item?.type) {
+    override fun colourItem(item: ItemStack, team: ITeam): ItemStack {
+        val type = when (item.type) {
             Material.WOOL, Material.STAINED_CLAY, Material.STAINED_GLASS -> item.type
             Material.GLASS -> Material.STAINED_GLASS
             else -> return item
         }
-        return ItemStack(type, item.amount, team.getColor().itemByte().toShort())
+        return ItemStack(type, item.amount, team.color.byte.toShort())
     }
 
     override fun createItemStack(material: String, amount: Int, data: Short) = try {
@@ -146,7 +146,7 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
         ItemStack(Material.BEDROCK)
     }
 
-    override fun isPlayerHead(material: String, data: Int) = material == "SKULL_ITEM" && data == 3
+    override fun isPlayerHead(material: Material, data: Int) = material == Material.SKULL_ITEM && data == 3
     override fun materialFireball() = Material.FIREBALL
     override fun materialPlayerHead() = Material.SKULL_ITEM
     override fun materialSnowball() =Material.SNOW_BALL
@@ -159,15 +159,15 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
     override fun materialCake() = Material.CAKE_BLOCK
     override fun materialCraftingTable() = Material.WORKBENCH
     override fun materialEnchantingTable() = Material.ENCHANTMENT_TABLE
-    override fun isBed(material: Material?) = material == Material.BED_BLOCK || material == Material.BED
+    override fun isBed(material: Material) = material == Material.BED_BLOCK || material == Material.BED
     override fun woolMaterial() = Material.WOOL
 
     @Suppress("DEPRECATION")
-    override fun itemStackDataCompare(i: ItemStack, data: Short) = i.data.data.toShort() == data
+    override fun itemStackDataCompare(item: ItemStack, data: Short) = item.data.data.toShort() == data
 
     @Suppress("DEPRECATION")
-    override fun setJoinSignBackgroundBlockData(block: BlockState, data: Byte) {
-        block.block.getRelative((block.data as Sign).attachedFace).setData(data, true)
+    override fun setJoinSignBackgroundBlockData(state: BlockState, data: Byte) {
+        state.block.getRelative((state.data as Sign).attachedFace).setData(data, true)
     }
 
     override fun getPlayerHead(player: Player, copyTagFrom: ItemStack?): ItemStack {
@@ -179,63 +179,69 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
         return head
     }
 
-    override fun sendPlayerSpawnPackets(respawned: Player?, arena: IArena?) {
-        if (respawned == null || arena == null || !arena.isPlayer(respawned)) return
+    override fun sendPlayerSpawnPackets(player: Player, arena: IArena) {
+        if (!arena.isPlayer(player)) return
 
         // if method was used when the player was still in re-spawning screen
-        if (arena.isReSpawning(respawned)) return
+        if (arena.isRespawning(player)) return
 
-        val entityPlayer = (respawned as CraftPlayer).handle
+        val entityPlayer = (player as CraftPlayer).handle
         val show = PacketPlayOutNamedEntitySpawn(entityPlayer)
         val playerVelocity = PacketPlayOutEntityVelocity(entityPlayer)
         val head = PacketPlayOutEntityHeadRotation(entityPlayer, getCompressedAngle(entityPlayer.yaw))
 
         val hand1 = PacketPlayOutEntityEquipment(entityPlayer.id, EnumItemSlot.MAINHAND, entityPlayer.inventory.itemInHand)
         val hand2 = PacketPlayOutEntityEquipment(entityPlayer.id, EnumItemSlot.OFFHAND, entityPlayer.itemInOffHand)
-        val helmet = PacketPlayOutEntityEquipment(entityPlayer.id, EnumItemSlot.HEAD, entityPlayer.inventory.armorContents.get(3))
-        val chest = PacketPlayOutEntityEquipment(entityPlayer.id, EnumItemSlot.CHEST, entityPlayer.inventory.armorContents.get(2))
-        val pants = PacketPlayOutEntityEquipment(entityPlayer.id, EnumItemSlot.LEGS, entityPlayer.inventory.armorContents.get(1))
-        val boots = PacketPlayOutEntityEquipment(entityPlayer.id, EnumItemSlot.FEET, entityPlayer.inventory.armorContents.get(0))
+        val armor = entityPlayer.inventory.armorContents
+        val armorPackets = arrayOf(
+            EnumItemSlot.FEET,
+            EnumItemSlot.LEGS,
+            EnumItemSlot.CHEST,
+            EnumItemSlot.HEAD
+        ).mapIndexed { index, slot ->
+            PacketPlayOutEntityEquipment(entityPlayer.id, slot, armor[index])
+        }.toTypedArray()
+
 
         for (p in arena.players) {
-            if (p == null || p == respawned) continue
+            if (p == player) continue
             // if p is in re-spawning screen continue
-            if (arena.isReSpawning(p)) continue
+            if (arena.isRespawning(p)) continue
 
             val boundTo = (p as CraftPlayer).handle
-            if (p.world == respawned.world) {
-                if (respawned.location.distance(p.location) <= arena.getRenderDistance()) {
+            if (p.world == player.world) {
+                if (player.location.distance(p.location) <= arena.renderDistance) {
                     // send respawned player to regular players
 
-                    p.sendPackets(show, playerVelocity, hand1, helmet, chest, pants, boots, hand2, head)
+                    p.sendPackets(show, playerVelocity, hand1, *armorPackets, hand2, head)
 
                     // send nearby players to respawned player
                     // if the player has invisibility hide armor
                     if (p.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
-                        hideArmor(p, respawned)
+                        hideArmor(p, player)
                     } else {
-                        respawned.sendPackets(
+                        player.sendPackets(
                             PacketPlayOutNamedEntitySpawn(boundTo),
                             PacketPlayOutEntityVelocity(boundTo),
                             PacketPlayOutEntityHeadRotation(boundTo, getCompressedAngle(boundTo.yaw))
                         )
-                        showArmor(p, respawned)
+                        showArmor(p, player)
                     }
                 }
             }
         }
 
         for (spectator in arena.spectators) {
-            if (spectator == null || spectator == respawned) continue
-            respawned.hidePlayer(plugin, spectator)
-            if (spectator.world != respawned.world || respawned.location.distance(spectator.location) > arena.getRenderDistance()) continue
+            if (spectator == player) continue
+            player.hidePlayer(plugin, spectator)
+            if (spectator.world != player.world || player.location.distance(spectator.location) > arena.renderDistance) continue
             // send respawned player to spectator
 
             spectator.sendPackets(
                 show,
                 playerVelocity,
                 PacketPlayOutEntityHeadRotation(entityPlayer, getCompressedAngle(entityPlayer.yaw)),
-                hand1, helmet, chest, pants, boots, hand2
+                hand1, *armorPackets, hand2
             )
         }
     }
@@ -243,18 +249,18 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
     override fun getInventoryName(e: InventoryEvent): String = e.inventory.name
 
     @Suppress("DEPRECATION")
-    override fun getMainLevel(): String = (MinecraftServer.getServer() as DedicatedServer).propertyManager.properties.getProperty("level-name")
+    override val mainLevel: String = (MinecraftServer.getServer() as DedicatedServer).propertyManager.properties.getProperty("level-name")
 
-    override fun setJoinSignBackground(b: BlockState, material: Material) {
-        b.location.block.getRelative((b.data as Sign).attachedFace).type = material
+    override fun setJoinSignBackground(state: BlockState, material: Material) {
+        state.location.block.getRelative((state.data as Sign).attachedFace).type = material
     }
 
-    override fun setFireballDirection(fireball: Fireball, vector: Vector): Fireball? {
+    override fun setFireballDirection(fireball: Fireball, vector: Vector): Fireball {
         val fb = (fireball as CraftFireball).handle
         fb.dirX = vector.getX() * 0.1
         fb.dirY = vector.getY() * 0.1
         fb.dirZ = vector.getZ() * 0.1
-        return fb.getBukkitEntity() as Fireball?
+        return fb.getBukkitEntity() as Fireball
     }
 
     override fun playRedStoneDot(player: Player) {
@@ -287,10 +293,10 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
     }
 
     @Suppress("DEPRECATION")
-    override fun placeLadder(b: org.bukkit.block.Block, x: Int, y: Int, z: Int, a: IArena, ladderData: Int) {
-        b.getRelative(x, y, z).type = Material.LADDER
-        b.getRelative(x, y, z).data = ladderData.toByte()
-        a.addPlacedBlock(b.getRelative(x, y, z))
+    override fun placeLadder(block: org.bukkit.block.Block, x: Int, y: Int, z: Int, arena: IArena, ladderData: Int) {
+        block.getRelative(x, y, z).type = Material.LADDER
+        block.getRelative(x, y, z).data = ladderData.toByte()
+        arena.addPlacedBlock(block.getRelative(x, y, z))
     }
 
     private val ItemStack.nms get() = CraftItemStack.asNMSCopy(this)
@@ -301,10 +307,10 @@ class v1_12_R1(plugin: Plugin, name: String) : VersionSupportCommon(plugin, name
         item.tag = tag
         return CraftItemStack.asBukkitCopy(item)
     }
-    override fun setTag(itemStack: ItemStack, key: String?, value: String?): ItemStack {
-        val tag = itemStack.tag ?: NBTTagCompound()
+    override fun setTag(item: ItemStack, key: String?, value: String?): ItemStack {
+        val tag = item.tag ?: NBTTagCompound()
         tag.setString(key, value)
-        return itemStack.setTag(tag)
+        return item.setTag(tag)
     }
     override fun copyTag(from: ItemStack?, to: ItemStack): ItemStack {
         return to.setTag(from?.tag ?: return to)

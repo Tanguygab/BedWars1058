@@ -34,11 +34,11 @@ class AdvancedSlimeAdapter(plugin: Plugin) : SlimeAdapter(
 ) {
     override fun generateWorld(arena: IArena?, session: ISetupSession?, world: SlimeWorld) {
         super.generateWorld(arena, session, world)
-        val w = Bukkit.getWorld(arena?.arenaName ?: session!!.worldName)
+        val w = Bukkit.getWorld(arena?.name ?: session!!.worldName)
         if (w == null) {
             if (arena != null) {
-                api.arenaUtil.removeFromEnableQueue(arena)
-                log.severe("Something wrong... removing arena ${arena.arenaName} from queue.")
+                api.arenaManager.removeFromEnableQueue(arena)
+                log.severe("Something wrong... removing arena ${arena.name} from queue.")
             }
             return
         }

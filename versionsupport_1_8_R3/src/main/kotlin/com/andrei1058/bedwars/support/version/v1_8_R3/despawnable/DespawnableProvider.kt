@@ -50,9 +50,9 @@ abstract class DespawnableProvider<T: LivingEntity>(type: DespawnableType): Desp
         it is EntityHuman && !(
             it.bukkitEntity.isDead ||
             team.wasMember(uuid) ||
-            team.getArena().isReSpawning(uuid) ||
-            team.getArena().isSpectator(uuid)
-        ) || api.despawnablesList[it.bukkitEntity.uniqueId]?.team !== team
+            team.arena.isRespawning(uuid) ||
+            team.arena.isSpectator(uuid)
+        ) || api.despawnables[it.bukkitEntity.uniqueId]?.team !== team
     }
 
     override fun applyDefaultNMSSettings(bukkitEntity: LivingEntity, attr: DespawnableAttributes) {

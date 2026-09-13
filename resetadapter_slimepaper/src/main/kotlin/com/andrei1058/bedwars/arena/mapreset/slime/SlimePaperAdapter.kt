@@ -43,7 +43,7 @@ class SlimePaperAdapter(plugin: Plugin) : SlimeAdapterCommon<SlimePlugin>(
 
     override fun loadWorld(arena: IArena, spawn: List<String>) {
         // Note that this method should be called asynchronously
-        var world = plugin.loadWorld(loader, arena.arenaName, true, buildPropertyMap(spawn))
+        var world = plugin.loadWorld(loader, arena.name, true, buildPropertyMap(spawn))
         if (api.serverType == ServerType.BUNGEE && api.isAutoScale) {
             world = world.clone(arena.worldName)
         }
@@ -52,14 +52,14 @@ class SlimePaperAdapter(plugin: Plugin) : SlimeAdapterCommon<SlimePlugin>(
         run {
             val loaded = plugin.loadWorld(world)
             if (loaded == null) {
-                api.arenaUtil.removeFromEnableQueue(arena)
-                log.severe("Something wrong... removing arena ${arena.arenaName} from queue.")
+                api.arenaManager.removeFromEnableQueue(arena)
+                log.severe("Something wrong... removing arena ${arena.name} from queue.")
                 return@run
             }
             val world = server.getWorld(loaded.name)
             if (world == null) {
-                api.arenaUtil.removeFromEnableQueue(arena)
-                log.severe("Something wrong... removing arena ${arena.arenaName} from queue.")
+                api.arenaManager.removeFromEnableQueue(arena)
+                log.severe("Something wrong... removing arena ${arena.name} from queue.")
                 return@run
             }
             server.pluginManager.callEvent(WorldInitEvent(world))
@@ -69,25 +69,25 @@ class SlimePaperAdapter(plugin: Plugin) : SlimeAdapterCommon<SlimePlugin>(
 
     override fun onRestart(arena: IArena) {
         if (api.serverType == ServerType.BUNGEE) {
-            if (api.arenaUtil.gamesBeforeRestart == 0) {
-                if (api.arenaUtil.arenas.size == 1 && api.arenaUtil.arenas[0].getStatus() == GameState.restarting) {
-                    val command = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)
+            if (api.arenaManager.gamesBeforeRestart == 0) {
+                if (api.arenaManager.arenas.values.firstOrNull()?.status == GameState.RESTARTING) {
+                    val command = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)!!
                     log.info("Dispatching command: $command")
                     server.dispatchCommand(server.consoleSender, command)
                 }
             } else {
-                if (api.arenaUtil.gamesBeforeRestart != -1) api.arenaUtil.gamesBeforeRestart -= 1
+                if (api.arenaManager.gamesBeforeRestart != -1) api.arenaManager.gamesBeforeRestart -= 1
                 run {
                     server.unloadWorld(arena.worldName, false)
-                    if (api.arenaUtil.canAutoScale(arena.arenaName)) {
-                        run(delay = 80) { api.arenaUtil.loadArena(arena.arenaName, null) }
+                    if (api.arenaManager.canAutoScale(arena.name)) {
+                        run(delay = 80) { api.arenaManager.loadArena(arena.name) }
                     }
                 }
             }
         } else {
             run {
-                server.unloadWorld(arena.getWorldName(), false)
-                run(delay = 80) { api.arenaUtil.loadArena(arena.arenaName, null) }
+                server.unloadWorld(arena.worldName, false)
+                run(delay = 80) { api.arenaManager.loadArena(arena.name) }
             }
         }
     }
@@ -108,14 +108,14 @@ class SlimePaperAdapter(plugin: Plugin) : SlimeAdapterCommon<SlimePlugin>(
                     if (File(server.worldContainer, "${session.worldName}/level.dat").exists()) {
                         session.message("Importing world to the SlimeWorldManager container.")
                         plugin.importWorld(
-                            File(server.worldContainer, session.getWorldName()),
+                            File(server.worldContainer, session.worldName),
                             session.worldName.lowercase(),
                             sLoader
                         )
                         plugin.loadWorld(sLoader, session.worldName, false, spm)
                     } else {
                         session.message("Creating anew void map.")
-                        plugin.createEmptyWorld(sLoader, session.getWorldName(), false, spm)
+                        plugin.createEmptyWorld(sLoader, session.worldName, false, spm)
                     }
                 }
 
