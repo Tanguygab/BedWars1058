@@ -34,6 +34,7 @@ $RECYCLE.BIN/
 *.nar
 *.ear
 hs_err_pid*
+.kotlin
 
 # Maven
 target/

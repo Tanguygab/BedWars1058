@@ -321,7 +321,7 @@ class ShopManager(plugin: BedWars) : ConfigManager(plugin, "shop", plugin.dataFo
             ShopOpenListener(plugin),
             PlayerDropListener(plugin),
             SpecialsListener(plugin)
-        ).forEach { plugin.server.pluginManager.registerEvents(it, plugin) }
+        ).forEach { plugin.registerEvents(it) }
     }
 
     private fun createItem(name: String, amount: String, data: String, enchant: String): ItemStack {

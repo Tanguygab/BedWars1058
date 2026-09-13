@@ -23,7 +23,6 @@ import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.entity.Player
 
 object SupportPAPI {
-    @JvmStatic
     var support: TextParser = Default()
 
     interface TextParser {

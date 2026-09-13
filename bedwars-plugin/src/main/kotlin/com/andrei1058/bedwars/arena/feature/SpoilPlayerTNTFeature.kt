@@ -42,7 +42,7 @@ object SpoilPlayerTNTFeature {
         val enable = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_SPOIL_TNT_PLAYERS)
         if (enable && !enabled) {
             enabled = true
-            plugin.server.pluginManager.registerEvents(TNTListener(plugin), plugin)
+            plugin.registerEvents(TNTListener(plugin))
             plugin.server.scheduler.runTaskTimer(plugin, ParticleTask(), 20, 1L)
         }
         plugin.metrics.appendPie("tnt_spoil_enable") { "$enable" }

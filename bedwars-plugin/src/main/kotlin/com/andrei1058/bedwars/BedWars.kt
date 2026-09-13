@@ -28,7 +28,6 @@ import com.andrei1058.bedwars.api.party.Party
 import com.andrei1058.bedwars.api.server.RestoreAdapter
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.api.server.VersionSupport
-import com.andrei1058.bedwars.arena.Arena
 import com.andrei1058.bedwars.arena.ArenaManagerImpl
 import com.andrei1058.bedwars.arena.Misc
 import com.andrei1058.bedwars.arena.VoidChunkGenerator
@@ -568,30 +567,30 @@ class BedWars : JavaPlugin() {
     companion object {
         var enabled = true
 
-        @JvmStatic var serverType = ServerType.MULTIARENA
+        var serverType = ServerType.MULTIARENA
             set(value) {
                 field = value
                 if (value == ServerType.BUNGEE) autoscale = true
             }
         var debug = true
-        @JvmStatic var autoscale = false
+        var autoscale = false
         const val MAIN_COMMAND = "bw"
         var link = "https://www.spigotmc.org/resources/50942/"
 
-        @JvmStatic var signs: ConfigManager? = null
-        @JvmStatic lateinit var generatorsCfg: ConfigManager
-        @JvmStatic lateinit var config: MainConfig
-        @JvmStatic lateinit var shop: ShopManager
-        @JvmStatic val statsManager get() = api.statsManager
-        @JvmStatic lateinit var plugin: BedWars
-        @JvmStatic lateinit var nms: VersionSupport
+        var signs: ConfigManager? = null
+        lateinit var generatorsCfg: ConfigManager
+        lateinit var config: MainConfig
+        lateinit var shop: ShopManager
+        val statsManager get() = api.statsManager
+        lateinit var plugin: BedWars
+        lateinit var nms: VersionSupport
 
         var isPaper = false
 
-        @JvmStatic var party: Party = NoParty()
-        @JvmStatic var chatSupport: com.andrei1058.bedwars.support.vault.Chat = NoChat()
+        var party: Party = NoParty()
+        var chatSupport: com.andrei1058.bedwars.support.vault.Chat = NoChat()
             private set
-        @JvmStatic var economy: com.andrei1058.bedwars.support.vault.Economy = NoEconomy()
+        var economy: com.andrei1058.bedwars.support.vault.Economy = NoEconomy()
             private set
 
         /**
@@ -603,7 +602,7 @@ class BedWars : JavaPlugin() {
         var levelSupport: Level = InternalLevel()
             set(value) {
                 if (value is InternalLevel) {
-                    plugin.server.pluginManager.registerEvents(LevelListeners(plugin).also { plugin.levelListeners = it }, plugin)
+                    plugin.registerEvents(LevelListeners(plugin).also { plugin.levelListeners = it })
                 } else {
                     plugin.levelListeners?.let { HandlerList.unregisterAll(it) }
                     plugin.levelListeners = null
@@ -618,21 +617,17 @@ class BedWars : JavaPlugin() {
          * @since v0.6.5beta
          */
         val serverVersion = Bukkit.getServer().javaClass.name.split(".")[3]
-        @JvmStatic var lobbyWorld = ""
+        var lobbyWorld = ""
 
         //remote database
-        @JvmStatic lateinit var remoteDatabase: Database
+        lateinit var remoteDatabase: Database
 
-        @JvmStatic
-        @get:JvmName("getAPI")
         lateinit var api: API
 
-        @JvmStatic
         fun debug(message: String) {
             if (debug) plugin.logger.info("DEBUG: $message")
         }
 
-        @JvmStatic
         fun getForCurrentVersion(v13: String, v8: String, v12: String = v8) = when (serverVersion) {
             "v1_8_R3" -> v8
             "v1_12_R1" -> v12

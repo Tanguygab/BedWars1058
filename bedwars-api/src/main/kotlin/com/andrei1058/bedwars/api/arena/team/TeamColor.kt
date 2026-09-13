@@ -91,7 +91,6 @@ enum class TeamColor(
          * @param color - [TeamColor] string.
          * @return [ChatColor] for given team.
          */
-        @JvmStatic
         fun getChatColor(color: String) = valueOf(color.uppercase()).chat
 
         /**
@@ -100,7 +99,6 @@ enum class TeamColor(
          * @param material material string.
          * @return the english color name for given material. EMPTY if item is not supported.
          */
-        @JvmStatic
         fun enName(material: String) = when (material.uppercase()) {
             "PINK_WOOL" -> "Pink"
             "RED_WOOL" -> "Red"
@@ -120,7 +118,6 @@ enum class TeamColor(
          * @param b color byte. Used for 1.12 and older.
          * @return the english color name for given material. EMPTY if item is not supported.
          */
-        @JvmStatic
         fun enName(b: Byte) = when (b.toInt()) {
             6 -> "Pink"
             14 -> "Red"

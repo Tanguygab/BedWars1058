@@ -30,7 +30,7 @@ class StatsManagerImpl : StatsManager {
     private val cache = ConcurrentHashMap<UUID, PlayerStats>()
 
     init {
-        Bukkit.getPluginManager().registerEvents(StatsListener(this), BedWars.plugin)
+        BedWars.plugin.registerEvents(StatsListener(this))
     }
 
     private val UUID.stats get() = getUnsafe(this)

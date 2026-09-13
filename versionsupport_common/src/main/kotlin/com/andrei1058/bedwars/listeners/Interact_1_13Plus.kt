@@ -29,9 +29,9 @@ import org.bukkit.event.player.PlayerInteractEvent
 
 @Suppress("ClassName")
 class Interact_1_13Plus : Listener {
-    @EventHandler //Check if player is opening an inventory
+    @EventHandler(ignoreCancelled = true) //Check if player is opening an inventory
     fun onInventoryInteract(e: PlayerInteractEvent) {
-        if (e.isCancelled || e.getAction() != Action.RIGHT_CLICK_BLOCK) return
+        if (e.action != Action.RIGHT_CLICK_BLOCK) return
         val block = e.clickedBlock ?: return
         val api = VersionCommon.api
         if (block.world.name != api.lobbyWorld && api.arenaManager.getArena(e.player) == null) return

@@ -42,7 +42,7 @@ object HalloweenSpecial {
 
         plugin.logger.info("${ChatColor.AQUA}Loaded Halloween Special <3")
         // pumpkin hats
-        plugin.server.pluginManager.registerEvents(HalloweenListener(), plugin)
+        plugin.registerEvents(HalloweenListener())
 
         // pumpkin in shop
         val blockCategory = ShopManager.shop.categoryList.find { it.name == "blocks-category" }
