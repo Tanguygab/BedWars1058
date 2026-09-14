@@ -22,7 +22,7 @@ package com.andrei1058.bedwars.shop
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.BedWars.Companion.debug
 import com.andrei1058.bedwars.BedWars.Companion.getForCurrentVersion
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.configuration.ConfigManager
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Messages
@@ -35,7 +35,7 @@ import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
-class ShopManager(plugin: BedWars) : ConfigManager(plugin, "shop", plugin.dataFolder.path) {
+class ShopConfig(private val plugin: BedWars) : ConfigManager(plugin, "shop", plugin.dataFolder.path) {
     init {
         options().copyDefaults(true).setHeader(listOf("Shop with quick buy and tiers"))
 
@@ -64,7 +64,7 @@ class ShopManager(plugin: BedWars) : ConfigManager(plugin, "shop", plugin.dataFo
 
             //specials
             ConfigPath.SHOP_SPECIAL_SILVERFISH_ENABLE to true,
-            ConfigPath.SHOP_SPECIAL_SILVERFISH_MATERIAL to getForCurrentVersion("SNOWBALL", "SNOW_BALL", "SNOW_BALL"),
+            ConfigPath.SHOP_SPECIAL_SILVERFISH_MATERIAL to getForCurrentVersion("SNOWBALL", "SNOW_BALL"),
             ConfigPath.SHOP_SPECIAL_SILVERFISH_DATA to 0,
             ConfigPath.SHOP_SPECIAL_SILVERFISH_HEALTH to 8.0,
             ConfigPath.SHOP_SPECIAL_SILVERFISH_DAMAGE to 4.0,
@@ -325,7 +325,7 @@ class ShopManager(plugin: BedWars) : ConfigManager(plugin, "shop", plugin.dataFo
     }
 
     private fun createItem(name: String, amount: String, data: String, enchant: String): ItemStack {
-        val item = BedWars.nms.createItemStack(
+        val item = plugin.versionSupport.createItemStack(
             getString(name)!!,
             getInt(amount),
             getInt(data).toShort()

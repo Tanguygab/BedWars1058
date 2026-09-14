@@ -12,14 +12,15 @@ import org.bukkit.event.entity.ExplosionPrimeEvent
 import org.bukkit.event.entity.ProjectileHitEvent
 
 class FireballListener(private val plugin: BedWars) : Listener {
-    private val fireballExplosionSize = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE)
-    private val fireballMakeFire = BedWars.config.getBoolean(ConfigPath.GENERAL_FIREBALL_MAKE_FIRE)
-    private val fireballHorizontal = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL) * -1
-    private val fireballVertical = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_VERTICAL)
+    private val config = plugin.mainConfig
+    private val fireballExplosionSize = config.getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE)
+    private val fireballMakeFire = config.getBoolean(ConfigPath.GENERAL_FIREBALL_MAKE_FIRE)
+    private val fireballHorizontal = config.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL) * -1
+    private val fireballVertical = config.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_VERTICAL)
 
-    private val damageSelf = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_SELF)
-    private val damageEnemy = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_ENEMY)
-    private val damageTeammates = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_TEAMMATES)
+    private val damageSelf = config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_SELF)
+    private val damageEnemy = config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_ENEMY)
+    private val damageTeammates = config.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_TEAMMATES)
 
     @EventHandler
     fun fireballHit(e: ProjectileHitEvent) {

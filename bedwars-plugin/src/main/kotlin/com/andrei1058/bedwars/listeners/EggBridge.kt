@@ -35,7 +35,7 @@ class EggBridge(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onLaunch(e: ProjectileLaunchEvent) {
         val egg = e.entity
-        if (BedWars.serverType == ServerType.MULTIARENA && egg.world.name.equals(BedWars.lobbyWorld, ignoreCase = true)) {
+        if (plugin.serverType == ServerType.MULTIARENA && egg.world.name.equals(plugin.lobbyWorld, ignoreCase = true)) {
             e.isCancelled = true
             return
         }

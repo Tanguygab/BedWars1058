@@ -19,10 +19,10 @@
  */
 package com.andrei1058.bedwars.shop.quickbuy
 
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import com.andrei1058.bedwars.shop.main.ShopCategory
 
 class QuickBuyElement(path: String, val slot: Int) {
-    val categoryContent = ShopCategory.getCategoryContent(path, ShopManager.shop)
+    val categoryContent = ShopCategory.getCategoryContent(path, ShopConfig.shop)
     val isLoaded = categoryContent != null
 }

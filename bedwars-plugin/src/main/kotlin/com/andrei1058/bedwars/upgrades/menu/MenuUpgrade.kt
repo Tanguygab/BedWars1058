@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.upgrades.menu
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.events.upgrades.UpgradeBuyEvent
@@ -43,7 +43,7 @@ import org.bukkit.inventory.ItemStack
  *
  * @param name identifier.
  */
-class MenuUpgrade(override val name: String) : MenuContent, TeamUpgrade {
+class MenuUpgrade(private val plugin: BedWars, override val name: String) : MenuContent, TeamUpgrade {
 
     /**
      * @return tiers list.
@@ -62,7 +62,7 @@ class MenuUpgrade(override val name: String) : MenuContent, TeamUpgrade {
         val highest = tiers.size == tier + 1 && team.teamUpgradeTiers.containsKey(name)
         if (!highest) tier += 1
         val ut = tiers[tier]
-        val afford = BedWars.api.upgradesManager.getMoney(player, ut.currency) >= ut.cost
+        val afford = plugin.upgradesManager.getMoney(player, ut.currency) >= ut.cost
 
         val i = ItemStack(tiers[tier].displayItem)
         i.editMeta {
@@ -78,7 +78,7 @@ class MenuUpgrade(override val name: String) : MenuContent, TeamUpgrade {
             ).replace("{color}", color))
 
             val lore = mutableListOf<String>()
-            val currencyMsg = BedWars.api.upgradesManager.getCurrencyMsg(player, ut)
+            val currencyMsg = plugin.upgradesManager.getCurrencyMsg(player, ut)
             for (s in Language.getList(
                 player,
                 Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", name.replace("upgrade-", ""))
@@ -122,11 +122,11 @@ class MenuUpgrade(override val name: String) : MenuContent, TeamUpgrade {
 
         val ut = tiers[tier + 1]
 
-        val money = BedWars.api.upgradesManager.getMoney(player, ut.currency)
+        val money = plugin.upgradesManager.getMoney(player, ut.currency)
         if (money < ut.cost) {
             Sounds.playSound(ConfigPath.SOUNDS_INSUFF_MONEY, player)
             player.sendLangMsg(Messages.SHOP_INSUFFICIENT_MONEY,
-                "{currency}" to BedWars.api.upgradesManager.getCurrencyMsg(player, ut),
+                "{currency}" to plugin.upgradesManager.getCurrencyMsg(player, ut),
                 "{amount}" to ut.cost - money
             )
             player.closeInventory()
@@ -140,7 +140,7 @@ class MenuUpgrade(override val name: String) : MenuContent, TeamUpgrade {
         if (ut.currency == Material.AIR) {
             BedWars.economy.buyAction(player, ut.cost.toDouble())
         } else {
-            BedWars.api.shopUtil.takeMoney(player, ut.currency, ut.cost)
+            plugin.shopManager.takeMoney(player, ut.currency, ut.cost)
         }
 
         team.teamUpgradeTiers[name] = if (!team.teamUpgradeTiers.containsKey(name)) 0
@@ -165,8 +165,8 @@ class MenuUpgrade(override val name: String) : MenuContent, TeamUpgrade {
             )
         }
 
-        val arena = BedWars.api.arenaManager.getArena(player)!!
-        val menuContentBySlot = BedWars.api.upgradesManager.getMenuForArena(arena).menuContentBySlot
+        val arena = plugin.arenaManager.getArena(player)!!
+        val menuContentBySlot = plugin.upgradesManager.getMenuForArena(arena).menuContentBySlot
         val inv = player.openInventory.topInventory
         for ((key, value) in menuContentBySlot) {
             inv.setItem(key, value.getDisplayItem(player, team))

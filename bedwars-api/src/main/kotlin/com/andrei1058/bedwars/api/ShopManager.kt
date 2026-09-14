@@ -5,7 +5,7 @@ import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-interface ShopUtil {
+interface ShopManager {
     /**
      * Get player's money amount
      */

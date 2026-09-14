@@ -22,7 +22,7 @@ package com.andrei1058.bedwars.api.levels
 import com.andrei1058.bedwars.api.events.player.PlayerXpGainEvent.XpSource
 import org.bukkit.entity.Player
 
-interface Level {
+interface LevelManager {
     /**
      * @return current player level formatted as string.
      */

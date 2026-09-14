@@ -27,17 +27,16 @@ import com.andrei1058.bedwars.api.tasks.RestartingTask
 import com.andrei1058.bedwars.arena.Arena
 import com.andrei1058.bedwars.arena.Misc
 import com.andrei1058.bedwars.configuration.Sounds
-import com.andrei1058.bedwars.Utils.teleportSafe
-import org.bukkit.Bukkit
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.potion.PotionEffectType
 import kotlin.random.Random
 
 class GameRestartingTask(override val arena: Arena) : Runnable, RestartingTask {
-    override var restarting = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_RESTART) + 5
+    private val plugin = BedWars.INSTANCE
+    override var restarting = plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_RESTART) + 5
         private set
-    override val bukkitTask = Bukkit.getScheduler().runTaskTimer(BedWars.plugin, this, 0, 20L)
+    override val bukkitTask = plugin.server.scheduler.runTaskTimer(plugin, this, 0, 20L)
 
     init {
         Sounds.playSound("game-end", arena.allPlayers)
@@ -56,12 +55,13 @@ class GameRestartingTask(override val arena: Arena) : Runnable, RestartingTask {
 
         // show eliminated players
         if (arena.config.getGameOverridableBoolean(ConfigPath.GENERAL_GAME_END_SHOW_ELIMINATED)) {
+            val nms = plugin.versionSupport
             for (spectator in arena.spectators) {
                 arena.getExTeam(spectator.uniqueId) ?: continue
                 spectator.removePotionEffect(PotionEffectType.INVISIBILITY)
                 for (player in arena.players) {
-                    BedWars.nms.showPlayer(player, spectator)
-                    BedWars.nms.showPlayer(spectator, player)
+                    nms.showPlayer(player, spectator)
+                    nms.showPlayer(spectator, player)
                 }
             }
         }
@@ -73,7 +73,7 @@ class GameRestartingTask(override val arena: Arena) : Runnable, RestartingTask {
         if (arena.players.isEmpty() && restarting > 9) restarting = 9
         when (restarting) {
             7 -> {
-                val bungee = BedWars.serverType == ServerType.BUNGEE
+                val bungee = plugin.serverType == ServerType.BUNGEE
                 for (on in arena.players.toList()) {
                     arena.removePlayer(on, bungee)
                 }
@@ -90,10 +90,7 @@ class GameRestartingTask(override val arena: Arena) : Runnable, RestartingTask {
                     if (arena.isPlayer(player)) arena.removePlayer(player, false)
                 }
 
-                arena.teams
-                    .flatMap { it.generators }
-                    .plus(arena.oreGenerators)
-                    .forEach { it.disable() }
+                arena.allGenerators.forEach { it.disable() }
             }
             0 -> {
                 arena.restart()

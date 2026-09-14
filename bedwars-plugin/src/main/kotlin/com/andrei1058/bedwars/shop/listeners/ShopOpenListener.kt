@@ -21,7 +21,7 @@ package com.andrei1058.bedwars.shop.listeners
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import com.andrei1058.bedwars.shop.quickbuy.PlayerQuickBuyCache
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -45,7 +45,7 @@ class ShopOpenListener(private val plugin: BedWars) : Listener {
             e.isCancelled = true
             if (!arena.isPlayer(player)) continue
             val cache = PlayerQuickBuyCache.getQuickBuyCache(player.uniqueId) ?: return
-            ShopManager.shop.open(player, cache, true)
+            ShopConfig.shop.open(player, cache, true)
         }
     }
 }

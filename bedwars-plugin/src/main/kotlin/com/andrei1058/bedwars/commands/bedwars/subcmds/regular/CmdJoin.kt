@@ -19,36 +19,31 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.api.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Sounds
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdJoin(parent: ParentCommand) : SubCommand("join", isShown = false, priority = 19) {
-    init {
-        displayInfo = createTC(
-            "§6 ▪ §7/${parent.commandName} join §e<random/ arena/ groupName>",
-            "/${parent.commandName} $subCommandName",
-            "§fJoin an arena by name or by group.\n§f/bw join random - join random arena."
-        )
-    }
+class CmdJoin(parent: MainCommand) : SubCommand(parent, "join", priority = 19) {
+    override val description = createDescription(
+        "Join an arena by name or by group.\n/bw join random - join random arena.",
+        syntax = "§e<random/ arena/ groupName>"
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
-        if (sender !is Player) return false
+        if (sender !is Player || SetupSession.isInSetupSession(sender.uniqueId)) return false
         if (args.isEmpty()) {
             sender.sendLangMsg(Messages.COMMAND_JOIN_USAGE)
             return true
         }
 
         val arg = args[0]
-        val arenaManager = BedWars.INSTANCE.arenaManager
+        val arenaManager = plugin.arenaManager
         val condition = when {
             arg.equals("random", ignoreCase = true) -> arenaManager.joinRandomArena(sender)
             MainCommand.isArenaGroup(arg) || '+' in arg -> arenaManager.joinRandomFromGroup(sender, arg)
@@ -73,13 +68,7 @@ class CmdJoin(parent: ParentCommand) : SubCommand("join", isShown = false, prior
         return true
     }
 
-    override val tabComplete get() = BedWars.INSTANCE.configs.mainConfig
+    override val tabComplete get() = plugin.configs.main
         .getStringList(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS)
-        .plus(BedWars.INSTANCE.arenaManager.arenas.keys)
-
-
-    override fun canSee(sender: CommandSender, api: BedWars) = sender is Player &&
-            !api.arenaManager.isInArena(sender) &&
-            !SetupSession.isInSetupSession(sender.uniqueId) &&
-            canUse(sender)
+        .plus(plugin.arenaManager.arenas.keys)
 }

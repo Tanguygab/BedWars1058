@@ -19,27 +19,23 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdTpStaff : SubCommand("tp", "bw.tp", isShown = false) {
+class CmdTpStaff(parent: MainCommand) : SubCommand(parent, "tp", "bw.tp") {
+    override fun canSee(sender: CommandSender) = canUse(sender)
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return true
         if (args.size != 1) {
             sender.sendLangMsg(Messages.COMMAND_TP_USAGE)
-            return true
-        }
-
-        if (!canUse(sender)) {
-            sender.sendLangMsg(Messages.COMMAND_FORCESTART_NO_PERM)
             return true
         }
 
@@ -49,7 +45,7 @@ class CmdTpStaff : SubCommand("tp", "bw.tp", isShown = false) {
             return true
         }
 
-        val arenaManager = BedWars.plugin.arenaManager
+        val arenaManager = plugin.arenaManager
         val targetArena = arenaManager.getArena(target)
         if (targetArena == null) {
             sender.sendLangMsg(Messages.COMMAND_TP_NOT_IN_ARENA)
@@ -75,7 +71,8 @@ class CmdTpStaff : SubCommand("tp", "bw.tp", isShown = false) {
         return true
     }
 
-    override val tabComplete get() = BedWars.plugin.arenaManager
+    override val tabComplete get() = plugin
+        .arenaManager
         .arenas
         .values
         .flatMap { it.allPlayers }

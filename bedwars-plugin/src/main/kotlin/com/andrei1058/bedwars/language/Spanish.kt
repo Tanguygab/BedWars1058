@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Spanish : Language(BedWars.plugin, "es") {
+class Spanish : Language(BedWars.INSTANCE, "es") {
     init {
         this.options().header("Translation by JuliCarles#1783 and Danidev819#7465")
         this.addDefault(Messages.PREFIX, "")

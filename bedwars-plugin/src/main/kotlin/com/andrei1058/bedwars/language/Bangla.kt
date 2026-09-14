@@ -26,7 +26,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 
 
-class Bangla : Language(BedWars.plugin, "bd") {
+class Bangla : Language(BedWars.INSTANCE, "bd") {
     init {
         val mainCmd = BedWars.MAIN_COMMAND
         apply {

@@ -28,7 +28,7 @@ import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.commands.shout.ShoutCommand
 import com.andrei1058.bedwars.configuration.Permissions
 import com.andrei1058.bedwars.configuration.Permissions.hasPermission
-import com.andrei1058.bedwars.support.papi.SupportPAPI.support
+import com.andrei1058.bedwars.support.papi.SupportPAPI
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -43,7 +43,7 @@ class ChatFormatting(private val plugin: BedWars) : Listener {
 
         // in shared mode we don't want messages from outside the arena to be seen in game
         val arena = plugin.arenaManager.getArena(player)
-        if (BedWars.serverType == ServerType.SHARED && arena == null) {
+        if (plugin.serverType == ServerType.SHARED && arena == null) {
             e.recipients.removeIf { plugin.arenaManager.getArena(it) != null }
             return
         }
@@ -57,7 +57,7 @@ class ChatFormatting(private val plugin: BedWars) : Listener {
 
 
         // handle lobby world for multi arena
-        if (BedWars.serverType == ServerType.MULTIARENA && player.world.name.equals(BedWars.lobbyWorld, ignoreCase = true)) {
+        if (plugin.serverType == ServerType.MULTIARENA && player.world.name.equals(plugin.lobbyWorld, ignoreCase = true)) {
             setRecipients(e, player.world.players)
         }
 
@@ -103,7 +103,7 @@ class ChatFormatting(private val plugin: BedWars) : Listener {
                     return
                 }
                 ShoutCommand.updateShout(player)
-                setRecipients(e, arena.players, arena.spectators)
+                setRecipients(e, arena.allPlayers)
                 msg = msg.substring(shoutPrefix.length).trim()
                 if (msg.isEmpty()) {
                     e.isCancelled = true
@@ -115,11 +115,7 @@ class ChatFormatting(private val plugin: BedWars) : Listener {
             }
 
             // player team chat
-            if (arena.maxInTeam == 1) {
-                setRecipients(e, arena.players, arena.spectators)
-            } else {
-                setRecipients(e, team!!.members)
-            }
+            setRecipients(e, if (arena.maxInTeam == 1) arena.allPlayers else team!!.members)
             e.parseAndSetFormat(language.m(Messages.FORMATTING_CHAT_TEAM), player, team)
             return
         }
@@ -128,30 +124,28 @@ class ChatFormatting(private val plugin: BedWars) : Listener {
         e.parseAndSetFormat(language.m(Messages.FORMATTING_CHAT_LOBBY), player, null)
     }
 
-    companion object {
-        private fun AsyncPlayerChatEvent.parseAndSetFormat(content: String, player: Player, team: ITeam?) {
-            var content = content
-                .replace("{vPrefix}", BedWars.chatSupport.getPrefix(player))
-                .replace("{vSuffix}", BedWars.chatSupport.getSuffix(player))
-                .replace("{playername}", player.name)
-                .replace("{level}", BedWars.levelSupport.getLevel(player))
-                .replace("{player}", player.displayName)
-            if (team != null) {
-                val teamFormat = Language.getMsg(player, Messages.FORMAT_PAPI_PLAYER_TEAM_TEAM)
-                    .replace("{TeamColor}", team.color.chat.toString() + "")
-                    .replace("{TeamName}", team.getDisplayName(Language.getLanguage(player)).uppercase())
-                content = content.replace("{team}", teamFormat)
-            }
-            format = support
-                .replace(player, content)!!
-                .replace("{message}", $$"%2$s")
-        }
+    fun setRecipients(e: AsyncPlayerChatEvent, vararg target: List<Player>) {
+        if (plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CHAT_GLOBAL)) return
 
-        fun setRecipients(e: AsyncPlayerChatEvent, vararg target: List<Player>) {
-            if (BedWars.config.getBoolean(ConfigPath.GENERAL_CHAT_GLOBAL)) return
+        e.recipients.clear()
+        for (list in target) e.recipients.addAll(list)
+    }
 
-            e.recipients.clear()
-            for (list in target) e.recipients.addAll(list)
+    private fun AsyncPlayerChatEvent.parseAndSetFormat(content: String, player: Player, team: ITeam?) {
+        var content = content
+            .replace("{vPrefix}", BedWars.chatSupport.getPrefix(player))
+            .replace("{vSuffix}", BedWars.chatSupport.getSuffix(player))
+            .replace("{playername}", player.name)
+            .replace("{level}", plugin.levelManager.getLevel(player))
+            .replace("{player}", player.displayName)
+        if (team != null) {
+            val teamFormat = Language.getMsg(player, Messages.FORMAT_PAPI_PLAYER_TEAM_TEAM)
+                .replace("{TeamColor}", "${team.color.chat}")
+                .replace("{TeamName}", team.getDisplayName(Language.getLanguage(player)).uppercase())
+            content = content.replace("{team}", teamFormat)
         }
+        format = SupportPAPI.support
+            .replace(player, content)
+            .replace("{message}", $$"%2$s")
     }
 }

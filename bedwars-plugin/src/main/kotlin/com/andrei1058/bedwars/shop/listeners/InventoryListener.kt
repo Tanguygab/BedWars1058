@@ -21,7 +21,7 @@ package com.andrei1058.bedwars.shop.listeners
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.shop.ShopCache
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import com.andrei1058.bedwars.shop.main.ShopCategory
 import com.andrei1058.bedwars.shop.main.ShopIndex
 import com.andrei1058.bedwars.shop.quickbuy.PlayerQuickBuyCache
@@ -60,7 +60,7 @@ class InventoryListener(private val plugin: BedWars) : Listener {
             return
         }
 
-        val shop = ShopManager.shop
+        val shop = ShopConfig.shop
         if (player.uniqueId in ShopIndex.indexViewers) {
             e.isCancelled = true
 
@@ -184,11 +184,12 @@ class InventoryListener(private val plugin: BedWars) : Listener {
         fun shouldCancelMovement(i: ItemStack?, sc: ShopCache?): Boolean {
             if (i == null || sc == null) return false
 
-            if (BedWars.nms.isCustomBedWarsItem(i) &&
-                BedWars.nms.getCustomData(i).equals("DEFAULT_ITEM", ignoreCase = true)
+            val nms = BedWars.INSTANCE.versionSupport
+            if (nms.isCustomBedWarsItem(i) &&
+                nms.getCustomData(i).equals("DEFAULT_ITEM", ignoreCase = true)
             ) return true
 
-            val identifier = BedWars.nms.getShopUpgradeIdentifier(i)
+            val identifier = nms.getShopUpgradeIdentifier(i)
             return identifier != "null" && sc.getCachedItem(identifier) != null
             // the commented line below was blocking movement only if tiers amount > 1
             // return sc.getCachedItem(identifier).cc.getContentTiers().size > 1

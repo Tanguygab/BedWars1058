@@ -1,9 +1,6 @@
 package com.andrei1058.bedwars.sidebar
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.BedWars.Companion.economy
-import com.andrei1058.bedwars.BedWars.Companion.serverType
-import com.andrei1058.bedwars.BedWars.Companion.statsManager
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.NextEvent
@@ -25,7 +22,7 @@ import java.util.LinkedList
 import java.util.TimeZone
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class BwSidebar(override val player: Player) : ISidebar {
+class BwSidebar(private val plugin: BedWars, override val player: Player) : ISidebar {
     override var arena: IArena? = null
         private set
     override var handle: Sidebar? = null
@@ -36,7 +33,7 @@ class BwSidebar(override val player: Player) : ISidebar {
     private val nextEventDateFormat = SimpleDateFormat(getMsg(player, Messages.FORMATTING_SCOREBOARD_NEXEVENT_TIMER))
     private val persistentProviders = ConcurrentLinkedQueue<PlaceholderProvider>()
 
-    private val tabList = BwTabList(this)
+    private val tabList = BwTabList(plugin, this)
 
     var topStatistics: StatisticsOrdered? = null
 
@@ -48,7 +45,7 @@ class BwSidebar(override val player: Player) : ISidebar {
             "poweredBy" to ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_POWERED_BY,
             "serverId" to ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID,
             "serverIp" to ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP
-        ).forEach { (placeholder, value) -> registerPersistentPlaceholder(PlaceholderProvider("{$placeholder}") { BedWars.config.getString(value) }) }
+        ).forEach { (placeholder, value) -> registerPersistentPlaceholder(PlaceholderProvider("{$placeholder}") { plugin.mainConfig.getString(value) }) }
     }
 
     fun remove() {
@@ -73,11 +70,11 @@ class BwSidebar(override val player: Player) : ISidebar {
         // if it is the first time setting content we create the handle
         val handle = handle
         if (handle == null) {
-            this.handle = BedWars.api.scoreboardManager.sidebarHandler!!.createSidebar(title, lines, placeholders)
+            this.handle = plugin.scoreboardManager.sidebarHandler!!.createSidebar(title, lines, placeholders)
             this.handle!!.add(player)
         } else {
             handle.clearLines()
-            BedWars.plugin.run(delay = 2) {
+            plugin.run(delay = 2) {
                 handle.placeholders.toList().forEach {
                     handle.removePlaceholder(it.placeholder)
                 }
@@ -127,7 +124,7 @@ class BwSidebar(override val player: Player) : ISidebar {
                             .replace("{TeamName}", teamName)
 
                         val status = "{Team${team.name}Status}"
-                        line = line.replace("{TeamStatus}", if ("{TeamStatus}" in line && BedWars.api.versionSupport.version >= 10) {
+                        line = line.replace("{TeamStatus}", if ("{TeamStatus}" in line && plugin.versionSupport.version >= 10) {
                             scoreLine = status
                             ""
                         } else status)
@@ -178,10 +175,10 @@ class BwSidebar(override val player: Player) : ISidebar {
 
             // General static placeholders
             line = line
-                .replace("{serverIp}", BedWars.config.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP)!!)
-                .replace("{poweredBy}", BedWars.config.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_POWERED_BY)!!)
-                .replace("{version}", BedWars.plugin.description.version)
-                .replace("{server}", BedWars.config.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID)!!)
+                .replace("{serverIp}", plugin.mainConfig.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP)!!)
+                .replace("{poweredBy}", plugin.mainConfig.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_POWERED_BY)!!)
+                .replace("{version}", plugin.description.version)
+                .replace("{server}", plugin.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID)!!)
 
             // Add the line to the sidebar
             val divided = line.split(",")
@@ -205,12 +202,12 @@ class BwSidebar(override val player: Player) : ISidebar {
         val level = getLevelByPlayer(player.uniqueId)
         val placeholders = mutableMapOf(
             "player" to player::getDisplayName,
-            "money" to { economy.getMoney(player).toString() },
+            "money" to { BedWars.economy.getMoney(player).toString() },
             "playerName" to player::getCustomName,
             "date" to { dateFormat.format(Date(System.currentTimeMillis())) },
             // fixme 29/08/2023: disabled for now because this is not a dynamic placeholder. Let's see what's the impact.
-            "severIp" to { BedWars.config.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP) },
-            "version" to BedWars.plugin.description::getVersion,
+            "severIp" to { plugin.mainConfig.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP) },
+            "version" to plugin.description::getVersion,
             "progress" to level::progress,
             "level" to level::levelName,
             "levelUnformatted" to { level.level.toString() },
@@ -282,7 +279,7 @@ class BwSidebar(override val player: Player) : ISidebar {
             }
         } else {
             placeholders += "on" to { Bukkit.getOnlinePlayers().size.toString() }
-            placeholders += statsManager.get(player.uniqueId).run { mapOf(
+            placeholders += plugin.statsManager.get(player.uniqueId).run { mapOf(
                 "kills" to { "$kills" },
                 "finalKills" to { "$finalKills" },
                 "beds" to { "$bedsDestroyed" },
@@ -329,8 +326,8 @@ class BwSidebar(override val player: Player) : ISidebar {
 
     // Provide header and footer for current game state
     private fun assignTabHeaderFooter() {
-        if (!BedWars.config.getBoolean(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_ENABLE)) return
-        if (arena == null || serverType == ServerType.SHARED) {
+        if (!plugin.mainConfig.getBoolean(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_ENABLE)) return
+        if (arena == null || plugin.serverType == ServerType.SHARED) {
             headerFooter = null
             return
         }
@@ -364,7 +361,7 @@ class BwSidebar(override val player: Player) : ISidebar {
             getPlaceholders(player)
         )
 
-        BedWars.api.scoreboardManager.sidebarHandler!!.sendHeaderFooter(player, headerFooter)
+        plugin.scoreboardManager.sidebarHandler!!.sendHeaderFooter(player, headerFooter)
     }
 
     override fun registerPersistentPlaceholder(placeholderProvider: PlaceholderProvider): Boolean {

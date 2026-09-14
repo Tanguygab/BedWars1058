@@ -19,42 +19,24 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive
 
-import com.andrei1058.bedwars.api.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.language.Language
-import com.andrei1058.bedwars.arena.Misc.msgHoverClick
-import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Permissions
-import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 
-class Reload(parent: ParentCommand) : SubCommand("reload", Permissions.PERMISSION_RELOAD, priority = 11) {
-    init {
-        displayInfo = msgHoverClick(
-            "§6 ▪ §7/${parent.commandName} $subCommandName       §8 - §ereload messages",
-            "§fReload messages.\n§cNot recommended!",
-            "/${parent.commandName} $subCommandName",
-            ClickEvent.Action.RUN_COMMAND
-        )
-    }
+class Reload(parent: MainCommand) : SubCommand(parent, "reload", Permissions.PERMISSION_RELOAD, priority = 11) {
+    override val description = createDescription(
+        "Reload messages.\n§cNot recommended!",
+        suffix = "reload messages",
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
-        if (!MainCommand.isLobbySet(sender as? Player)) return true
+        if (!isLobbySet(sender)) return true
         for (l in Language.languages) {
             l.reload()
             sender.sendMessage("§6 ▪ §7${l.langName} reloaded!")
         }
         return true
-    }
-
-    override fun canSee(sender: CommandSender, api: BedWars): Boolean {
-        if (sender is Player) {
-            if (api.arenaManager.isInArena(sender)) return false
-            if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        }
-        return canUse(sender)
     }
 }

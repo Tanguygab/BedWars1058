@@ -43,7 +43,7 @@ class CmdProcess(private val plugin: BedWars) : Listener {
 
         val cmd = command.removePrefix("/").split(" ")
         if (cmd.isEmpty() || !plugin.arenaManager.isInArena(player)) return
-        if (BedWars.config.getStringList(ConfigPath.CENERAL_CONFIGURATION_ALLOWED_COMMANDS).contains(cmd[0])) return
+        if (plugin.mainConfig.getStringList(ConfigPath.CENERAL_CONFIGURATION_ALLOWED_COMMANDS).contains(cmd[0])) return
 
         player.sendLangMsg(Messages.COMMAND_NOT_ALLOWED_IN_GAME)
         e.isCancelled = true

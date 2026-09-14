@@ -22,7 +22,7 @@ package com.andrei1058.bedwars.shop.quickbuy
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.shop.ShopCache
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import com.andrei1058.bedwars.shop.main.CategoryContent
 import com.andrei1058.bedwars.shop.main.ShopCategory
 import org.bukkit.Bukkit
@@ -36,7 +36,7 @@ class QuickBuyAdd(player: Player, cc: CategoryContent) {
     }
 
     fun open(player: Player, cc: CategoryContent) {
-        val inv = Bukkit.createInventory(null, ShopManager.shop.invSize, Language.getMsg(player, Messages.SHOP_QUICK_ADD_NAME))
+        val inv = Bukkit.createInventory(null, ShopConfig.shop.invSize, Language.getMsg(player, Messages.SHOP_QUICK_ADD_NAME))
         val cache = PlayerQuickBuyCache.getQuickBuyCache(player.uniqueId)
         val sc = ShopCache.getShopCache(player.uniqueId)
         if (sc == null || cache == null) {

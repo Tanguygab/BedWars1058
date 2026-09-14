@@ -1,10 +1,10 @@
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import org.bukkit.entity.Player
 
-class SetBuildHeight : SetupCommand("setMaxBuildHeight") {
+class SetBuildHeight(parent: MainCommand) : SetupCommand(parent, "setMaxBuildHeight") {
     /**
      * Add your sub-command code under this method
      * 
@@ -20,7 +20,7 @@ class SetBuildHeight : SetupCommand("setMaxBuildHeight") {
                 return
             }
         }
-        sender.sendMessage("§c▪ §7Usage: /${BedWars.MAIN_COMMAND} setMaxBuildHeight <int>")
+        sender.sendMessage("§c▪ §7Usage: /${parent.commandName} setMaxBuildHeight <int>")
     }
 
     override val tabComplete = listOf("180", "256")

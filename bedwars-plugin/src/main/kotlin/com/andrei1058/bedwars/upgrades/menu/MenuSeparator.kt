@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.upgrades.menu
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
@@ -36,11 +36,11 @@ import org.bukkit.inventory.ItemStack
  *
  * @param displayItem display item.
  */
-class MenuSeparator(override val name: String, displayItem: ItemStack) : MenuContent {
+class MenuSeparator(plugin: BedWars, override val name: String, displayItem: ItemStack) : MenuContent {
     private val cleanName = name.removePrefix("separator-")
-    private val displayItem = BedWars.nms.addCustomData(displayItem, "MCONT_$name")
-    private val playerCommands = BedWars.api.upgradesManager.configuration.getStringList("$name.on-click.player")
-    private val consoleCommands = BedWars.api.upgradesManager.configuration.getStringList("$name.on-click.console")
+    private val displayItem = plugin.versionSupport.addCustomData(displayItem, "MCONT_$name")
+    private val playerCommands = plugin.upgradesManager.configuration.getStringList("$name.on-click.player")
+    private val consoleCommands = plugin.upgradesManager.configuration.getStringList("$name.on-click.console")
 
     init {
         arrayOf(

@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Romanian : Language(BedWars.plugin, "ro") {
+class Romanian : Language(BedWars.INSTANCE, "ro") {
     init {
         this.addDefault(Messages.PREFIX, "")
         this.addDefault("name", "Română")

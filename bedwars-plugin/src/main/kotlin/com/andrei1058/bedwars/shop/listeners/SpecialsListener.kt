@@ -24,7 +24,6 @@ import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.events.PlayerArenaEvent
 import com.andrei1058.bedwars.api.events.player.PlayerBedBugSpawnEvent
 import com.andrei1058.bedwars.api.events.player.PlayerDreamDefenderSpawnEvent
-import com.andrei1058.bedwars.arena.Misc.isProjectile
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -48,11 +47,11 @@ class SpecialsListener(private val plugin: BedWars) : Listener {
         val block = e.clickedBlock ?: return
         val location = block.location
 
-        val shop = BedWars.shop
+        val shop = plugin.shopManager.config
 
         if (spawn(player, item, Despawnable.SILVERFISH) {
             val event = PlayerBedBugSpawnEvent(player, arena)
-            BedWars.nms.spawnSilverfish(
+                plugin.versionSupport.spawnSilverfish(
                 location.add(0.0, 1.0, 0.0),
                 event.playerTeam,
                 shop.getDouble(ConfigPath.SHOP_SPECIAL_SILVERFISH_SPEED),
@@ -68,7 +67,7 @@ class SpecialsListener(private val plugin: BedWars) : Listener {
 
         e.isCancelled = spawn(player, item, Despawnable.GOLEM) {
             val event = PlayerDreamDefenderSpawnEvent(player, arena)
-            BedWars.nms.spawnIronGolem(
+            plugin.versionSupport.spawnIronGolem(
                 location.add(0.0, 1.0, 0.0),
                 event.playerTeam,
                 shop.getDouble(ConfigPath.SHOP_SPECIAL_IRON_GOLEM_SPEED),
@@ -80,21 +79,32 @@ class SpecialsListener(private val plugin: BedWars) : Listener {
     }
 
     private fun spawn(player: Player, item: ItemStack, despawnable: Despawnable, spawn: () -> PlayerArenaEvent): Boolean {
-        val shop = BedWars.shop
+        val shop = plugin.shopManager.config
         val projectile = Material.valueOf(shop.getString(despawnable.material)!!)
 
+        val nms = plugin.versionSupport
         if (!shop.getBoolean(despawnable.enabled) ||
             isProjectile(projectile) ||
             item.type != projectile ||
-            !BedWars.nms.itemStackDataCompare(item, shop.getInt(despawnable.data).toShort())
+            !nms.itemStackDataCompare(item, shop.getInt(despawnable.data).toShort())
         ) return false
 
         Bukkit.getPluginManager().callEvent(spawn())
-        if (BedWars.nms.isProjectile(item)) return true
+        if (nms.isProjectile(item)) return true
 
-        BedWars.nms.minusAmount(player, item, 1)
+        nms.minusAmount(player, item, 1)
         player.updateInventory()
         return true
+    }
+
+    fun isProjectile(material: Material): Boolean {
+        val nms = plugin.versionSupport
+        return material in arrayOf(
+            Material.EGG,
+            nms.materialFireball(),
+            nms.materialSnowball(),
+            Material.ARROW
+        )
     }
 
     enum class Despawnable(

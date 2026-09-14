@@ -7,9 +7,9 @@ import com.andrei1058.bedwars.arena.Arena
 import org.bukkit.Bukkit
 
 class MoneyPerMinuteTask(arena: Arena) {
-    private val money = BedWars.plugin.moneyConfig.getDouble("money-rewards.per-minute")
+    private val money = BedWars.INSTANCE.moneyConfig.getDouble("money-rewards.per-minute")
 
-    private val task = if (money < 1) Bukkit.getScheduler().runTaskTimer(BedWars.plugin, Runnable {
+    private val task = if (money < 1) Bukkit.getScheduler().runTaskTimer(BedWars.INSTANCE, Runnable {
         for (player in arena.players) {
             BedWars.economy.giveMoney(player, money)
             player.sendMessage(Language

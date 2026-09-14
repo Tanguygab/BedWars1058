@@ -19,22 +19,23 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.command.SubCommand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdUpgrades : SubCommand("upgradesmenu", isShown = false) {
+class CmdUpgrades(parent: MainCommand) : SubCommand(parent, "upgradesmenu") {
+    override fun canSee(sender: CommandSender) = canUse(sender)
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
 
-        val arena = BedWars.plugin.arenaManager.getArena(sender) ?: return false
+        val arena = plugin.arenaManager.getArena(sender) ?: return false
         if (!arena.isPlayer(sender)) return false
 
         val t = arena.getTeam(sender)!!
         return if (t.teamUpgrades!!.distance(sender.location) < 4) {
-            BedWars.api.upgradesManager.getMenuForArena(arena).open(sender)
+            plugin.upgradesManager.getMenuForArena(arena).open(sender)
             true
         } else false
     }

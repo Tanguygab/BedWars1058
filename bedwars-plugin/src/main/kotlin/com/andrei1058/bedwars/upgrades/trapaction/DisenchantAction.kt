@@ -29,10 +29,11 @@ class DisenchantAction(private val enchantment: Enchantment, private val type: A
     override val name = "disenchant-item"
 
     override fun onTrigger(player: Player, playerTeam: ITeam, targetTeam: ITeam) {
+        val nms = BedWars.INSTANCE.versionSupport
         val check = when (type) {
-            ApplyType.SWORD -> BedWars.nms::isSword
-            ApplyType.ARMOR -> BedWars.nms::isArmor
-            ApplyType.BOW -> BedWars.nms::isBow
+            ApplyType.SWORD -> nms::isSword
+            ApplyType.ARMOR -> nms::isArmor
+            ApplyType.BOW -> nms::isBow
         }
         player.inventory
             .filter(check)

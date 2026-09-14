@@ -39,22 +39,18 @@ object SpoilPlayerTNTFeature {
     private var enabled = false
 
     fun init(plugin: BedWars) {
-        val enable = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_SPOIL_TNT_PLAYERS)
+        val enable = plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_SPOIL_TNT_PLAYERS)
         if (enable && !enabled) {
             enabled = true
             plugin.registerEvents(TNTListener(plugin))
-            plugin.server.scheduler.runTaskTimer(plugin, ParticleTask(), 20, 1L)
-        }
-        plugin.metrics.appendPie("tnt_spoil_enable") { "$enable" }
-    }
-
-    private class ParticleTask : Runnable {
-        override fun run() {
-            for (player in playersWithTnt) {
-                if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) return
-                BedWars.nms.playRedStoneDot(player)
+            plugin.repeat(20, 1) {
+                for (player in playersWithTnt) {
+                    if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) continue
+                    plugin.versionSupport.playRedStoneDot(player)
+                }
             }
         }
+        plugin.metrics.appendPie("tnt_spoil_enable") { "$enable" }
     }
 
     private class TNTListener(private val plugin: BedWars) : Listener {

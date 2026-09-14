@@ -25,16 +25,17 @@ import com.zaxxer.hikari.HikariDataSource
 import java.sql.SQLException
 import java.util.concurrent.TimeUnit
 
-class MySQL : CommonSQL() {
-    private val host = BedWars.config.getString("database.host")
-    private val database = BedWars.config.getString("database.database")
-    private val user = BedWars.config.getString("database.user")
-    private val pass = BedWars.config.getString("database.pass")
-    private val port = BedWars.config.getInt("database.port")
-    private val ssl = BedWars.config.getBoolean("database.ssl")
-    private val certificateVerification = BedWars.config.getBoolean("database.verify-certificate", true)
-    private val poolSize = BedWars.config.getInt("database.pool-size", 10)
-    private val maxLifetime = BedWars.config.getInt("database.max-lifetime", 1800)
+class MySQL(plugin: BedWars) : CommonSQL() {
+    private val config = plugin.mainConfig
+    private val host = config.getString("database.host")
+    private val database = config.getString("database.database")
+    private val user = config.getString("database.user")
+    private val pass = config.getString("database.pass")
+    private val port = config.getInt("database.port")
+    private val ssl = config.getBoolean("database.ssl")
+    private val certificateVerification = config.getBoolean("database.verify-certificate", true)
+    private val poolSize = config.getInt("database.pool-size", 10)
+    private val maxLifetime = config.getInt("database.max-lifetime", 1800)
 
     /**
      * Creates the SQL connection pool and tries to connect.

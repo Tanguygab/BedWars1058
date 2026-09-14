@@ -21,20 +21,18 @@ package com.andrei1058.bedwars.stats
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.StatsManager
-import org.bukkit.Bukkit
 import java.sql.Timestamp
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class StatsManagerImpl : StatsManager {
+class StatsManagerImpl(private val plugin: BedWars) : StatsManager {
     private val cache = ConcurrentHashMap<UUID, PlayerStats>()
 
     init {
-        BedWars.plugin.registerEvents(StatsListener(this))
+        plugin.registerEvents(StatsListener(plugin, this))
     }
 
-    private val UUID.stats get() = getUnsafe(this)
-        ?: BedWars.remoteDatabase.fetchStats(this)
+    private val UUID.stats get() = getUnsafe(this) ?: plugin.database.fetchStats(this)
     override fun getPlayerFirstPlay(player: UUID) = Timestamp.from(player.stats.firstPlay)!!
     override fun getPlayerLastPlay(player: UUID) = Timestamp.from(player.stats.lastPlay)!!
     override fun getPlayerWins(player: UUID) = player.stats.wins

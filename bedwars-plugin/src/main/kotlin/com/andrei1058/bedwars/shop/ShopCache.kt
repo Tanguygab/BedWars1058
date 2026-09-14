@@ -31,7 +31,7 @@ import java.util.UUID
 
 class ShopCache(val player: UUID) {
     val cachedItems = mutableListOf<CachedItem>()
-    var selectedCategory = ShopManager.shop.quickBuyButton.slot
+    var selectedCategory = ShopConfig.shop.quickBuyButton.slot
     private var categoryWeight = HashMap<ShopCategory, Byte>()
 
     init {
@@ -86,7 +86,7 @@ class ShopCache(val player: UUID) {
             for (i in p!!.inventory.contents) {
                 if (i == null) continue
                 if (i.type == Material.AIR) continue
-                if (BedWars.nms.getShopUpgradeIdentifier(i) == cc.identifier) {
+                if (BedWars.INSTANCE.versionSupport.getShopUpgradeIdentifier(i) == cc.identifier) {
                     p.inventory.remove(i)
                 }
             }

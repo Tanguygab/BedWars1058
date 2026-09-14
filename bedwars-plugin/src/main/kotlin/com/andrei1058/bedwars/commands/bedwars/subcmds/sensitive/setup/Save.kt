@@ -19,17 +19,16 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
+import com.andrei1058.bedwars.api.util.Utils.message
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.arena.SetupSession
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 
-class Save(private val parent: ParentCommand) : SetupCommand("save") {
+class Save(parent: MainCommand) : SetupCommand(parent, "save") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         //Clear setup armor-stands
         for (e in sender.world.entities) {
@@ -38,7 +37,7 @@ class Save(private val parent: ParentCommand) : SetupCommand("save") {
             }
         }
 
-        sender.teleportSafe((Bukkit.getWorld(BedWars.lobbyWorld) ?: Bukkit.getWorlds()[0]).spawnLocation)
+        sender.teleportSafe((Bukkit.getWorld(plugin.lobbyWorld) ?: Bukkit.getWorlds()[0]).spawnLocation)
         session.done()
         sender.sendMessage("${session.prefix}Arena changes saved!")
         sender.sendMessage("${session.prefix}You can now enable it using:")

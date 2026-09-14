@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Polish : Language(BedWars.plugin, "pl") {
+class Polish : Language(BedWars.INSTANCE, "pl") {
     init {
         this.options()
             .header("Polish translation by RarstManPL#0616 and Creper132#7570 Updated by Seriously Not Beluga#0082")

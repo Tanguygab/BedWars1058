@@ -11,14 +11,14 @@ class MetricsManager(plugin: BedWars) {
 
     init {
         // base metrics
-        appendPie("server_type") { BedWars.serverType.toString() }
+        appendPie("server_type") { plugin.serverType.toString() }
         appendPie("default_language") { Language.defaultLanguage.iso }
-        appendPie("auto_scale") { BedWars.autoscale.toString() }
-        appendPie("party_adapter") { BedWars.party.javaClass.getName() }
-        appendPie("chat_adapter") { BedWars.chatSupport.javaClass.getName() }
-        appendPie("level_adapter") { BedWars.levelSupport.javaClass.getName() }
-        appendPie("db_adapter") { BedWars.remoteDatabase.javaClass.getName() }
-        appendPie("map_adapter") { BedWars.api.restoreAdapter.javaClass.getName() }
+        appendPie("auto_scale") { plugin.autoScale.toString() }
+        appendPie("party_adapter") { plugin.partyUtil.javaClass.name }
+        appendPie("chat_adapter") { BedWars.chatSupport.javaClass.name }
+        appendPie("level_adapter") { plugin.levelManager.javaClass.name }
+        appendPie("db_adapter") { plugin.database.javaClass.name }
+        appendPie("map_adapter") { plugin.restoreAdapter.javaClass.name }
         appendPie("citizens_support") { JoinNPC.isCitizensSupport.toString() }
     }
 

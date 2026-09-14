@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.arena.generators
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.generator.GeneratorType
@@ -82,7 +82,7 @@ class Generator(
 
     override lateinit var hologramHolder: ArmorStand
         private set
-    override var isStack = BedWars.generatorsCfg.getBoolean(ConfigPath.GENERATOR_STACK_ITEMS)
+    override var isStack = BedWars.INSTANCE.configs.generators.getBoolean(ConfigPath.GENERATOR_STACK_ITEMS)
 
     init {
         BedWars.debug("Initializing new generator at: $location - $type - ${team?.name ?: "NOTEAM"}")
@@ -100,7 +100,7 @@ class Generator(
         amount = type.getAmount(arena, upgradeStage)
 
         languageHolograms.values.forEach {
-            val lang = Language.getLang(it.iso)
+            val lang = Language.getLanguageByIso(it.iso)
             val tier = lang.m(if (upgradeStage == 2) Messages.FORMATTING_GENERATOR_TIER2 else Messages.FORMATTING_GENERATOR_TIER3)
             it.setTierName(lang
                 .m(Messages.GENERATOR_HOLOGRAM_TIER)
@@ -119,7 +119,7 @@ class Generator(
 
             for (hologram in languageHolograms.values) {
                 hologram.setTimerName(Language
-                    .getLang(hologram.iso)
+                    .getLanguageByIso(hologram.iso)
                     .m(Messages.GENERATOR_HOLOGRAM_TIMER)
                     .replace("{seconds}", "$nextSpawn")
                 )
@@ -150,7 +150,7 @@ class Generator(
             return
         }
 
-        if (!BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ENABLE_GEN_SPLIT)) {
+        if (!BedWars.INSTANCE.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ENABLE_GEN_SPLIT)) {
             dropItem(location)
             return
         }
@@ -238,7 +238,7 @@ class Generator(
         for (lang in Language.languages) {
             val iso = lang.iso
             if (iso in languageHolograms) continue
-            languageHolograms[iso] = HoloGram(this, iso)
+            languageHolograms[iso] = Hologram(this, iso)
         }
         languageHolograms.values.forEach { it.updateForAll() }
 

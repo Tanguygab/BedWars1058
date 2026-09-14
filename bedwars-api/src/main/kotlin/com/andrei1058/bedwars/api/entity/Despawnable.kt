@@ -22,6 +22,7 @@ package com.andrei1058.bedwars.api.entity
 import com.andrei1058.bedwars.api.BedWars
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.events.player.PlayerKillEvent.PlayerKillCause
+import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import org.bukkit.Bukkit
 import org.bukkit.entity.LivingEntity
@@ -58,14 +59,14 @@ class Despawnable(
     }
 
     private fun setName() {
-        val lang = api!!.defaultLang
+        val lang = Language.defaultLanguage
         val percentage = ((entity.health * 100) / entity.maxHealth / 10).toInt()
         val healthLang = lang.m(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH)
         val name = lang.m(namePath)
             .replace("{despawn}", "$despawn")
             .replace("{health}", healthLang.repeat(percentage) + "§7" + healthLang.repeat(10 - percentage))
             .replace("{TeamColor}", "${team.color.chat}")
-            .replace("{TeamName}", team.getDisplayName(api!!.defaultLang)
+            .replace("{TeamName}", team.getDisplayName(lang)
         )
         entity.customName = name
     }

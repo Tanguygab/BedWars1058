@@ -119,7 +119,7 @@ open class Language(
         }
         if (serverIp == null) {
             val api = plugin.server.servicesManager.getRegistration(BedWars::class.java)!!.provider
-            serverIp = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP)
+            serverIp = api.configs.main.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP)
         }
         return ChatColor.translateAlternateColorCodes('&', message
             .replace("{prefix}", prefix)
@@ -148,7 +148,7 @@ open class Language(
     fun setupUnSetCategories() {
         val api = plugin.server.servicesManager.getRegistration(BedWars::class.java)!!.provider
 
-        for (category in api.configs.shopConfig.getConfigurationSection("")!!.getKeys(false)) {
+        for (category in api.configs.shop.getConfigurationSection("")!!.getKeys(false)) {
             if (category.equals(ConfigPath.SHOP_SETTINGS_PATH, ignoreCase = true)) continue
             if (category.equals(ConfigPath.SHOP_SPECIALS_PATH, ignoreCase = true)) continue
             if (category == ConfigPath.SHOP_QUICK_DEFAULTS_PATH) continue
@@ -161,7 +161,7 @@ open class Language(
                 .filter { it.key !in this }
                 .forEach { set(it.key, it.value) }
 
-            val contents = api.configs.shopConfig.getConfigurationSection(category + ConfigPath.SHOP_CATEGORY_CONTENT_PATH) ?: continue
+            val contents = api.configs.shop.getConfigurationSection(category + ConfigPath.SHOP_CATEGORY_CONTENT_PATH) ?: continue
             for (content in contents.getKeys(false)) {
                 mapOf(
                     Messages.SHOP_CONTENT_TIER_ITEM_NAME to "&8Name not set",
@@ -184,7 +184,7 @@ open class Language(
         /**
          * Get server default language.
          */
-        val defaultLanguage get() = BedWars.INSTANCE.defaultLang
+        lateinit var defaultLanguage: Language
 
         val langByPlayer = mutableMapOf<UUID, Language>()
 
@@ -249,7 +249,7 @@ open class Language(
          * 
          * @return null if you could not find.
          */
-        fun getLang(iso: String) = languages.find { it.iso.equals(iso, ignoreCase = true) } ?: defaultLanguage
+        fun getLanguageByIso(iso: String) = languages.find { it.iso.equals(iso, ignoreCase = true) } ?: defaultLanguage
 
         private fun addDefaultMessages(
             yml: YamlConfiguration,
@@ -271,7 +271,7 @@ open class Language(
             val api = Bukkit.getServer().servicesManager.getRegistration(BedWars::class.java)!!.provider
             for (l in languages) {
                 /* save messages for stats gui items if custom items added */
-                val stats = api.configs.mainConfig.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_STATS_PATH) ?: continue
+                val stats = api.configs.main.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_STATS_PATH) ?: continue
                 for (item in stats.getKeys(false)) {
                     if (item in ConfigPath.GENERAL_CONFIGURATION_STATS_GUI_SIZE) continue
 
@@ -298,7 +298,7 @@ open class Language(
                 ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_PATH,
                 ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_PATH,
                 ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_PATH
-            ).associateWith { api.configs.mainConfig.getConfigurationSection(it) }
+            ).associateWith { api.configs.main.getConfigurationSection(it) }
                 .filterValues { it != null }
                 .forEach { (path, section) ->
                     section!!.getKeys(false).forEach { item ->
@@ -362,7 +362,7 @@ open class Language(
          * scoreboard and custom join items.
          */
         fun setPlayerLanguage(uuid: UUID, iso: String): Boolean {
-            val newLang = getLang(iso)
+            val newLang = getLanguageByIso(iso)
             val oldLang = getLanguage(uuid)
             if (oldLang.iso == newLang.iso) return false
 

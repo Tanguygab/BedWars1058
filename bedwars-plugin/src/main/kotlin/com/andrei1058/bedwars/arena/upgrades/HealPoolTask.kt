@@ -9,7 +9,7 @@ import org.bukkit.Material
 import org.bukkit.scheduler.BukkitRunnable
 import kotlin.random.Random
 
-class HealPoolTask(var team: ITeam) : BukkitRunnable() {
+class HealPoolTask(private val plugin: BedWars, val team: ITeam) : BukkitRunnable() {
     private val arena = team.arena
     private val spawn = team.spawn!!
     private val radius = team.arena.config.getInt(ConfigPath.ARENA_ISLAND_RADIUS)
@@ -21,15 +21,16 @@ class HealPoolTask(var team: ITeam) : BukkitRunnable() {
     private val minZ = spawn.blockZ - radius
 
     init {
-        runTaskTimerAsynchronously(BedWars.plugin, 0, 80L)
+        runTaskTimerAsynchronously(plugin, 0, 80L)
         healPoolTasks.add(this)
     }
 
     override fun run() {
-        val players = if (BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HEAL_POOL_SEEN_TEAM_ONLY))
+        val players = if (plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HEAL_POOL_SEEN_TEAM_ONLY))
             team.members
         else arena.players
 
+        val nms = plugin.versionSupport
         for (x in minX..maxX) {
             for (y in minY..maxY) {
                 for (z in minZ..maxZ) {
@@ -40,7 +41,7 @@ class HealPoolTask(var team: ITeam) : BukkitRunnable() {
                     if (chance != 0) continue
 
                     for (p in players) {
-                        BedWars.nms.playVillagerEffect(p, location)
+                        nms.playVillagerEffect(p, location)
                     }
                 }
             }

@@ -27,24 +27,27 @@ import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.bedwars.subcmds.regular.*
-import com.andrei1058.bedwars.commands.bedwars.subcmds.regular.CmdLeave
 import com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.*
 import com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup.*
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.command.defaults.BukkitCommand
 import org.bukkit.entity.Player
 
 class MainCommand(private val plugin: BedWars, override val commandName: String) : BukkitCommand(commandName), ParentCommand {
-    override val subCommands = mutableListOf(
+    override val subCommands = mutableListOf<SubCommand>(
+        Level(this),
+        CmdList(this), //priority 20
+        CmdStats(this),
+        CmdLang(this),
         CmdJoin(this),
         CmdLeave(this),
-        CmdLang(this),
-        CmdTeleporter(),
-        CmdStats(this),
+
+
+        CmdTeleporter(this),
         CmdStart(this),
+
         SetupArena(this), //priority 2
         ArenaList(this), //priority 3
         DelArena(this), //priority 4
@@ -53,31 +56,30 @@ class MainCommand(private val plugin: BedWars, override val commandName: String)
         CloneArena(this), //priority 7
         ArenaGroup(this), //priority 8
         Build(this), //priority 9
-        Level(this),
+
         Reload(this), //priority 11
-        CmdList(this), //priority 20
 
         /* Arena setup commands (in world) */
         AutoCreateTeams(this),
-        SetWaitingSpawn(),
-        SetSpectatorPos(),
-        CreateTeam(),
+        SetWaitingSpawn(this),
+        SetSpectatorPos(this),
+        CreateTeam(this),
         WaitingPos(this),
-        RemoveTeam(),
-        SetMaxInTeam(),
-        SetBuildHeight(),
+        RemoveTeam(this),
+        SetMaxInTeam(this),
+        SetBuildHeight(this),
         SetSpawn(this),
         SetBed(this),
         SetShop(this),
         SetUpgrade(this),
         AddGenerator(this),
-        RemoveGenerator(),
+        RemoveGenerator(this),
         SetType(this),
-        Save(this),
         SetKillDropsLoc(this),
+        Save(this),
 
-        CmdTpStaff(),
-        CmdUpgrades(),
+        CmdTpStaff(this),
+        CmdUpgrades(this),
 
         NPCCommand(this)
     )
@@ -85,10 +87,11 @@ class MainCommand(private val plugin: BedWars, override val commandName: String)
     init {
         INSTANCE = this
         aliases = listOf("bedwars", "bedwars1058")
-        if (BedWars.serverType != ServerType.BUNGEE) {
+        if (plugin.serverType != ServerType.BUNGEE) {
             subCommands += CmdGUI(this)
             subCommands += SetLobby(this) //priority 1
         }
+        subCommands.sortBy { it.priority }
     }
 
     override fun execute(sender: CommandSender, label: String, args: Array<String>): Boolean {
@@ -101,54 +104,48 @@ class MainCommand(private val plugin: BedWars, override val commandName: String)
         }
 
         /* Set op commands*/
-        if (!sender.isOp && !sender.hasPermission("$commandName.*")) {
+        if (!sender.isOp && !sender.hasPermission("$name.*")) {
             if (sender is ConsoleCommandSender) {
                 sender.sendMessage("§fNo console commands available atm.")
                 return true
             }
             /* Send player commands */
-            Bukkit.dispatchCommand(sender, "$commandName cmds")
+            Bukkit.dispatchCommand(sender, "$name cmds")
             return true
         }
 
         if (sender is Player) {
             if (SetupSession.isInSetupSession(sender.uniqueId)) {
-                Bukkit.dispatchCommand(sender, "$commandName cmds")
+                Bukkit.dispatchCommand(sender, "$name cmds")
             } else {
                 sender.sendMessage("\n§8§l$dot §6${plugin.description.name} v${plugin.description.version} §7- §c Admin Commands\n")
                 sendSubCommands(sender)
             }
         } else {
-            sender.sendMessage("§f   $commandName safemode §eenable/ disable")
+            sender.sendMessage("§f   $name safemode §eenable/ disable")
         }
         return true
     }
 
     override fun addSubCommand(subCommand: SubCommand) {
-        subCommands.add(subCommand)
+        subCommands += subCommand
+        subCommands.sortBy { it.priority }
     }
 
-    override fun sendSubCommands(player: Player) {
-        for (i in 0..20) {
-            for (sb in subCommands) {
-                if (sb.priority == i && sb.isShown && sb.canSee(player, BedWars.api)) {
-                    player.spigot().sendMessage(sb.displayInfo)
-                }
-            }
-        }
-    }
+    override fun sendSubCommands(player: Player) = subCommands
+        .filter { it.description != null && it.canSee(player) }
+        .forEach { player.spigot().sendMessage(it.description) }
 
     @Throws(IllegalArgumentException::class)
     override fun tabComplete(
         sender: CommandSender,
         alias: String,
-        args: Array<String>,
-        location: Location?
+        args: Array<String>
     ): List<String> {
         val arg = args.getOrNull(0) ?: ""
         return when (args.size) {
-            1 -> subCommands.filter { it.canSee(sender, BedWars.api) }.map { it.subCommandName }
-            2 if getSubCommand(arg)?.canSee(sender, BedWars.api) == true -> getSubCommand(arg)!!.tabComplete
+            1 -> subCommands.filter { it.canSee(sender) }.map { it.name }
+            2 if getSubCommand(arg)?.canSee(sender) == true -> getSubCommand(arg)!!.tabComplete
             else -> emptyList()
         }
     }
@@ -157,7 +154,7 @@ class MainCommand(private val plugin: BedWars, override val commandName: String)
     /**
      * Get sub-command by name
      */
-    fun getSubCommand(name: String) = subCommands.find { it.subCommandName.equals(name, ignoreCase = true) }
+    fun getSubCommand(name: String) = subCommands.find { it.name.equals(name, ignoreCase = true) }
 
     override fun hasSubCommand(name: String) = getSubCommand(name) != null
 
@@ -170,17 +167,6 @@ class MainCommand(private val plugin: BedWars, override val commandName: String)
         var dot = 254.toChar()
 
         fun isArenaGroup(name: String) = name.equals("default", ignoreCase = true) ||
-                name in BedWars.config.getStringList("arenaGroups")
-        /**
-         * Check if lobby location is set, else send a error message to the player
-         */
-        fun isLobbySet(p: Player?): Boolean {
-            if (BedWars.serverType == ServerType.BUNGEE) return true
-            if (BedWars.config.lobbyWorldName.isEmpty()) {
-                p?.sendMessage("§c▪ §7You have to set the lobby location first!")
-                return false
-            }
-            return true
-        }
+                name in BedWars.INSTANCE.mainConfig.getStringList("arenaGroups")
     }
 }

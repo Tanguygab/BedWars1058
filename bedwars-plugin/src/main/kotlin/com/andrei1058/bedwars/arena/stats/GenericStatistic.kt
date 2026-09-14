@@ -11,7 +11,7 @@ abstract class GenericStatistic : GameStatisticProvider<GenericStatistic.Value> 
 
     override fun getVoidReplacement(language: Language) = "0"
 
-    override val owner get() = BedWars.plugin
+    override val owner get() = BedWars.INSTANCE
 
     class Value : GameStatistic<Int>, Incrementable, Comparable<GameStatistic<Int>> {
         override var value = 0

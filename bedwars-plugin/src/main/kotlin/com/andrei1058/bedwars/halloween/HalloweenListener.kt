@@ -29,7 +29,6 @@ import com.andrei1058.bedwars.api.events.player.PlayerXpGainEvent
 import com.andrei1058.bedwars.api.events.server.ArenaDisableEvent
 import com.andrei1058.bedwars.api.events.server.ArenaEnableEvent
 import com.andrei1058.bedwars.api.events.server.ArenaRestartEvent
-import com.andrei1058.bedwars.arena.Misc
 import com.andrei1058.bedwars.levels.internal.PlayerLevel
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -78,7 +77,7 @@ class HalloweenListener : Listener {
 
         block.type = Material.valueOf(getForCurrentVersion("COBWEB", "WEB"))
         e.arena.addPlacedBlock(block)
-        block.setMetadata("give-bw-exp", FixedMetadataValue(BedWars.plugin, "ok"))
+        block.setMetadata("give-bw-exp", FixedMetadataValue(BedWars.INSTANCE, "ok"))
         CobWebRemover.getByArenaWorld(e.arena.worldName)?.addCobWeb(block)
     }
 
@@ -94,7 +93,7 @@ class HalloweenListener : Listener {
     @EventHandler
     fun onJoin(e: PlayerJoinArenaEvent) {
         if (e.isSpectator) return
-        BedWars.plugin.run(delay = 20) { e.player.world.playSound(e.player.location, ambienceSound, 3f, 1f) }
+        BedWars.INSTANCE.run(delay = 20) { e.player.world.playSound(e.player.location, ambienceSound, 3f, 1f) }
     }
 
     @EventHandler

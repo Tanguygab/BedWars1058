@@ -26,13 +26,13 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.SQLException
 
-class SQLite : CommonSQL() {
+class SQLite(plugin: BedWars) : CommonSQL() {
     private val url: String
 
     init {
-        val folder = File("${BedWars.plugin.dataFolder}/Cache")
+        val folder = File("${plugin.dataFolder}/Cache")
         if (!folder.exists() && !folder.mkdir()) {
-            BedWars.plugin.logger.severe("Could not create /Cache folder!")
+            plugin.logger.severe("Could not create /Cache folder!")
         }
         val dataFolder = File("${folder.path}/shop.db")
         url = "jdbc:sqlite:$dataFolder"
@@ -40,7 +40,7 @@ class SQLite : CommonSQL() {
         if (!dataFolder.exists()) {
             try {
                 if (!dataFolder.createNewFile()) {
-                    BedWars.plugin.logger.severe("Could not create /Cache/shop.db file!")
+                    plugin.logger.severe("Could not create /Cache/shop.db file!")
                 }
 
                 try {
@@ -49,7 +49,7 @@ class SQLite : CommonSQL() {
                 } catch (e: SQLException) {
                     e.printStackTrace()
                 } catch (e: ClassNotFoundException) {
-                    BedWars.plugin.logger.severe("Could Not Found SQLite Driver on your system!")
+                    plugin.logger.severe("Could Not Found SQLite Driver on your system!")
                     e.printStackTrace()
                 }
             } catch (e: IOException) {

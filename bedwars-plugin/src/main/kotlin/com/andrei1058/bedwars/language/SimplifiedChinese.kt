@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class SimplifiedChinese : Language(BedWars.plugin, "zh_cn") {
+class SimplifiedChinese : Language(BedWars.INSTANCE, "zh_cn") {
     init {
         this.options().copyDefaults(true)
         this.addDefault(Messages.PREFIX, "")

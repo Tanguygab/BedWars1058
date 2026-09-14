@@ -20,8 +20,8 @@
 package com.andrei1058.bedwars.api
 
 import com.andrei1058.bedwars.api.arena.ArenaManager
-import com.andrei1058.bedwars.api.language.Language
-import com.andrei1058.bedwars.api.levels.Level
+import com.andrei1058.bedwars.api.command.ParentCommand
+import com.andrei1058.bedwars.api.levels.LevelManager
 import com.andrei1058.bedwars.api.party.Party
 import com.andrei1058.bedwars.api.server.ISetupSession
 import com.andrei1058.bedwars.api.server.RestoreAdapter
@@ -57,17 +57,18 @@ interface BedWars {
     /**
      * Get shop util.
      */
-    val shopUtil: ShopUtil
+    val shopManager: ShopManager
 
     val upgradesManager: UpgradesManager
 
     /**
-     * Get levels methods.
+     * Get/Set level manager.
      */
-    val levelsUtil: Level
+    var levelManager: LevelManager
 
     /**
-     * Get party util.
+     * Get/Set the party interface.
+     * You may need to unregister /party command yourself.
      */
     val partyUtil: Party
 
@@ -90,21 +91,10 @@ interface BedWars {
     val serverType: ServerType
 
     /**
-     * Get a player language iso code
-     */
-    fun getLangIso(player: Player): String
-
-    /**
      * Get the restore adapter.
      */
     @set:Throws(IllegalAccessError::class)
     var restoreAdapter: RestoreAdapter<*>
-
-    /**
-     * Change the party interface.
-     * You man need to unregister /party command yourself.
-     */
-    fun setPartyAdapter(partyAdapter: Party)
 
     /**
      * Get nms operations.
@@ -112,30 +102,15 @@ interface BedWars {
     val versionSupport: VersionSupport
 
     /**
-     * Get server default language.
-     */
-    val defaultLang: Language
-
-    /**
      * Get lobby world name.
      */
     val lobbyWorld: String
 
-    fun setLevelAdapter(level: Level)
-
-    val isAutoScale: Boolean
-
-    /**
-     * Get language by iso code.
-     */
-    fun getLanguageByIso(isoCode: String): Language
-
-    /**
-     * Get a player language.
-     */
-    fun getLanguage(player: Player): Language
+    val autoScale: Boolean
 
     val addonsPath: File
+
+    val mainCommand: ParentCommand
 
     /**
      * Scoreboard options.

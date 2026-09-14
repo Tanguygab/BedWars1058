@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.arena.team
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.arena.generators.GeneratorOre
 import com.andrei1058.bedwars.api.arena.generator.IGenerator
 import com.andrei1058.bedwars.api.arena.team.ITeam
@@ -37,7 +37,7 @@ import com.andrei1058.bedwars.arena.Arena
 import com.andrei1058.bedwars.arena.generators.Generator
 import com.andrei1058.bedwars.configuration.Sounds
 import com.andrei1058.bedwars.shop.ShopCache
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.ArmorStand
@@ -67,12 +67,13 @@ class BedWarsTeam(
          */
         set(bedDestroyed) {
             field = bedDestroyed
+            val plugin = BedWars.INSTANCE
             if (!bedDestroyed) {
-                if (BedWars.nms.isBed(bed.block.type)) {
-                    BedWars.plugin.logger.severe("Bed not set for team: $name in arena: ${arena.name}")
+                if (plugin.versionSupport.isBed(bed.block.type)) {
+                    plugin.logger.severe("Bed not set for team: $name in arena: ${arena.name}")
                     return
                 }
-                BedWars.nms.colorBed(this)
+                plugin.versionSupport.colorBed(this)
             } else {
                 bed.block.type = Material.AIR
             }
@@ -162,7 +163,7 @@ class BedWarsTeam(
             gameMode = GameMode.SURVIVAL
             canPickupItems = true
         }
-        BedWars.nms.setCollide(player, arena, true)
+        BedWars.INSTANCE.versionSupport.setCollide(player, arena, true)
         sendDefaultInventory(player, true)
         Bukkit.getPluginManager().callEvent(PlayerFirstSpawnEvent(player, arena))
     }
@@ -176,15 +177,17 @@ class BedWarsTeam(
         val upgradeLoc = arena.config.getArenaLoc("Team.$name.Upgrade")!!
         val shopLoc = arena.config.getArenaLoc("Team.$name.Shop")!!
 
-        BedWars.plugin.run(delay = 20) {
-            BedWars.nms.colorBed(this)
-            BedWars.nms.spawnShop(
+        val plugin = BedWars.INSTANCE
+        val nms = plugin.versionSupport
+        plugin.run(delay = 20) {
+            nms.colorBed(this)
+            nms.spawnShop(
                 upgradeLoc,
                 (if (arena.maxInTeam > 1) Messages.NPC_NAME_TEAM_UPGRADES else Messages.NPC_NAME_SOLO_UPGRADES),
                 arena.players,
                 arena
             )
-            BedWars.nms.spawnShop(
+            nms.spawnShop(
                 shopLoc,
                 (if (arena.maxInTeam > 1) Messages.NPC_NAME_TEAM_SHOP else Messages.NPC_NAME_SOLO_SHOP),
                 arena.players,
@@ -215,7 +218,7 @@ class BedWarsTeam(
      * Rejoin a team
      */
     override fun reJoin(player: Player) {
-        reJoin(player, BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_COUNTDOWN))
+        reJoin(player, BedWars.INSTANCE.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_COUNTDOWN))
     }
 
     override fun reJoin(player: Player, respawnTime: Int) {
@@ -229,42 +232,45 @@ class BedWarsTeam(
     override fun sendDefaultInventory(player: Player, clear: Boolean) {
         if (clear) player.inventory.clear()
         var path = "${ConfigPath.GENERAL_CONFIGURATION_DEFAULT_ITEMS}.${arena.group}"
-        if (path !in BedWars.config) path = "${ConfigPath.GENERAL_CONFIGURATION_DEFAULT_ITEMS}.Default"
+        val plugin = BedWars.INSTANCE
+        val config = plugin.mainConfig
+        if (path !in config) path = "${ConfigPath.GENERAL_CONFIGURATION_DEFAULT_ITEMS}.Default"
 
-        for (s in BedWars.config.getStringList(path)) {
+        for (s in config.getStringList(path)) {
             if (s.isEmpty()) continue
             val parm = s.split(",")
 
             val material = try {
                 Material.valueOf(parm[0])
             } catch (_: Exception) {
-                BedWars.plugin.logger.severe("${parm[0]} is not an material at: $s (config)")
+                plugin.logger.severe("${parm[0]} is not an material at: $s (config)")
                 continue
             }
             var amount = if (parm.size > 1) parm[1].toIntOrNull() else 1
             if (amount == null) {
-                BedWars.plugin.logger.severe("${parm[1]} is not an integer at: $s (config)")
+                plugin.logger.severe("${parm[1]} is not an integer at: $s (config)")
                 amount = 1
             }
 
             var data = if (parm.size > 2) parm[2].toShortOrNull() else 0
             if (data == null) {
-                BedWars.plugin.logger.severe("${parm[2]} is not an integer at: $s (config)")
+                plugin.logger.severe("${parm[2]} is not an integer at: $s (config)")
                 data = 0
             }
             var item = ItemStack(material, amount, data)
 
+            val nms = plugin.versionSupport
             item.editMeta {
                 if (parm.size > 3) setDisplayName(ChatColor.translateAlternateColorCodes('&', parm[3]))
-                BedWars.nms.setUnbreakable(this)
+                nms.setUnbreakable(this)
             }
 
-            item = BedWars.nms.addCustomData(item, "DEFAULT_ITEM")
+            item = nms.addCustomData(item, "DEFAULT_ITEM")
 
             val inventory = player.inventory.contents.filter { it != null && item.type != Material.AIR }
             if (when {
-                BedWars.nms.isSword(item) -> inventory.none { BedWars.nms.isSword(item) }
-                BedWars.nms.isBow(item) -> inventory.none { BedWars.nms.isBow(it) }
+                nms.isSword(item) -> inventory.none { nms.isSword(item) }
+                nms.isBow(item) -> inventory.none { nms.isBow(it) }
                 else -> true
             }) player.inventory.addItem(item)
         }
@@ -273,42 +279,45 @@ class BedWarsTeam(
 
     override fun defaultSword(player: Player) {
         var path = "${ConfigPath.GENERAL_CONFIGURATION_DEFAULT_ITEMS}.${arena.group}"
-        if (path !in BedWars.config) path = "${ConfigPath.GENERAL_CONFIGURATION_DEFAULT_ITEMS}.Default"
+        val plugin = BedWars.INSTANCE
+        val config = plugin.mainConfig
+        if (path !in config) path = "${ConfigPath.GENERAL_CONFIGURATION_DEFAULT_ITEMS}.Default"
 
-        for (s in BedWars.config.getStringList(path)) {
+        for (s in config.getStringList(path)) {
             val parm = s.split(",")
             if (parm.isEmpty()) continue
 
             val material = try {
                 Material.valueOf(parm[0])
             } catch (_: Exception) {
-                BedWars.plugin.logger.severe("${parm[0]} is not an material at: $s (config)")
+                plugin.logger.severe("${parm[0]} is not an material at: $s (config)")
                 continue
             }
 
             var amount = if (parm.size > 1) parm[1].toIntOrNull() else 1
             if (amount == null) {
-                BedWars.plugin.logger.severe("${parm[1]} is not an integer at: $s (config)")
+                plugin.logger.severe("${parm[1]} is not an integer at: $s (config)")
                 amount = 1
             }
 
             var data = if (parm.size > 2) parm[2].toShortOrNull() else 0
             if (data == null) {
-                BedWars.plugin.logger.severe("${parm[2]} is not an integer at: $s (config)")
+                plugin.logger.severe("${parm[2]} is not an integer at: $s (config)")
                 data = 0
             }
 
             var item = ItemStack(material, amount, data)
+            val nms = plugin.versionSupport
             item.editMeta {
                 if (parm.size > 3) {
                     setDisplayName(ChatColor.translateAlternateColorCodes('&', parm[3]))
                 }
-                BedWars.nms.setUnbreakable(this)
+                nms.setUnbreakable(this)
             }
 
-            item = BedWars.nms.addCustomData(item, "DEFAULT_ITEM")
+            item = nms.addCustomData(item, "DEFAULT_ITEM")
 
-            if (!BedWars.nms.isSword(item)) continue
+            if (!nms.isSword(item)) continue
             player.inventory.addItem(item)
             break
         }
@@ -319,10 +328,11 @@ class BedWarsTeam(
      */
     fun spawnGenerators() {
         for (type in arrayOf("Iron", "Gold")) {
-            val o = arena.config.get("Team.$name.$type")
+            val config = arena.config
+            val o = config.get("Team.$name.$type")
             val locs = if (o is String)
-                listOf(arena.config.getArenaLoc("Team.$name.$type"))
-            else arena.config.getArenaLocations("Team.$name.$type")
+                listOf(config.getArenaLoc("Team.$name.$type"))
+            else config.getArenaLocations("Team.$name.$type")
 
             for (loc in locs) {
                 val gen = Generator(loc ?: continue, arena, GeneratorOre.valueOf(type.uppercase()), this)
@@ -336,32 +346,34 @@ class BedWarsTeam(
      * Respawn a member
      */
     override fun respawnMember(player: Player) {
-        reSpawnInvulnerability[player.uniqueId] = System.currentTimeMillis() + BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_INVULNERABILITY)
+        val plugin = BedWars.INSTANCE
+        reSpawnInvulnerability[player.uniqueId] = System.currentTimeMillis() + plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_INVULNERABILITY)
 
+        val nms = plugin.versionSupport
         player.apply {
             teleportSafe(spawn)
             velocity = Vector(0, 0, 0)
             removePotionEffect(PotionEffectType.INVISIBILITY)
-            BedWars.nms.setCollide(this, arena, true)
+            nms.setCollide(this, arena, true)
             allowFlight = false
             isFlying = false
             health = 20.0
         }
 
-        BedWars.plugin.run(delay = 8) {
-            arena.respawnSessions.remove(player) //Fixes https://github.com/andrei1058/BedWars1058/issues/669
+        plugin.run(delay = 8) {
+            arena.respawnSessions -= player //Fixes https://github.com/andrei1058/BedWars1058/issues/669
 
             for (inGame in arena.players) {
                 if (inGame == player) continue
-                BedWars.nms.showPlayer(player, inGame)
-                BedWars.nms.showPlayer(inGame, player)
+                nms.showPlayer(player, inGame)
+                nms.showPlayer(inGame, player)
             }
             for (spectator in arena.spectators) {
-                BedWars.nms.showPlayer(player, spectator)
+                nms.showPlayer(player, spectator)
             }
         }
 
-        BedWars.nms.sendTitle(player, Language.getMsg(player, Messages.PLAYER_DIE_RESPAWNED_TITLE), "", 0, 20, 10)
+        nms.sendTitle(player, Language.getMsg(player, Messages.PLAYER_DIE_RESPAWNED_TITLE), "", 0, 20, 10)
 
         sendDefaultInventory(player, false)
         ShopCache.getShopCache(player.uniqueId)
@@ -375,8 +387,8 @@ class BedWarsTeam(
             for (i in player.inventory.contents) {
                 if (i == null) continue
                 if (i.type == Material.BOW) i.editMeta {
-                    for (e in bowsEnchantments) {
-                        addEnchant(e.enchantment, e.amplifier, true)
+                    for ((enchantment, amplifier) in bowsEnchantments) {
+                        addEnchant(enchantment, amplifier, true)
                     }
                 }
                 player.updateInventory()
@@ -385,7 +397,7 @@ class BedWarsTeam(
         if (swordsEnchantments.isNotEmpty()) {
             for (i in player.inventory.contents) {
                 if (i == null) continue
-                if (BedWars.nms.isSword(i)) i.editMeta {
+                if (nms.isSword(i)) i.editMeta {
                     for (e in swordsEnchantments) {
                         addEnchant(e.enchantment, e.amplifier, true)
                     }
@@ -396,43 +408,43 @@ class BedWarsTeam(
         if (armorsEnchantments.isNotEmpty()) {
             for (i in player.inventory.armorContents) {
                 if (i == null) continue
-                if (BedWars.nms.isArmor(i)) i.editMeta {
-                    for (e in armorsEnchantments) {
-                        addEnchant(e.enchantment, e.amplifier, true)
+                if (nms.isArmor(i)) i.editMeta {
+                    for ((enchantment, amplifier) in armorsEnchantments) {
+                        addEnchant(enchantment, amplifier, true)
                     }
                 }
                 player.updateInventory()
             }
         }
-        Bukkit.getPluginManager().callEvent(PlayerReSpawnEvent(player, arena))
-        BedWars.nms.sendPlayerSpawnPackets(player, arena)
+        plugin.server.pluginManager.callEvent(PlayerReSpawnEvent(player, arena))
+        nms.sendPlayerSpawnPackets(player, arena)
 
-        BedWars.plugin.run(delay = 10) {
-            BedWars.nms.sendPlayerSpawnPackets(player, arena)
+        plugin.run(delay = 10) {
+            nms.sendPlayerSpawnPackets(player, arena)
 
             // #274
             for (on in arena.showTime.keys) {
-                BedWars.nms.hideArmor(on, player)
+                nms.hideArmor(on, player)
             }
         }
 
-        /*if (!BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_DISABLE_RESPAWN_PACKETS)) {
-            BedWars.plugin.run(delay = 12) { BedWars.nms.invisibilityFix(player, arena) }
-            BedWars.plugin.run(delay = 30) { BedWars.nms.invisibilityFix(player, arena) }
-            BedWars.plugin.run(delay = 25) {arena.players.forEach { BedWars.nms.showPlayer(it, player) } }
+        /*if (!config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_DISABLE_RESPAWN_PACKETS)) {
+            plugin.run(delay = 12) { nms.invisibilityFix(player, arena) }
+            plugin.run(delay = 30) { nms.invisibilityFix(player, arena) }
+            plugin.run(delay = 25) { arena.players.forEach { nms.showPlayer(it, player) } }
         }*/
 
         // un-vanish from respawn
-        /*BedWars.plugin.run(delay = 20) {
+        /*plugin.run(delay = 20) {
             arena.players.forEach {
-                BedWars.nms.showPlayer(player, it)
-                BedWars.nms.showArmor(player, it)
-                BedWars.nms.showPlayer(it, player)
-                BedWars.nms.showArmor(it, player)
+                nms.showPlayer(player, it)
+                nms.showArmor(player, it)
+                nms.showPlayer(it, player)
+                nms.showArmor(it, player)
             }
             arena.spectators.forEach {
-                BedWars.nms.showPlayer(player, it)
-                BedWars.nms.showArmor(player, it)
+                nms.showPlayer(player, it)
+                nms.showArmor(player, it)
             }
         }*/
         Sounds.playSound("player-re-spawn", player)
@@ -445,7 +457,7 @@ class BedWarsTeam(
         editMeta {
             this as LeatherArmorMeta?
             setColor(this@BedWarsTeam.color.bukkit)
-            BedWars.nms.setUnbreakable(this)
+            BedWars.INSTANCE.versionSupport.setUnbreakable(this)
         }
     }
 
@@ -495,9 +507,10 @@ class BedWarsTeam(
                 isMarker = true
                 isVisible = false
             }
+            val nms = BedWars.INSTANCE.versionSupport
             for (p2 in arena.world.players) {
                 if (p !== p2.uniqueId) {
-                    BedWars.nms.hideEntity(armorStand, p2)
+                    nms.hideEntity(armorStand, p2)
                 }
             }
         }
@@ -512,7 +525,7 @@ class BedWarsTeam(
         fun destroy() {
             if (!arena.config.getBoolean(ConfigPath.ARENA_USE_BED_HOLO)) return
             armorStand.remove()
-            beds.remove(p)
+            beds -= p
         }
 
         fun show() {
@@ -537,10 +550,10 @@ class BedWarsTeam(
      */
     override fun addBaseEffect(effect: PotionEffectType, amplifier: Int, duration: Int) {
         baseEffects += PotionEffect(effect, duration, amplifier)
-        for (p in ArrayList<Player>(members)) {
-            if (p.location.distance(bed) <= arena.islandRadius) {
+        for (member in members.toList()) {
+            if (member.location.distance(bed) <= arena.islandRadius) {
                 for (e in baseEffects) {
-                    p.addPotionEffect(e, true)
+                    member.addPotionEffect(e, true)
                 }
             }
         }
@@ -551,12 +564,12 @@ class BedWarsTeam(
      */
     override fun addBowEnchantment(enchantment: Enchantment, amplifier: Int) {
         bowsEnchantments += TeamEnchant(enchantment, amplifier)
-        for (player in members) {
-            for (item in player.inventory.contents) {
+        for (member in members) {
+            for (item in member.inventory.contents) {
                 if (item == null || item.type != Material.BOW) continue
                 item.editMeta { addEnchant(enchantment, amplifier, true) }
             }
-            player.updateInventory()
+            member.updateInventory()
         }
     }
 
@@ -564,11 +577,12 @@ class BedWarsTeam(
      * Used when someone buys a new enchantment with apply == sword
      */
     override fun addSwordEnchantment(e: Enchantment, a: Int) {
-        swordsEnchantments.add(TeamEnchant(e, a))
+        swordsEnchantments += TeamEnchant(e, a)
+        val nms = BedWars.INSTANCE.versionSupport
         for (p in members) {
             for (i in p.inventory.contents) {
                 if (i == null) continue
-                if (BedWars.nms.isSword(i) || BedWars.nms.isAxe(i)) {
+                if (nms.isSword(i) || nms.isAxe(i)) {
                     i.editMeta { addEnchant(e, a, true) }
                 }
             }
@@ -580,22 +594,24 @@ class BedWarsTeam(
      * Used when someone buys a new enchantment with apply == armor
      */
     override fun addArmorEnchantment(e: Enchantment, a: Int) {
-        armorsEnchantments.add(TeamEnchant(e, a))
-        for (p in members) {
-            for (i in p.inventory.armorContents) {
+        swordsEnchantments += TeamEnchant(e, a)
+        val plugin = BedWars.INSTANCE
+        val nms = plugin.versionSupport
+        for (player in members) {
+            for (i in player.inventory.armorContents) {
                 if (i == null) continue
-                if (BedWars.nms.isArmor(i)) {
+                if (nms.isArmor(i)) {
                     i.editMeta { addEnchant(e, a, true) }
                 }
             }
-            p.updateInventory()
+            player.updateInventory()
         }
 
         // #274
-        BedWars.plugin.run(delay = 20) {
+        plugin.run(delay = 20) {
             for (member in members) {
                 if (!member.hasPotionEffect(PotionEffectType.INVISIBILITY)) continue
-                arena.allPlayers.forEach { BedWars.nms.hideArmor(member, it) }
+                arena.allPlayers.forEach { nms.hideArmor(member, it) }
             }
         }
     }

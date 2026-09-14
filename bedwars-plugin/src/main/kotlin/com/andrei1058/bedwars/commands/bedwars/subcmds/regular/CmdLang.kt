@@ -19,29 +19,21 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
-import com.andrei1058.bedwars.arena.SetupSession
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdLang(parent: ParentCommand) : SubCommand("lang", isShown = false, priority = 18) {
-    init {
-        displayInfo = createTC(
-            "§6 ▪ §7/${parent.commandName} $subCommandName",
-            "/${parent.commandName} $subCommandName",
-            "§fChange your language."
-        )
-    }
+class CmdLang(parent: MainCommand) : SubCommand(parent, "lang", priority = 18) {
+    override val description = createDescription("Change your language.")
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
 
-        if (BedWars.plugin.arenaManager.getArena(sender) != null) {
+        if (plugin.arenaManager.getArena(sender) != null) {
             sender.sendLangMsg(Messages.COMMAND_LANG_USAGE_DENIED)
             return true
         }
@@ -53,7 +45,7 @@ class CmdLang(parent: ParentCommand) : SubCommand("lang", isShown = false, prior
             }
 
             if (Language.setPlayerLanguage(sender.uniqueId, args[0])) {
-                BedWars.plugin.run(delay = 3) { sender.sendLangMsg(Messages.COMMAND_LANG_SELECTED_SUCCESSFULLY) }
+                plugin.run(delay = 3) { sender.sendLangMsg(Messages.COMMAND_LANG_SELECTED_SUCCESSFULLY) }
                 return true
             }
         }
@@ -67,13 +59,4 @@ class CmdLang(parent: ParentCommand) : SubCommand("lang", isShown = false, prior
     }
 
     override val tabComplete get() = Language.languages.map { it.iso }
-
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
-        if (sender !is Player) return false
-
-        if (api.arenaManager.isInArena(sender)) return false
-
-        if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        return canUse(sender)
-    }
 }

@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.shop.main
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.shop.IBuyItem
 import com.andrei1058.bedwars.api.configuration.ConfigPath
@@ -62,14 +62,16 @@ class BuyItem(
     init {
         BedWars.debug("Loading BuyItems: $path")
 
+        val plugin = BedWars.INSTANCE
         var material = yml.getString("$path.material")
         if (material == null) {
-            BedWars.plugin.logger.severe("BuyItem: Material not set at $path")
+            plugin.logger.severe("BuyItem: Material not set at $path")
             material = "AIR"
             isLoaded = false
         }
 
-        itemStack = BedWars.nms.createItemStack(
+        val nms = plugin.versionSupport
+        itemStack = nms.createItemStack(
             material,
             yml.getInt("$path.amount", 1),
             yml.getInt("$path.data", 1).toShort()
@@ -88,13 +90,13 @@ class BuyItem(
                 val enchant = try {
                     Enchantment.getByName(array[0])!!
                 } catch (_: Exception) {
-                    BedWars.plugin.logger.severe("BuyItem: Invalid enchants ${array[0]} at: $path.enchants")
+                    plugin.logger.severe("BuyItem: Invalid enchants ${array[0]} at: $path.enchants")
                     continue
                 }
 
                 val level = if (array.size > 1) try { array[1].toInt() }
                 catch (_: Exception) {
-                    BedWars.plugin.logger.severe("BuyItem: Invalid int ${array[1]} at: $path.enchants")
+                    plugin.logger.severe("BuyItem: Invalid int ${array[1]} at: $path.enchants")
                     continue
                 } else 1
                 addEnchant(enchant, level, true)
@@ -106,7 +108,7 @@ class BuyItem(
             // 1.16+ custom color
             val potionColor = yml.getString("$path.potion-color")
             if (!potionColor.isNullOrEmpty()) {
-                itemStack = BedWars.nms.setTag(itemStack, "CustomPotionColor", potionColor)
+                itemStack = nms.setTag(itemStack, "CustomPotionColor", potionColor)
             }
 
             var customEffectsList = emptyList<PotionEffect>()
@@ -117,19 +119,19 @@ class BuyItem(
                     val type = try {
                         PotionEffectType.getByName(array[0].uppercase())!!
                     } catch (_: Exception) {
-                        BedWars.plugin.logger.severe("BuyItem: Invalid potion effect ${array[0]} at: $path.potion")
+                        plugin.logger.severe("BuyItem: Invalid potion effect ${array[0]} at: $path.potion")
                         continue
                     }
 
                     val duration = if (array.size > 1) array[1].toIntOrNull() else 50
                     if (duration == null) {
-                        BedWars.plugin.logger.severe("BuyItem: Invalid int (duration) ${array[1]} at: $path.potion")
+                        plugin.logger.severe("BuyItem: Invalid int (duration) ${array[1]} at: $path.potion")
                         continue
                     }
 
                     val amplifier = if (array.size > 2) array[2].toIntOrNull() else 1
                     if (amplifier == null) {
-                        BedWars.plugin.logger.severe("BuyItem: Invalid int (amplifier) ${array[2]} at: $path.potion")
+                        plugin.logger.severe("BuyItem: Invalid int (amplifier) ${array[2]} at: $path.potion")
                         continue
                     }
 
@@ -139,14 +141,14 @@ class BuyItem(
                 }
             }
 
-            itemStack = BedWars.nms.setTag(itemStack, "Potion", "minecraft:water")
+            itemStack = nms.setTag(itemStack, "Potion", "minecraft:water")
             if (parent.itemStack.type == Material.POTION && customEffectsList.isNotEmpty()) {
                 var parentItemStack = parent.itemStack
                 parentItemStack.editMeta {
                     if (this !is PotionMeta) return@editMeta
                     customEffectsList.forEach { addCustomEffect(it, true) }
                 }
-                parentItemStack = BedWars.nms.setTag(parentItemStack, "Potion", "minecraft:water")
+                parentItemStack = nms.setTag(parentItemStack, "Potion", "minecraft:water")
                 parent.itemStack = parentItemStack
             }
         }
@@ -165,59 +167,61 @@ class BuyItem(
             return
         }
 
+        val plugin = BedWars.INSTANCE
+        val nms = plugin.versionSupport
         item.editMeta {
-            if (isPermanent) BedWars.nms.setUnbreakable(this)
+            if (isPermanent) nms.setUnbreakable(this)
         }
 
-        if (isAutoEquip && BedWars.nms.isArmor(itemStack)) {
+        if (isAutoEquip && nms.isArmor(itemStack)) {
             item.editMeta {
                 team.armorsEnchantments.forEach {
                     addEnchant(it.enchantment, it.amplifier, true)
                 }
             }
 
-            if (isPermanent) item = BedWars.nms.setShopUpgradeIdentifier(item, upgradeIdentifier)
+            if (isPermanent) item = nms.setShopUpgradeIdentifier(item, upgradeIdentifier)
             when (item.type) {
                 Material.LEATHER_HELMET,
                 Material.CHAINMAIL_HELMET,
                 Material.IRON_HELMET, Material.DIAMOND_HELMET,
-                BedWars.nms.materialGoldenHelmet(),
-                BedWars.nms.materialNetheriteHelmet() -> player.inventory.helmet = item
+                nms.materialGoldenHelmet(),
+                nms.materialNetheriteHelmet() -> player.inventory.helmet = item
 
                 Material.LEATHER_CHESTPLATE,
                 Material.CHAINMAIL_CHESTPLATE,
                 Material.IRON_CHESTPLATE,
                 Material.DIAMOND_CHESTPLATE,
-                BedWars.nms.materialGoldenChestPlate(),
-                BedWars.nms.materialNetheriteChestPlate(),
-                BedWars.nms.materialElytra() -> player.inventory.chestplate = item
+                nms.materialGoldenChestPlate(),
+                nms.materialNetheriteChestPlate(),
+                nms.materialElytra() -> player.inventory.chestplate = item
 
                 Material.LEATHER_LEGGINGS,
                 Material.CHAINMAIL_LEGGINGS,
                 Material.IRON_LEGGINGS,
                 Material.DIAMOND_LEGGINGS,
-                BedWars.nms.materialGoldenLeggings(),
-                BedWars.nms.materialNetheriteLeggings() -> player.inventory.leggings = item
+                nms.materialGoldenLeggings(),
+                nms.materialNetheriteLeggings() -> player.inventory.leggings = item
 
                 else -> player.inventory.boots = item
             }
             player.updateInventory()
             playSound("shop-auto-equip", player)
 
-            BedWars.plugin.run(delay = 20) {
+            plugin.run(delay = 20) {
                 // #274
                 if (!player.hasPotionEffect(PotionEffectType.INVISIBILITY)) return@run
-                arena.players.forEach { BedWars.nms.hideArmor(player, it) }
+                arena.players.forEach { nms.hideArmor(player, it) }
             }
             return
         }
 
-        item = BedWars.nms.colourItem(item, team)
+        item = nms.colourItem(item, team)
         item.editMeta {
-            if (isUnbreakable) BedWars.nms.setUnbreakable(this)
+            if (isUnbreakable) nms.setUnbreakable(this)
             mapOf(
                 (item.type == Material.BOW) to team.bowsEnchantments,
-                (BedWars.nms.isSword(item) || BedWars.nms.isAxe(item)) to team.swordsEnchantments
+                (nms.isSword(item) || nms.isAxe(item)) to team.swordsEnchantments
             ).asSequence()
                 .filter { it.key }
                 .flatMap { it.value }
@@ -225,20 +229,20 @@ class BuyItem(
         }
 
         if (isPermanent) {
-            item = BedWars.nms.setShopUpgradeIdentifier(item, upgradeIdentifier)
+            item = nms.setShopUpgradeIdentifier(item, upgradeIdentifier)
         }
 
         //Remove swords with lower damage
-        if (BedWars.nms.isSword(item)) player
+        if (nms.isSword(item)) player
             .inventory
             .contents
             .asSequence()
             .filterNotNull()
             .filter { it.type != Material.AIR || it === item }
-            .filter { BedWars.nms.isSword(it) }
-            .filter { BedWars.nms.isCustomBedWarsItem(it) }
-            .filter { BedWars.nms.getCustomData(it) == "DEFAULT_ITEM" }
-            .filter { BedWars.nms.getDamage(it) <= BedWars.nms.getDamage(item) }
+            .filter { nms.isSword(it) }
+            .filter { nms.isCustomBedWarsItem(it) }
+            .filter { nms.getCustomData(it) == "DEFAULT_ITEM" }
+            .filter { nms.getDamage(it) <= nms.getDamage(item) }
             .forEach { player.inventory.remove(it) }
         //
         player.inventory.addItem(item)

@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Turkish : Language(BedWars.plugin, "tr") {
+class Turkish : Language(BedWars.INSTANCE, "tr") {
     init {
         this.options().copyDefaults(true)
         this.options().header("Turkish translation by https://kuzeeeyk.me [kuzeeeyk#7268 or @kuzeeeyk]")

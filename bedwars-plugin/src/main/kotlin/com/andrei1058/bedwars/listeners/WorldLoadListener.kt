@@ -19,15 +19,15 @@
  */
 package com.andrei1058.bedwars.listeners
 
-import com.andrei1058.bedwars.BedWars.Companion.api
+import com.andrei1058.bedwars.BedWars
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.WorldLoadEvent
 
-class WorldLoadListener : Listener {
+class WorldLoadListener(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onLoad(e: WorldLoadEvent) {
-        for (a in api.arenaManager.enableQueue.toList()) {
+        for (a in plugin.arenaManager.enableQueue.toList()) {
             if (!a.worldName.equals(e.world.name, ignoreCase = true)) continue
             a.init(e.world)
             return

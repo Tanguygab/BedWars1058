@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.upgrades.menu
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
@@ -34,7 +34,7 @@ import org.bukkit.inventory.ItemStack
  * @param displayItem display item.
  */
 class MenuTrapSlot(override val name: String, displayItem: ItemStack) : MenuContent {
-    private val displayItem = BedWars.nms.addCustomData(displayItem, "MCONT_$name")
+    private val displayItem = BedWars.INSTANCE.versionSupport.addCustomData(displayItem, "MCONT_$name")
     private var trap: Int
 
     init {
@@ -50,7 +50,7 @@ class MenuTrapSlot(override val name: String, displayItem: ItemStack) : MenuCont
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + name.removePrefix("trap-slot-"),
             mutableListOf("&cLore2 not set")
         )
-        trap = BedWars.api.upgradesManager.configuration.getInt("$name.trap")
+        trap = BedWars.INSTANCE.upgradesManager.configuration.getInt("$name.trap")
         if (trap < 0) trap = 0
         if (trap != 0) trap -= 1
     }
@@ -77,7 +77,7 @@ class MenuTrapSlot(override val name: String, displayItem: ItemStack) : MenuCont
                     Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + name.replace("trap-slot-", "")
                 )
             } else {
-                val upgrades = BedWars.api.upgradesManager
+                val upgrades = BedWars.INSTANCE.upgradesManager
                 val arena = team.arena.name.lowercase()
                 var cost = upgrades.configuration.getInt("$arena-upgrades-settings.trap-start-price")
                 if (cost == 0) cost = upgrades.configuration.getInt("default-upgrades-settings.trap-start-price")

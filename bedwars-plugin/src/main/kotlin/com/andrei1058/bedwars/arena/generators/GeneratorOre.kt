@@ -19,7 +19,7 @@
  */
 package com.andrei1058.bedwars.arena.generators
 
-import com.andrei1058.bedwars.BedWars.Companion.generatorsCfg
+import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.generator.GeneratorType
 import com.andrei1058.bedwars.api.configuration.ConfigPath
@@ -85,7 +85,10 @@ enum class GeneratorOre(
             : this(material, listOf(delay), listOf(amount), listOf(limit))
 
     private val item = ItemStack(material)
-    private fun getArenaProperty(arena: IArena, property: String) = generatorsCfg.getInt("${arena.group}.$property", generatorsCfg.getInt("Default.$property"))
+    private fun getArenaProperty(arena: IArena, property: String): Int {
+        val config = BedWars.INSTANCE.configs.generators
+        return config.getInt("${arena.group}.$property", config.getInt("Default.$property"))
+    }
 
     override fun getItem(arena: IArena, tier: Int) = item
     override fun getDelay(arena: IArena, tier: Int): Int = getArenaProperty(arena, delay[tier-1])

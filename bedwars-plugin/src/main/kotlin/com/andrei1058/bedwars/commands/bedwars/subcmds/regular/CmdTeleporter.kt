@@ -19,27 +19,27 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.api.BedWars
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.arena.spectator.TeleporterGUI
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdTeleporter : SubCommand("teleporter", isShown = false) {
+class CmdTeleporter(parent: MainCommand) : SubCommand(parent, "teleporter") {
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
-        val a = BedWars.INSTANCE.arenaManager.getArena(sender) ?: return false
+        val a = plugin.arenaManager.getArena(sender) ?: return false
         if (!a.isSpectator(sender)) return false
         TeleporterGUI.openGUI(sender)
         return true
     }
 
-    override fun canSee(sender: CommandSender, api: BedWars): Boolean {
+    override fun canSee(sender: CommandSender): Boolean {
         if (sender !is Player) return false
 
-        val a = api.arenaManager.getArena(sender) ?: return false
+        val a = plugin.arenaManager.getArena(sender) ?: return false
         if (!a.isSpectator(sender)) return false
 
         if (SetupSession.isInSetupSession(sender.uniqueId)) return false

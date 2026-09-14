@@ -64,11 +64,11 @@ class ReJoin(
         reJoinList += this
         debug("Created ReJoin for ${player.name} ${player.uniqueId} at ${arena.name}")
 
-        if (BedWars.autoscale) sendMessage(JsonObject().apply {
+        if (BedWars.INSTANCE.autoScale) sendMessage(JsonObject().apply {
             addProperty("type", "RC")
             addProperty("uuid", "${player.uniqueId}")
             addProperty("arena_id", arena.worldName)
-            addProperty("server", BedWars.config.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID))
+            addProperty("server", BedWars.INSTANCE.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID))
         })
     }
 
@@ -98,7 +98,7 @@ class ReJoin(
         player.sendLangMsg(Messages.REJOIN_ALLOWED, "{arena}" to arena.displayName)
 
         if (player.gameMode != GameMode.SURVIVAL) {
-            BedWars.plugin.run(delay = 20) {
+            BedWars.INSTANCE.run(delay = 20) {
                 player.run {
                     gameMode = GameMode.SURVIVAL
                     allowFlight = true
@@ -118,8 +118,8 @@ class ReJoin(
 
         sendMessage(JsonObject().apply {
             addProperty("type", "RD")
-            addProperty("uuid", pl.toString())
-            addProperty("server", BedWars.config.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID))
+            addProperty("uuid", "$pl")
+            addProperty("server", BedWars.INSTANCE.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID))
         })
 
         if (!destroyTeam || team.members.isNotEmpty()) return

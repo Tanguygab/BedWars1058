@@ -31,24 +31,24 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
 
-class CitizensListener : Listener {
+class CitizensListener(private val plugin: BedWars) : Listener {
     @EventHandler
     fun removeNPC(e: NPCRemoveEvent) {
         val npc = e.npc
         if (npc?.entity == null) return
 
-        val locations = BedWars.config.getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE).toMutableList()
+        val locations = plugin.mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE).toMutableList()
 
         var removed = false
         if (npc.id in JoinNPC.npcs) {
-            JoinNPC.npcs.remove(npc.id)
+            JoinNPC.npcs -= npc.id
             removed = true
         }
 
         for (s in locations.toList()) {
             val data = s.split(",")
             if (data.size >= 10 && data[9].toIntOrNull() == npc.id) {
-                locations.remove(s)
+                locations -= s
                 removed = true
             }
         }
@@ -59,7 +59,7 @@ class CitizensListener : Listener {
             }
         }
 
-        if (removed) BedWars.config.set(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE, locations)
+        if (removed) plugin.mainConfig.set(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE, locations)
     }
 
     @EventHandler // Citizens support
@@ -71,7 +71,7 @@ class CitizensListener : Listener {
         val npc = CitizensAPI.getNPCRegistry().getNPC(e.rightClicked) ?: return
 
         if (npc.id !in JoinNPC.npcs) return
-        val sound = if (!BedWars.plugin.arenaManager.joinRandomFromGroup(player, JoinNPC.npcs[npc.id]!!)) {
+        val sound = if (!plugin.arenaManager.joinRandomFromGroup(player, JoinNPC.npcs[npc.id]!!)) {
             player.sendLangMsg(Messages.COMMAND_JOIN_NO_EMPTY_FOUND)
             "join-denied"
         } else "join-allowed"

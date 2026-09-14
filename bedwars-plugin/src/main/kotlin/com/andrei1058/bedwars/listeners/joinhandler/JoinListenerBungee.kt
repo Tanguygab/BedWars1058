@@ -27,13 +27,12 @@ import com.andrei1058.bedwars.arena.ReJoin
 import com.andrei1058.bedwars.configuration.Permissions
 import com.andrei1058.bedwars.configuration.Sounds
 import com.andrei1058.bedwars.lobbysocket.LoadedUser
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.support.preloadedparty.PreLoadedParty
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerLoginEvent
-import org.bukkit.event.player.PlayerTeleportEvent
 
 class JoinListenerBungee(val plugin: BedWars) : Listener {
     @EventHandler
@@ -78,10 +77,10 @@ class JoinListenerBungee(val plugin: BedWars) : Listener {
         // Player logic
         when (status) {
             // Vip join/kick feature
-            GameState.STARTING, GameState.WAITING -> if (arena.players.size >= arena.maxPlayers && BedWars.api.isVIP(player)) {
+            GameState.STARTING, GameState.WAITING -> if (arena.players.size >= arena.maxPlayers && plugin.isVIP(player)) {
                 var canJoin = false
                 for (inGame in arena.players) {
-                    if (!BedWars.api.isVIP(inGame)) {
+                    if (!plugin.isVIP(inGame)) {
                         canJoin = true
                         inGame.kickPlayer(Language.getMsg(inGame, Messages.ARENA_JOIN_VIP_KICK))
                         break
@@ -123,8 +122,8 @@ class JoinListenerBungee(val plugin: BedWars) : Listener {
                 for (inGame in plugin.server.onlinePlayers) {
                     if (inGame == player) continue
                     if (plugin.arenaManager.isInArena(inGame)) {
-                        BedWars.nms.hidePlayer(player, inGame)
-                        BedWars.nms.hidePlayer(inGame, player)
+                        plugin.versionSupport.hidePlayer(player, inGame)
+                        plugin.versionSupport.hidePlayer(inGame, player)
                     }
                 }
             } else {
@@ -186,13 +185,13 @@ class JoinListenerBungee(val plugin: BedWars) : Listener {
                     if (partyOwner?.isOnline == true) {
                         // If joiner is the party owner create the party
                         if (partyOwner == player) {
-                            BedWars.party.createParty(player)
+                            plugin.partyUtil.createParty(player)
 
                             // Handle to-be-teamed-up players. A list used if some party members join before the party owner.
                             PreLoadedParty.getPartyByOwner(partyOwner.name)?.teamUp()
                         } else {
                             // Add to a existing party
-                            BedWars.party.addMember(partyOwner, player)
+                            plugin.partyUtil.addMember(partyOwner, player)
                         }
                     } else {
                         // If a party member joined before the party owner create a waiting list

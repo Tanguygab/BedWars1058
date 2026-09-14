@@ -1,15 +1,13 @@
 package com.andrei1058.bedwars.api.util
 
-import com.andrei1058.bedwars.api.BedWars
 import com.andrei1058.bedwars.api.arena.IArena
-import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.server.VersionSupport
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.util.Vector
 
-class BlastProtectionUtil(private val versionSupport: VersionSupport, private val api: BedWars) {
+class BlastProtectionUtil(private val versionSupport: VersionSupport, private val rayBlockedByGlass: Boolean) {
     /**
      * Check if block is protected by blast-proof glass or an unbreakable block from a point of view
      * 
@@ -28,8 +26,6 @@ class BlastProtectionUtil(private val versionSupport: VersionSupport, private va
      */
     fun isProtected(arena: IArena, pov: Location, block: Block, step: Double): Boolean {
         if (arena.isProtected(block.location) || arena.isTeamBed(block.location)) return true
-
-        val rayBlockedByGlass = api.configs.mainConfig.getBoolean(ConfigPath.GENERAL_TNT_RAY_BLOCKED_BY_GLASS)
 
         // Trace blocks from pov to the block location
         val targetVectors = mutableListOf<Vector>()

@@ -20,32 +20,32 @@
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
+import com.andrei1058.bedwars.api.util.Utils.message
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.arena.SetupSession
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-class SetType(private val parent: ParentCommand) : SetupCommand("setType") {
+class SetType(parent: MainCommand) : SetupCommand(parent, "setType") {
 
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         if (args.isEmpty() || !available.contains(args[0])) {
-            sender.sendMessage("§9 ▪ §7Usage: ${parent.commandName} $subCommandName <type>")
+            sender.sendMessage("§9 ▪ §7Usage: ${parent.commandName} $name <type>")
             sender.sendMessage("§9Available types: ")
             for (st in available) sender.message(
                 "§1 ▪ §e$st §7(click to set)",
                 "§dClick to make the arena $st",
-                "/${parent.commandName} $subCommandName $st"
+                "/${parent.commandName} $name $st"
             )
             return
         }
 
-        val groups = BedWars.config.getStringList(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS)
+        val groups = plugin.mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS)
         val input = args[0].lowercase().replaceFirstChar { it.uppercaseChar() }
         if (input !in groups) {
-            BedWars.config.set(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS, groups + input)
+            plugin.mainConfig.set(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS, groups + input)
         }
         session.config["maxInTeam"] = when (input.lowercase()) {
             "Solo" -> 1
@@ -59,7 +59,7 @@ class SetType(private val parent: ParentCommand) : SetupCommand("setType") {
         if (session.setupType == SetupType.ASSISTED) Bukkit.dispatchCommand(sender, parent.commandName)
     }
 
-    override val tabComplete get() = BedWars.config
+    override val tabComplete get() = plugin.mainConfig
         .getStringList(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS)
         .plus(available)
         .distinct()

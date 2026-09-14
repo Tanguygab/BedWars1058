@@ -23,7 +23,7 @@ import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.configuration.ConfigManager
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
-import com.andrei1058.bedwars.api.levels.Level
+import com.andrei1058.bedwars.api.levels.LevelManager
 import com.andrei1058.bedwars.api.party.Party
 import com.andrei1058.bedwars.api.server.RestoreAdapter
 import com.andrei1058.bedwars.api.server.ServerType
@@ -35,8 +35,6 @@ import com.andrei1058.bedwars.arena.despawnables.TargetListener
 import com.andrei1058.bedwars.arena.feature.SpoilPlayerTNTFeature
 import com.andrei1058.bedwars.arena.spectator.SpectatorListeners
 import com.andrei1058.bedwars.arena.stats.DefaultStatsHandler
-import com.andrei1058.bedwars.arena.tasks.OneTick
-import com.andrei1058.bedwars.arena.tasks.Refresh
 import com.andrei1058.bedwars.arena.upgrades.BaseListener
 import com.andrei1058.bedwars.arena.upgrades.HealPoolListner
 import com.andrei1058.bedwars.commands.bedwars.MainCommand
@@ -50,7 +48,7 @@ import com.andrei1058.bedwars.database.MySQL
 import com.andrei1058.bedwars.database.SQLite
 import com.andrei1058.bedwars.halloween.HalloweenSpecial
 import com.andrei1058.bedwars.language.*
-import com.andrei1058.bedwars.levels.internal.InternalLevel
+import com.andrei1058.bedwars.levels.internal.InternalLevelManager
 import com.andrei1058.bedwars.levels.internal.LevelListeners
 import com.andrei1058.bedwars.listeners.*
 import com.andrei1058.bedwars.listeners.arenaselector.ArenaSelectorListener
@@ -64,11 +62,15 @@ import com.andrei1058.bedwars.lobbysocket.SendTask
 import com.andrei1058.bedwars.maprestore.internal.InternalAdapter
 import com.andrei1058.bedwars.metrics.MetricsManager
 import com.andrei1058.bedwars.money.internal.MoneyListeners
-import com.andrei1058.bedwars.shop.ShopManager
 import com.andrei1058.bedwars.sidebar.ScoreboardManagerImpl
 import com.andrei1058.bedwars.support.citizens.CitizensListener
 import com.andrei1058.bedwars.support.citizens.JoinNPC
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
+import com.andrei1058.bedwars.api.Configs
+import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.arena.generators.Generator
+import com.andrei1058.bedwars.shop.ShopManagerImpl
+import com.andrei1058.bedwars.stats.StatsManagerImpl
 import com.andrei1058.bedwars.support.papi.PAPISupport
 import com.andrei1058.bedwars.support.papi.SupportPAPI
 import com.andrei1058.bedwars.support.party.*
@@ -96,13 +98,90 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
 import java.io.File
 import java.lang.Deprecated
+import java.util.UUID
+import com.andrei1058.bedwars.api.BedWars as API
 
-class BedWars : JavaPlugin() {
+class BedWars : JavaPlugin(), API {
     val metrics = MetricsManager(this)
-    val afkManager = AFKManagerImpl()
-    val arenaManager = ArenaManagerImpl(this)
-    lateinit var scoreboardManager: ScoreboardManagerImpl
-    lateinit var upgradesManager: UpgradesManagerImpl
+    override val statsManager = StatsManagerImpl(this)
+    lateinit var mainConfig: MainConfig
+    override val afkManager = AFKManagerImpl()
+    override val arenaManager = ArenaManagerImpl(this)
+
+    private lateinit var generatorsConfig: GeneratorsConfig
+    private lateinit var signsConfig: ConfigManager
+
+    override val configs = object : Configs {
+        override val main get() = mainConfig
+        override val signs get() = signsConfig
+        override val generators get() = generatorsConfig
+        override val shop get() = shopManager.config
+        override val upgrades get() = upgradesManager.configuration
+    }
+
+    override lateinit var shopManager: ShopManagerImpl
+    override lateinit var scoreboardManager: ScoreboardManagerImpl
+    override var isShuttingDown = false
+        internal set
+
+    override fun isVIP(player: Player) = player.hasPermission("$MAIN_COMMAND.*") || player.hasPermission("$MAIN_COMMAND.vip")
+
+    override lateinit var upgradesManager: UpgradesManagerImpl
+
+    /**
+     * Get/Set the level manager.
+     * You can use this to add your own levels manager just implement
+     * the Level interface so the plugin will be able to display
+     * the level internally.
+     */
+    override var levelManager: LevelManager = InternalLevelManager()
+        set(value) {
+            if (value is InternalLevelManager) {
+                registerEvents(LevelListeners(this).also { levelListeners = it })
+            } else {
+                levelListeners?.let { HandlerList.unregisterAll(it) }
+                levelListeners = null
+            }
+            field = value
+        }
+    override var partyUtil: Party = NoParty()
+        set(value) {
+            if (value == partyUtil) return
+            field = value
+            logger.warning("One of your plugins changed the Party adapter to: ${value.javaClass.name}")
+        }
+
+    override fun getSetupSession(player: UUID) = SetupSession.getSession(player)
+    override fun isInSetupSession(player: UUID) = SetupSession.isInSetupSession(player)
+
+    override var serverType = ServerType.MULTIARENA
+        internal set(value) {
+            field = value
+            if (value == ServerType.BUNGEE) autoScale = true
+        }
+
+    override var restoreAdapter
+        get() = Companion.restoreAdapter
+        set(value) {
+            if (arenaManager.arenas.isNotEmpty()) throw IllegalAccessError("Arenas must be unloaded when changing the adapter")
+
+            Companion.restoreAdapter = value
+            if (value.owner === this) return
+            logger.warning("${value.owner.name} changed the restore system to its own adapter.")
+        }
+
+    override lateinit var versionSupport: VersionSupport
+        private set
+    override var lobbyWorld = ""
+        internal set
+
+    override var autoScale = false
+        internal set
+
+    override val addonsPath = File(dataFolder, "Addons")
+    override lateinit var mainCommand: MainCommand
+
+    lateinit var database: Database
 
     private var levelListeners: LevelListeners? = null
     lateinit var levelsConfig: LevelsConfig
@@ -119,14 +198,7 @@ class BedWars : JavaPlugin() {
             return
         }
 
-        isPaper = try {
-            Class.forName("com.destroystokyo.paper.PaperConfig")
-            true
-        } catch (_: ClassNotFoundException) {
-            false
-        }
-
-        plugin = this
+        INSTANCE = this
 
         /* Load version support */
         val supp = try {
@@ -137,16 +209,15 @@ class BedWars : JavaPlugin() {
             return
         }
 
-        api = API(this)
         server.servicesManager.register(
-            com.andrei1058.bedwars.api.BedWars::class.java,
-            api,
+            API::class.java,
+            this,
             this,
             ServicePriority.Highest
         )
 
         try {
-            nms = supp.getConstructor(Plugin::class.java, String::class.java)
+            versionSupport = supp.getConstructor(Plugin::class.java, String::class.java)
                 .newInstance(this, serverVersion) as VersionSupport
         } catch (e: Exception) {
             e.printStackTrace()
@@ -172,12 +243,12 @@ class BedWars : JavaPlugin() {
         SimplifiedChinese()
         Turkish()
 
-        Companion.config = MainConfig(this)
+        mainConfig = MainConfig(this)
 
-        generatorsCfg = GeneratorsConfig(this)
+        generatorsConfig = GeneratorsConfig(this)
         // Initialize signs config after the main config
         if (serverType != ServerType.BUNGEE) {
-            signs = SignsConfig(this, "signs", dataFolder.path)
+            signsConfig = SignsConfig(this, "signs", dataFolder.path)
         }
     }
 
@@ -187,18 +258,19 @@ class BedWars : JavaPlugin() {
             return
         }
 
-        nms.registerVersionListeners()
+        versionSupport.registerVersionListeners()
 
         if (!handleWorldAdapter()) {
-            api.restoreAdapter = InternalAdapter(this)
+            restoreAdapter = InternalAdapter(this)
             logger.info("Using internal world restore system.")
         }
 
         /* Register commands */
-        nms.commandMap.register(MAIN_COMMAND, MainCommand(this, MAIN_COMMAND))
+        mainCommand = MainCommand(this, MAIN_COMMAND)
+        versionSupport.commandMap.register(mainCommand.name, mainCommand)
 
         // newer versions do not seem to like delayed registration of commands
-        if (nms.version >= 9) {
+        if (versionSupport.version >= 9) {
             registerCommands()
         } else {
             run(delay = 20L) { registerCommands() }
@@ -208,7 +280,7 @@ class BedWars : JavaPlugin() {
         server.messenger.registerOutgoingPluginChannel(this, "BungeeCord")
 
         /* Check if lobby location is set. Required for non Bungee servers */
-        val lobbyName = Companion.config.lobbyWorldName
+        val lobbyName = mainConfig.lobbyWorldName
         if (lobbyName.isEmpty() && serverType != ServerType.BUNGEE) {
             logger.warning("Lobby location is not set!")
         }
@@ -232,28 +304,28 @@ class BedWars : JavaPlugin() {
                         }
                     }
             }
-            val l = Companion.config.getConfigLoc("lobbyLoc") ?: return@run
-            val w = server.getWorld(Companion.config.lobbyWorldName)
+            val l = mainConfig.getConfigLoc("lobbyLoc") ?: return@run
+            val w = server.getWorld(mainConfig.lobbyWorldName)
             w?.setSpawnLocation(l.blockX, l.blockY, l.blockZ)
         }
 
         // Register events
         registerEvents(
-            EnderPearlLanded(this), QuitAndTeleportListener(this), BreakPlace(this), DamageDeathMove(),
+            EnderPearlLanded(this), QuitAndTeleportListener(this), BreakPlace(this), DamageDeathMove(this),
             Inventory(this), Interact(this), RefreshGUI(), HungerWeatherSpawn(this), CmdProcess(this),
             FireballListener(this), EggBridge(this), SpectatorListeners(this), BaseListener(this),
             TargetListener(this), LangListener(this), Warnings(this), ChatAFK(this),
             GameEndListener(), DefaultStatsHandler()
         )
 
-        if (Companion.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HEAL_POOL_ENABLE)) {
-            registerEvents(HealPoolListner())
+        if (mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HEAL_POOL_ENABLE)) {
+            registerEvents(HealPoolListner(this))
         }
 
         if (serverType == ServerType.BUNGEE) {
-            if (autoscale) {
+            if (autoScale) {
                 //registerEvents(ArenaListeners());
-                ArenaSocket.lobbies.addAll(Companion.config.getStringList(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_LOBBY_SERVERS))
+                ArenaSocket.lobbies += mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_LOBBY_SERVERS)
                 SendTask(this)
                 registerEvents(AutoscaleListener(this), PrePartyListener(), JoinListenerBungee(this))
                 server.scheduler.runTaskTimerAsynchronously(this, LoadedUsersCleaner(), 60L, 60L)
@@ -269,10 +341,10 @@ class BedWars : JavaPlugin() {
             )
         }
 
-        registerEvents(WorldLoadListener())
+        registerEvents(WorldLoadListener(this))
 
-        if (serverType != ServerType.BUNGEE || !autoscale) {
-            registerEvents(JoinHandlerCommon())
+        if (serverType != ServerType.BUNGEE || !autoScale) {
+            registerEvents(JoinHandlerCommon(this))
         }
 
         // Register setup-holograms fix
@@ -284,38 +356,38 @@ class BedWars : JavaPlugin() {
         arenaManager.load()
 
         /* Party support */
-        if (Companion.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ALLOW_PARTIES)) {
+        if (mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ALLOW_PARTIES)) {
             run(delay = 10) {
                 val (adapter, log) = when {
-                    server.pluginManager.isPluginEnabled("Parties") -> PartiesAdapter() to "Parties (by AlessioDP)"
+                    server.pluginManager.isPluginEnabled("Parties") -> PartiesAdapter(this) to "Parties (by AlessioDP)"
                     server.pluginManager.isPluginEnabled("PartyAndFriends") -> PAF() to "Party and Friends for Spigot (by Simonsator)"
                     server.pluginManager.isPluginEnabled("Spigot-Party-API-PAF") -> PAFBungeecordRedisApi() to "Spigot Party API for Party and Friends Extended (by Simonsator)"
                     else -> Internal() to null
                 }
-                party = adapter
+                partyUtil = adapter
                 logger.info(log?.let { "Hook into $it support!" } ?: "Loading internal Party system. /party")
             }
         }
 
         /* Levels support */
-        levelSupport = InternalLevel()
+        levelManager = InternalLevelManager()
 
         /* Register tasks */
-        server.scheduler.runTaskTimer(this, Refresh(), 20L, 20L)
+        repeat(20, 20) { versionSupport.despawnables.values.forEach { it.refresh() } }
 
         //new Refresh().runTaskTimer(this, 20L, 20L);
-        if (Companion.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_ROTATE_GEN)) {
+        if (mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_ROTATE_GEN)) {
             //new OneTick().runTaskTimer(this, 120, 1);
-            server.scheduler.runTaskTimer(this, OneTick(), 120, 1)
+            repeat(120, 1) { Generator.rotation.forEach { it.rotate() } }
         }
 
         /* Database support */
-        if (Companion.config.getBoolean("database.enable")) {
-            val mySQL = MySQL()
+        if (mainConfig.getBoolean("database.enable")) {
+            val mySQL = MySQL(this)
             val time = System.currentTimeMillis()
-            remoteDatabase = if (!mySQL.connect()) {
+            database = if (!mySQL.connect()) {
                 logger.severe("Could not connect to database! Please verify your credentials and make sure that the server IP is whitelisted in MySQL.")
-                SQLite()
+                SQLite(this)
             } else mySQL
             if (System.currentTimeMillis() - time >= 5000) {
                 logger.severe(
@@ -323,14 +395,14 @@ class BedWars : JavaPlugin() {
                         "Using this remote connection is not recommended!"
                 )
             }
-        } else remoteDatabase = SQLite()
-        remoteDatabase.init()
+        } else database = SQLite(this)
+        database.init()
 
         /* Citizens support */
         run(delay = 5) {
             if (server.pluginManager.getPlugin("Citizens") == null) return@run
             logger.info("Hook into Citizens support. /bw npc")
-            registerEvents(CitizensListener())
+            registerEvents(CitizensListener(this))
             //spawn NPCs
             try {
                 JoinNPC.init()
@@ -376,14 +448,14 @@ class BedWars : JavaPlugin() {
         }
 
         /* Chat support */
-        if (Companion.config.getBoolean(ConfigPath.GENERAL_CHAT_FORMATTING)) {
+        if (mainConfig.getBoolean(ConfigPath.GENERAL_CHAT_FORMATTING)) {
             registerEvents(ChatFormatting(this))
         }
 
         /* Protect glass walls from tnt explosion */
-        nms.registerTntWhitelist(
-            Companion.config.getDouble(ConfigPath.GENERAL_TNT_PROTECTION_END_STONE_BLAST).toFloat(),
-            Companion.config.getDouble(ConfigPath.GENERAL_TNT_PROTECTION_GLASS_BLAST).toFloat()
+        versionSupport.registerTntWhitelist(
+            mainConfig.getDouble(ConfigPath.GENERAL_TNT_PROTECTION_END_STONE_BLAST).toFloat(),
+            mainConfig.getDouble(ConfigPath.GENERAL_TNT_PROTECTION_GLASS_BLAST).toFloat()
         )
 
         /* Prevent issues on reload */
@@ -393,7 +465,7 @@ class BedWars : JavaPlugin() {
         Sounds.init()
 
         /* Initialize shop */
-        shop = ShopManager(this)
+        shopManager = ShopManagerImpl(this)
 
         //Leave this code at the end of the enable method
         for (l in Language.languages) {
@@ -410,7 +482,7 @@ class BedWars : JavaPlugin() {
             try {
                 val vf = server.servicesManager.getRegistration(IVipFeatures::class.java)!!.provider
                 vf.registerMiniGame(VipFeatures(this))
-                registerEvents(VipListeners(vf))
+                registerEvents(VipListeners(this, vf))
                 logger.info("Hook into VipFeatures support.")
             } catch (_: Exception) {
                 logger.warning("Could not load support for VipFeatures.")
@@ -419,14 +491,14 @@ class BedWars : JavaPlugin() {
             }
         }
 
-        run(delay = 100) { logger.info("This server is running in $serverType with auto-scale $autoscale") }
+        run(delay = 100) { logger.info("This server is running in $serverType with auto-scale $autoScale") }
 
         // Initialize team upgrades
         upgradesManager = UpgradesManagerImpl(this)
 
         // Initialize sidebar manager
         scoreboardManager = ScoreboardManagerImpl(this)
-        if (api.scoreboardManager.sidebarHandler != null) {
+        if (scoreboardManager.sidebarHandler != null) {
             logger.info("Initializing SidebarLib by andrei1058")
         } else {
             logger.severe("SidebarLib by andrei1058 does not support your server version")
@@ -471,7 +543,7 @@ class BedWars : JavaPlugin() {
             logger.info("Loading restore adapter: $adapterPath ...")
 
             val candidate = constructor.newInstance(this) as RestoreAdapter<*>
-            api.restoreAdapter = candidate
+            restoreAdapter = candidate
             logger.info("Hook into ${candidate.displayName} as restore adapter.")
             return true
         } catch (e: Exception) {
@@ -482,8 +554,8 @@ class BedWars : JavaPlugin() {
     }
 
     private fun registerCommands() {
-        nms.commandMap.run {
-            register("shout", ShoutCommand("shout"))
+        versionSupport.commandMap.run {
+            register("shout", ShoutCommand(this@BedWars))
             register("rejoin", RejoinCommand("rejoin"))
 
             if (serverType == ServerType.BUNGEE) return
@@ -496,7 +568,7 @@ class BedWars : JavaPlugin() {
     }
 
     override fun onDisable() {
-        api.isShuttingDown = true
+        isShuttingDown = true
         if (!enabled) return
         if (serverType == ServerType.BUNGEE) {
             ArenaSocket.disable()
@@ -511,7 +583,7 @@ class BedWars : JavaPlugin() {
     }
 
     fun performDeprecationCheck() {
-        if (nms.javaClass.annotations.none { it is Deprecated }) return
+        if (versionSupport.javaClass.annotations.none { it is Deprecated }) return
         logger.warning(
             "Support for $serverVersion is scheduled for removal. " +
                     "Please consider upgrading your server software to a newer Minecraft version."
@@ -525,7 +597,7 @@ class BedWars : JavaPlugin() {
     }
 
     fun run(async: Boolean = false, delay: Long = 0, run: Runnable) {
-        if (api.isShuttingDown) return
+        if (isShuttingDown) return
         if (async) {
             if (delay == 0L) server.scheduler.runTaskAsynchronously(this, run)
             else server.scheduler.runTaskLaterAsynchronously(this, run, delay)
@@ -547,10 +619,10 @@ class BedWars : JavaPlugin() {
     internal fun sendToMainLobby(player: Player, arena: IArena): Boolean {
         val location = when (serverType) {
             ServerType.SHARED -> {
-                api.scoreboardManager.remove(player)
+                scoreboardManager.remove(player)
                 arenaManager.playerLocation[player]
             }
-            ServerType.MULTIARENA -> Companion.config.getConfigLoc("lobbyLoc")
+            ServerType.MULTIARENA -> mainConfig.getConfigLoc("lobbyLoc")
             else -> {
                 Misc.moveToLobbyOrKick(player, arena)
                 return true
@@ -566,49 +638,17 @@ class BedWars : JavaPlugin() {
 
     companion object {
         var enabled = true
-
-        var serverType = ServerType.MULTIARENA
-            set(value) {
-                field = value
-                if (value == ServerType.BUNGEE) autoscale = true
-            }
         var debug = true
-        var autoscale = false
+
+        lateinit var INSTANCE: BedWars
+        private lateinit var restoreAdapter: RestoreAdapter<*>
         const val MAIN_COMMAND = "bw"
-        var link = "https://www.spigotmc.org/resources/50942/"
 
-        var signs: ConfigManager? = null
-        lateinit var generatorsCfg: ConfigManager
-        lateinit var config: MainConfig
-        lateinit var shop: ShopManager
-        val statsManager get() = api.statsManager
-        lateinit var plugin: BedWars
-        lateinit var nms: VersionSupport
-
-        var isPaper = false
-
-        var party: Party = NoParty()
         var chatSupport: com.andrei1058.bedwars.support.vault.Chat = NoChat()
             private set
+
         var economy: com.andrei1058.bedwars.support.vault.Economy = NoEconomy()
             private set
-
-        /**
-         * Get/Set the level manager.
-         * You can use this to add your own levels manager just implement
-         * the Level interface so the plugin will be able to display
-         * the level internally.
-         */
-        var levelSupport: Level = InternalLevel()
-            set(value) {
-                if (value is InternalLevel) {
-                    plugin.registerEvents(LevelListeners(plugin).also { plugin.levelListeners = it })
-                } else {
-                    plugin.levelListeners?.let { HandlerList.unregisterAll(it) }
-                    plugin.levelListeners = null
-                }
-                field = value
-            }
 
         /**
          * Get the server version
@@ -616,16 +656,10 @@ class BedWars : JavaPlugin() {
          *
          * @since v0.6.5beta
          */
-        val serverVersion = Bukkit.getServer().javaClass.name.split(".")[3]
-        var lobbyWorld = ""
-
-        //remote database
-        lateinit var remoteDatabase: Database
-
-        lateinit var api: API
+        private val serverVersion = Bukkit.getServer().javaClass.name.split(".")[3]
 
         fun debug(message: String) {
-            if (debug) plugin.logger.info("DEBUG: $message")
+            if (debug) INSTANCE.logger.info("DEBUG: $message")
         }
 
         fun getForCurrentVersion(v13: String, v8: String, v12: String = v8) = when (serverVersion) {

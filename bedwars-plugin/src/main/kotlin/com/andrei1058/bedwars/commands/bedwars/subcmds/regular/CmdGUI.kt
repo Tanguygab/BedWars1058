@@ -19,26 +19,18 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.api.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.arena.ArenaGUI
-import com.andrei1058.bedwars.arena.SetupSession
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdGUI(parent: ParentCommand) : SubCommand("gui", isShown = false, priority = 17) {
-    init {
-        displayInfo = createTC(
-            "§6 ▪ §7/${parent.commandName} $subCommandName",
-            "/${parent.commandName} $subCommandName",
-            "§fOpens the arena GUI."
-        )
-    }
+class CmdGUI(parent: MainCommand) : SubCommand(parent, "gui", priority = 17) {
+    override val description = createDescription()
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
-        if (BedWars.INSTANCE.arenaManager.getArena(sender) != null) return false
+        if (plugin.arenaManager.getArena(sender) != null) return false
 
         var group = "default"
         if (args.size == 1) {
@@ -48,9 +40,4 @@ class CmdGUI(parent: ParentCommand) : SubCommand("gui", isShown = false, priorit
         ArenaGUI.openGui(sender, group)
         return true
     }
-
-    override fun canSee(sender: CommandSender, api: BedWars) = sender is Player &&
-            BedWars.INSTANCE.arenaManager.isInArena(sender) &&
-            !SetupSession.isInSetupSession(sender.uniqueId) &&
-            canUse(sender)
 }

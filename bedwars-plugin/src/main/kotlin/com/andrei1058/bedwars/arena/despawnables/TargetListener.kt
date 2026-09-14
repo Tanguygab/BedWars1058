@@ -21,7 +21,6 @@ package com.andrei1058.bedwars.arena.despawnables
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
-import com.andrei1058.bedwars.arena.Arena
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -46,8 +45,8 @@ class TargetListener(private val plugin: BedWars) : Listener {
             return
         }
 
-        if (!BedWars.nms.isDespawnable(entity)) return
-        if (arena.getTeam(player) === BedWars.nms.despawnables[entity.uniqueId]!!.team) {
+        val despawnable = plugin.versionSupport.despawnables[entity.uniqueId] ?: return
+        if (arena.getTeam(player) === despawnable.team) {
             e.isCancelled = true
         }
     }

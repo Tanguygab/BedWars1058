@@ -22,7 +22,6 @@ package com.andrei1058.bedwars.levels.internal
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.events.player.PlayerLevelUpEvent
 import com.andrei1058.bedwars.api.events.player.PlayerXpGainEvent
-import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import java.text.NumberFormat
 import java.util.UUID
@@ -43,9 +42,9 @@ class PlayerLevel private constructor(
     var level = level.coerceAtLeast(1)
         set(value) {
             field = value
-            nextLevelCost = BedWars.plugin.levelsConfig.getNextCost(value)
-            levelName = ChatColor.translateAlternateColorCodes('&', BedWars.plugin.levelsConfig.getLevelName(value))
-                .replace("{number}", "$value")
+            val config = BedWars.INSTANCE.levelsConfig
+            nextLevelCost = config.getNextCost(value)
+            levelName = ChatColor.translateAlternateColorCodes('&', config.getLevelName(value)).replace("{number}", "$value")
             formattedRequiredXp = if (nextLevelCost >= 1000)
                 if (nextLevelCost % 1000 == 0) "${nextLevelCost / 1000}k"
                 else "${nextLevelCost.toDouble() / 1000}k"
@@ -106,13 +105,13 @@ class PlayerLevel private constructor(
     }
 
     fun setLevelName(level: Int) {
-        levelName = ChatColor.translateAlternateColorCodes('&', BedWars.plugin.levelsConfig.getLevelName(level))
+        levelName = ChatColor.translateAlternateColorCodes('&', BedWars.INSTANCE.levelsConfig.getLevelName(level))
             .replace("{number}", "$level")
     }
 
     fun setNextLevelCost(level: Int, initialize: Boolean) {
         if (!initialize) modified = true
-        nextLevelCost = BedWars.plugin.levelsConfig.getNextCost(level)
+        nextLevelCost = BedWars.INSTANCE.levelsConfig.getNextCost(level)
     }
 
     fun lazyLoad(level: Int, currentXp: Int) {
@@ -137,7 +136,7 @@ class PlayerLevel private constructor(
             locked = 10
             unlocked = 0
         }
-        val config = BedWars.plugin.levelsConfig
+        val config = BedWars.INSTANCE.levelsConfig
         val symbol = config.getString("progress-bar.symbol") ?: ""
         val unlockedColor = config.getString("progress-bar.unlocked-color") ?: ""
         val lockedColor = config.getString("progress-bar.locked-color") ?: ""
@@ -157,7 +156,8 @@ class PlayerLevel private constructor(
      */
     fun addXp(xp: Int, source: PlayerXpGainEvent.XpSource) {
         if (xp < 0) return
-        Bukkit.getPluginManager().callEvent(PlayerXpGainEvent(Bukkit.getPlayer(uuid)!!, xp, source))
+        val plugin = BedWars.INSTANCE
+        plugin.server.pluginManager.callEvent(PlayerXpGainEvent(plugin.server.getPlayer(uuid)!!, xp, source))
         setXp(currentXp + xp)
     }
 
@@ -179,13 +179,14 @@ class PlayerLevel private constructor(
 
         currentXp -= nextLevelCost
         level++
-        nextLevelCost = BedWars.plugin.levelsConfig.getNextCost(level)
-        levelName = ChatColor.translateAlternateColorCodes('&', BedWars.plugin.levelsConfig.getLevelName(level))
+        val plugin = BedWars.INSTANCE
+        nextLevelCost = plugin.levelsConfig.getNextCost(level)
+        levelName = ChatColor.translateAlternateColorCodes('&', plugin.levelsConfig.getLevelName(level))
             .replace("{number}", "$level")
         formattedRequiredXp = formatNumber(nextLevelCost)
         formattedCurrentXp = formatNumber(currentXp)
-        Bukkit.getPluginManager().callEvent(PlayerLevelUpEvent(
-            Bukkit.getPlayer(uuid)!!,
+        plugin.server.pluginManager.callEvent(PlayerLevelUpEvent(
+            plugin.server.getPlayer(uuid)!!,
             level,
             nextLevelCost
         ))
@@ -204,12 +205,13 @@ class PlayerLevel private constructor(
      */
     fun destroy() {
         levelByPlayer.remove(uuid)
-        BedWars.remoteDatabase.setLevelData(
+        val plugin = BedWars.INSTANCE
+        plugin.database.setLevelData(
             uuid,
             level,
             currentXp,
-            BedWars.plugin.levelsConfig.getString("levels.$level.name")
-                ?: BedWars.plugin.levelsConfig.getString("levels.others.name"),
+            plugin.levelsConfig.getString("levels.$level.name")
+                ?: plugin.levelsConfig.getString("levels.others.name"),
             nextLevelCost
         )
         updateDatabase()
@@ -217,10 +219,11 @@ class PlayerLevel private constructor(
 
     fun updateDatabase() {
         if (!modified) return
-        BedWars.plugin.run(async = true) {
-            BedWars.remoteDatabase.setLevelData(
+        val plugin = BedWars.INSTANCE
+        plugin.run(async = true) {
+            plugin.database.setLevelData(
                 uuid, level, currentXp,
-                BedWars.plugin.levelsConfig.getLevelName(level),
+                plugin.levelsConfig.getLevelName(level),
                 nextLevelCost
             )
         }

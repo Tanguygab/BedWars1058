@@ -21,7 +21,7 @@ package com.andrei1058.bedwars.shop.main
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.BedWars.Companion.debug
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.events.shop.ShopOpenEvent
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.shop.ShopCache
@@ -75,7 +75,7 @@ class ShopIndex(
      */
     fun open(player: Player, quickBuyCache: PlayerQuickBuyCache, callEvent: Boolean) {
         if (callEvent) {
-            val event = ShopOpenEvent(player, BedWars.plugin.arenaManager.getArena(player)!!)
+            val event = ShopOpenEvent(player, BedWars.INSTANCE.arenaManager.getArena(player)!!)
             Bukkit.getPluginManager().callEvent(event)
             if (event.isCancelled) return
         }

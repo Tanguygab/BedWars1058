@@ -30,10 +30,9 @@ import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.api.util.BlastProtectionUtil
-import com.andrei1058.bedwars.arena.Arena
 import com.andrei1058.bedwars.configuration.Sounds
 import com.andrei1058.bedwars.popuptower.PopupTowerBuilder
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -56,13 +55,13 @@ import org.bukkit.event.player.PlayerInteractEvent
 import java.io.File
 
 class BreakPlace(private val plugin: BedWars) : Listener {
-    private val allowFireBreak = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ALLOW_FIRE_EXTINGUISH)
-    private val blastProtection = BlastProtectionUtil(BedWars.nms, BedWars.api)
+    private val allowFireBreak = plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ALLOW_FIRE_EXTINGUISH)
+    private val blastProtection = BlastProtectionUtil(plugin.versionSupport, plugin.mainConfig.getBoolean(ConfigPath.GENERAL_TNT_RAY_BLOCKED_BY_GLASS))
 
     @EventHandler
     fun onIceMelt(e: BlockFadeEvent) {
         val block = e.block
-        if (BedWars.serverType == ServerType.MULTIARENA && block.location.world?.name.equals(BedWars.lobbyWorld, ignoreCase = true) ||
+        if (plugin.serverType == ServerType.MULTIARENA && block.location.world?.name.equals(plugin.lobbyWorld, ignoreCase = true) ||
             block.type == Material.ICE && plugin.arenaManager.getArenaByWorld(block.world.name) != null)
             e.isCancelled = true
     }
@@ -98,7 +97,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
                 e.isCancelled = true
                 return
             }
-            if (e.itemInHand.type == BedWars.nms.materialFireball() && block.type == Material.FIRE) {
+            if (e.itemInHand.type == plugin.versionSupport.materialFireball() && block.type == Material.FIRE) {
                 e.isCancelled = true
             }
         }
@@ -132,23 +131,23 @@ class BreakPlace(private val plugin: BedWars) : Listener {
 
             arena.addPlacedBlock(block)
             if (block.type == Material.TNT) {
-                if (BedWars.config.getBoolean(ConfigPath.GENERAL_TNT_AUTO_IGNITE)) {
+                if (plugin.mainConfig.getBoolean(ConfigPath.GENERAL_TNT_AUTO_IGNITE)) {
                     e.blockPlaced.type = Material.AIR
                     val tnt = block.location.world!!.spawn(block.location.add(0.5, 0.0, 0.5), TNTPrimed::class.java)
-                    tnt.fuseTicks = BedWars.config.getInt(ConfigPath.GENERAL_TNT_FUSE_TICKS)
-                    BedWars.nms.setSource(tnt, player)
+                    tnt.fuseTicks = plugin.mainConfig.getInt(ConfigPath.GENERAL_TNT_FUSE_TICKS)
+                    plugin.versionSupport.setSource(tnt, player)
                     return
                 }
-            } else if (BedWars.shop.getBoolean(ConfigPath.SHOP_SPECIAL_TOWER_ENABLE)) {
-                if (block.type == Material.valueOf(BedWars.shop.getString(ConfigPath.SHOP_SPECIAL_TOWER_MATERIAL)!!)) {
+            } else if (plugin.shopManager.config.getBoolean(ConfigPath.SHOP_SPECIAL_TOWER_ENABLE)) {
+                if (block.type == Material.valueOf(plugin.shopManager.config.getString(ConfigPath.SHOP_SPECIAL_TOWER_MATERIAL)!!)) {
                     e.isCancelled = true
                     PopupTowerBuilder.handleTowerPlace(player, block)
                 }
             }
             return
         }
-        if (BedWars.serverType == ServerType.MULTIARENA &&
-            block.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true) &&
+        if (plugin.serverType == ServerType.MULTIARENA &&
+            block.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true) &&
             !isBuildSession(player)
         ) e.isCancelled = true
     }
@@ -157,8 +156,8 @@ class BreakPlace(private val plugin: BedWars) : Listener {
     fun onInteract(e: PlayerInteractEvent) {
         val player = e.player
         val block = e.clickedBlock ?: return
-        if (BedWars.serverType == ServerType.MULTIARENA &&
-            player.world.name.equals(BedWars.lobbyWorld, ignoreCase = true) &&
+        if (plugin.serverType == ServerType.MULTIARENA &&
+            player.world.name.equals(plugin.lobbyWorld, ignoreCase = true) &&
             block.getRelative(BlockFace.UP).type == Material.FIRE && !isBuildSession(player)
         ) e.setCancelled(true)
     }
@@ -175,7 +174,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
         val entity = e.entity
         plugin.arenaManager.getArenaByWorld(entity.world.name) ?: return
         val material = entity.itemStack.type
-        if (BedWars.nms.isBed(material) || material.toString() == "SEEDS" || material.toString() == "WHEAT_SEEDS") {
+        if (plugin.versionSupport.isBed(material) || material.toString() == "SEEDS" || material.toString() == "WHEAT_SEEDS") {
             e.isCancelled = true
         }
     }
@@ -185,8 +184,8 @@ class BreakPlace(private val plugin: BedWars) : Listener {
         if (e.isCancelled) return
         val player = e.player
         val block = e.block
-        if (BedWars.serverType == ServerType.MULTIARENA &&
-            block.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true) &&
+        if (plugin.serverType == ServerType.MULTIARENA &&
+            block.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true) &&
             !isBuildSession(player)
         ) {
             e.isCancelled = true
@@ -212,7 +211,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
             }
         }
 
-        if (!BedWars.nms.isBed(block.type)) return
+        if (!plugin.versionSupport.isBed(block.type)) return
 
         for (team in arena.teams) {
             for (x in block.x - 2..<block.x + 2) {
@@ -265,7 +264,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
                             val title = breakEvent.title(on)
                             val subTitle = breakEvent.subTitle(on)
                             if (title != null && subTitle != null) {
-                                BedWars.nms.sendTitle(on, title, subTitle, 0, 40, 10)
+                                plugin.versionSupport.sendTitle(on, title, subTitle, 0, 40, 10)
                             }
                             Sounds.playSound(
                                 if (team.isMember(on)) ConfigPath.SOUNDS_BED_DESTROY_OWN
@@ -297,7 +296,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onSignChange(e: SignChangeEvent) {
         val player = e.player
-        if (!e.getLine(0).equals("[${BedWars.MAIN_COMMAND}]", ignoreCase = true)) return
+        if (!e.getLine(0).equals("[${plugin.mainCommand.name}]", ignoreCase = true)) return
 
         val dir = File(plugin.dataFolder, "/Arenas")
         if (!dir.exists()) {
@@ -307,10 +306,11 @@ class BreakPlace(private val plugin: BedWars) : Listener {
         val exists = !dir.listFiles { it.isFile && it.name.endsWith(".yml") && e.getLine(1) == it.name.removeSuffix(".yml") }.isNullOrEmpty()
 
         val block = e.block
-        val sings = BedWars.signs!!.getStringList("locations").toMutableList()
+        val config = plugin.configs.signs
+        val sings = config.getStringList("locations").toMutableList()
         if (exists) {
-            sings.add(e.getLine(1) + "," + BedWars.signs!!.stringLocationConfigFormat(block.location))
-            BedWars.signs!!.set("locations", sings)
+            sings += e.getLine(1) + "," + config.stringLocationConfigFormat(block.location)
+            config["locations"] = sings
         }
         val arena = plugin.arenaManager.getArena(e.getLine(1) ?: "") ?: return
 
@@ -318,7 +318,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
         arena.addSign(block.location)
 
         val sign = block.state as Sign
-        BedWars.signs!!.getStringList("format").forEachIndexed { line, string ->
+        config.getStringList("format").forEachIndexed { line, string ->
             e.setLine(line, string
                 .replace("[on]", "${arena.players.size}")
                 .replace("[max]", "${arena.maxPlayers}")
@@ -334,8 +334,8 @@ class BreakPlace(private val plugin: BedWars) : Listener {
     fun onBucketFill(e: PlayerBucketFillEvent) {
         if (e.isCancelled) return
         val player = e.player
-        if (BedWars.serverType == ServerType.MULTIARENA &&
-            player.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true) &&
+        if (plugin.serverType == ServerType.MULTIARENA &&
+            player.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true) &&
             !isBuildSession(player)
         ) e.isCancelled = true
 
@@ -352,8 +352,8 @@ class BreakPlace(private val plugin: BedWars) : Listener {
         val player = e.player
 
         // Lobby protection in MULTIARENA
-        if (BedWars.serverType == ServerType.MULTIARENA &&
-            player.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true) &&
+        if (plugin.serverType == ServerType.MULTIARENA &&
+            player.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true) &&
             !isBuildSession(player)
         ) e.isCancelled = true
 
@@ -390,7 +390,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
         }
 
         // Remove one empty bucket from player's hand after a short delay
-        BedWars.plugin.run(delay = 3) { BedWars.nms.minusAmount(player, e.itemStack!!, 1) }
+        plugin.run(delay = 3) { plugin.versionSupport.minusAmount(player, e.itemStack!!, 1) }
     }
 
     @EventHandler
@@ -420,8 +420,8 @@ class BreakPlace(private val plugin: BedWars) : Listener {
     fun onPaintingRemove(e: HangingBreakByEntityEvent) {
         val a = plugin.arenaManager.getArenaByWorld(e.entity.world.name)
         if (a == null) {
-            if (BedWars.serverType == ServerType.SHARED) return
-            if (BedWars.lobbyWorld != e.entity.world.name) return
+            if (plugin.serverType == ServerType.SHARED) return
+            if (plugin.lobbyWorld != e.entity.world.name) return
         }
         if (e.entity.type == EntityType.PAINTING || e.entity.type == EntityType.ITEM_FRAME) {
             e.isCancelled = true
@@ -473,7 +473,7 @@ class BreakPlace(private val plugin: BedWars) : Listener {
         val block = e.block
         if (e.to != Material.DIRT || block.type.toString() != "FARMLAND" && block.type.toString() != "SOIL") return
         val world = block.world.name
-        if (world == BedWars.lobbyWorld || plugin.arenaManager.getArenaByWorld(world) != null)
+        if (world == plugin.lobbyWorld || plugin.arenaManager.getArenaByWorld(world) != null)
             e.isCancelled = true
     }
 

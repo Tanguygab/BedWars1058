@@ -21,7 +21,7 @@ package com.andrei1058.bedwars.arena.spectator
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.BedWars.Companion.chatSupport
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
@@ -45,7 +45,7 @@ object TeleporterGUI {
      * Refresh the Teleporter GUI for a player
      */
     fun refreshInv(player: Player, inv: Inventory) {
-        val arena = BedWars.plugin.arenaManager.getArena(player)
+        val arena = BedWars.INSTANCE.arenaManager.getArena(player)
         if (arena == null) {
             player.closeInventory()
             return
@@ -63,7 +63,7 @@ object TeleporterGUI {
      * Opens the Teleporter GUI to a Player
      */
     fun openGUI(player: Player) {
-        val arena = BedWars.plugin.arenaManager.getArena(player) ?: return
+        val arena = BedWars.INSTANCE.arenaManager.getArena(player) ?: return
 
         val playerCount = arena.players.size
         val size = if ((playerCount % 9) == 0) playerCount else (ceil(playerCount / 9.0).toInt()) * 9
@@ -85,7 +85,8 @@ object TeleporterGUI {
     private fun createHead(player: Player, viewer: Player, arena: IArena): ItemStack {
         val team = arena.getTeam(player)!!
 
-        val item = BedWars.nms.getPlayerHead(player, null)
+        val nms = BedWars.INSTANCE.versionSupport
+        val item = nms.getPlayerHead(player, null)
         item.editMeta {
             setDisplayName(Language.getMsg(viewer, Messages.ARENA_SPECTATOR_TELEPORTER_GUI_HEAD_NAME)
                 .replace("{vPrefix}", chatSupport.getPrefix(player))
@@ -100,7 +101,7 @@ object TeleporterGUI {
                 .map { it.replace("{health}", "$health").replace("{food}", "${player.foodLevel}") }
             )
         }
-        return BedWars.nms.addCustomData(item, NBT_SPECTATOR_TELEPORTER_GUI_HEAD + player.name)
+        return nms.addCustomData(item, NBT_SPECTATOR_TELEPORTER_GUI_HEAD + player.name)
     }
 
     /**

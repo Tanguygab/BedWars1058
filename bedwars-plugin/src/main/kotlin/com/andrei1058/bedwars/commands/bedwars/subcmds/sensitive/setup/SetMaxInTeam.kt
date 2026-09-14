@@ -19,11 +19,11 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import org.bukkit.entity.Player
 
-class SetMaxInTeam : SetupCommand("setMaxInTeam") {
+class SetMaxInTeam(parent: MainCommand) : SetupCommand(parent, "setMaxInTeam") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         if (args.isNotEmpty()) {
             val max = args[0].toIntOrNull()
@@ -33,7 +33,7 @@ class SetMaxInTeam : SetupCommand("setMaxInTeam") {
                 return
             }
         }
-        sender.sendMessage("§c▪ §7Usage: /${BedWars.MAIN_COMMAND} setMaxInTeam <int>")
+        sender.sendMessage("§c▪ §7Usage: /${parent.commandName} setMaxInTeam <int>")
     }
 
     override val tabComplete = listOf("1", "2", "4")

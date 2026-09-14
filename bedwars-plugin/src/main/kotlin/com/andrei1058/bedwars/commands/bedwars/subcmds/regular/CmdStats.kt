@@ -19,42 +19,89 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.api.BedWars
+import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.arena.Misc
-import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.api.configuration.ConfigPath
+import com.andrei1058.bedwars.api.language.Language
+import com.andrei1058.bedwars.api.language.Messages
+import com.andrei1058.bedwars.api.util.Utils.editMeta
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.commands.bedwars.subcmds.CooldownCommand
+import com.andrei1058.bedwars.configuration.Sounds
+import com.andrei1058.bedwars.support.papi.SupportPAPI
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
+import java.time.Instant
 
-class CmdStats(parent: ParentCommand) : CooldownCommand("stats", 3000, isShown = false, priority = 16) {
-    init {
-        displayInfo = createTC(
-            "§6 ▪ §7/${parent.commandName} $subCommandName",
-            "/${parent.commandName} $subCommandName",
-            "§fOpens the stats GUI."
-        )
-    }
+class CmdStats(parent: MainCommand) : CooldownCommand(parent, "stats", 3000, priority = 16) {
+    override val description = createDescription("Opens the stats GUI.")
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
-        val arena = BedWars.INSTANCE.arenaManager.getArena(sender)
+        val arena = plugin.arenaManager.getArena(sender)
         if (arena != null && arena.status != GameState.STARTING && arena.status != GameState.WAITING && !arena.isSpectator(sender)) {
             return false
         }
         if (isOnCooldown(sender.uniqueId)) return true
         setCooldown(sender.uniqueId)
-        Misc.openStatsGUI(sender)
+
+        val config = plugin.config
+        plugin.run {
+            /* create inventory */
+            val inv = Bukkit.createInventory(
+                null,
+                config.getInt(ConfigPath.GENERAL_CONFIGURATION_STATS_GUI_SIZE),
+                replaceStatsPlaceholders(sender, Language.getMsg(sender, Messages.PLAYER_STATS_GUI_INV_NAME), true)
+            )
+
+            /* add custom items to gui */
+            for (stat in config.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_STATS_PATH)!!.getKeys(false)) {
+                /* skip inv size, it isn't a content */
+                if (ConfigPath.GENERAL_CONFIGURATION_STATS_GUI_SIZE.contains(stat)) continue
+                /* create new itemStack for content */
+                val item = plugin.versionSupport.createItemStack(
+                    config.getString(ConfigPath.GENERAL_CONFIGURATION_STATS_ITEMS_MATERIAL.replace("%path%", stat))!!.uppercase(),
+                    1,
+                    config.getInt(ConfigPath.GENERAL_CONFIGURATION_STATS_ITEMS_DATA.replace("%path%", stat)).toShort()
+                )
+                item.editMeta {
+                    addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+                    setDisplayName(replaceStatsPlaceholders(sender, Language.getMsg(sender, "${Messages.PLAYER_STATS_GUI_PATH}-$stat-name"), true))
+
+                    lore = Language.getList(sender, "${Messages.PLAYER_STATS_GUI_PATH}-$stat-lore")
+                        .map { replaceStatsPlaceholders(sender, it, true) }
+                }
+                inv.setItem(config.getInt(ConfigPath.GENERAL_CONFIGURATION_STATS_ITEMS_SLOT.replace("%path%", stat)), item)
+            }
+
+            sender.openInventory(inv)
+            Sounds.playSound("stats-gui-open", sender)
+        }
         return true
     }
 
-    override fun canSee(sender: CommandSender, api: BedWars): Boolean {
-        if (sender !is Player) return false
+    private fun replaceStatsPlaceholders(player: Player, s: String, papiReplacements: Boolean): String {
+        val stats = BedWars.INSTANCE.statsManager.get(player.uniqueId)
 
-        if (api.arenaManager.isInArena(sender)) return false
-
-        if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        return canUse(sender)
+        val dateFormat = SimpleDateFormat(Language.getMsg(player, Messages.FORMATTING_STATS_DATE_FORMAT))
+        val s = stats.run { s.replace("{kills}", "$kills")
+            .replace("{deaths}", "$deaths")
+            .replace("{losses}", "$losses")
+            .replace("{wins}", "$wins")
+            .replace("{finalKills}", "$finalKills")
+            .replace("{finalDeaths}", "$finalDeaths")
+            .replace("{bedsDestroyed}", "$bedsDestroyed")
+            .replace("{gamesPlayed}", "$gamesPlayed")
+            .replace("{firstPlay}", dateFormat.format(Timestamp.from(firstPlay ?: Instant.now())))
+            .replace("{lastPlay}", dateFormat.format(Timestamp.from(lastPlay ?: Instant.now())))
+            .replace("{player}", player.displayName)
+            .replace("{playername}", player.name)
+            .replace("{prefix}", BedWars.chatSupport.getPrefix(player))
+        }
+        return if (papiReplacements) SupportPAPI.support.replace(player, s) else s
     }
 }

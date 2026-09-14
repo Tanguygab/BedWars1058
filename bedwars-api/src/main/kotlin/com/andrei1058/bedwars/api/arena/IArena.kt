@@ -326,6 +326,8 @@ interface IArena {
      */
     val oreGenerators: MutableList<IGenerator>
 
+    val allGenerators get() = teams.flatMap { it.generators } + oreGenerators
+
     /**
      * Get the list of next events to come.
      * Not ordered.

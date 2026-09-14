@@ -34,7 +34,7 @@ import org.bukkit.entity.Player
  *
  * @param name arena group name.
  */
-class InternalMenu(override val name: String) : UpgradesIndex {
+class InternalMenu(private val plugin: BedWars, override val name: String) : UpgradesIndex {
     override val menuContentBySlot = HashMap<Int, MenuContent>()
 
     init {
@@ -45,17 +45,17 @@ class InternalMenu(override val name: String) : UpgradesIndex {
     }
 
     override fun open(player: Player) {
-        val arena = BedWars.api.arenaManager.getArena(player) ?: return
+        val arena = plugin.arenaManager.getArena(player) ?: return
         if (!arena.isPlayer(player)) return
         val team = arena.getTeam(player) ?: return
-        if (!BedWars.api.arenaManager.isPlaying(player)) return
+        if (!plugin.arenaManager.isPlaying(player)) return
 
         val inv = Bukkit.createInventory(null, 45, Language.getMsg(player, Messages.UPGRADES_MENU_GUI_NAME_PATH + name))
         for ((key, value) in menuContentBySlot) {
             inv.setItem(key, value.getDisplayItem(player, team))
         }
         player.openInventory(inv)
-        BedWars.api.upgradesManager.setWatchingGUI(player)
+        plugin.upgradesManager.setWatchingGUI(player)
     }
 
     override fun addContent(content: MenuContent, slot: Int) {

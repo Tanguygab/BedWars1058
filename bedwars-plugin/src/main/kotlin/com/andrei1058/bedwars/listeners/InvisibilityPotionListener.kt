@@ -21,7 +21,6 @@ package com.andrei1058.bedwars.listeners
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.events.player.PlayerInvisibilityPotionEvent
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -50,9 +49,10 @@ class InvisibilityPotionListener(private val plugin: BedWars) : Listener {
         val item = e.item
         if (item.type != Material.POTION) return
         // remove potion bottle
-        plugin.run(delay = 5) { BedWars.nms.minusAmount(player, ItemStack(Material.GLASS_BOTTLE), 1) }
+        val nms = plugin.versionSupport
+        plugin.run(delay = 5) { nms.minusAmount(player, ItemStack(Material.GLASS_BOTTLE), 1) }
 
-        if (!BedWars.nms.isInvisibilityPotion(item)) return
+        if (!nms.isInvisibilityPotion(item)) return
 
         plugin.run(delay = 5) {
             val invisibility = player.activePotionEffects
@@ -65,7 +65,7 @@ class InvisibilityPotionListener(private val plugin: BedWars) : Listener {
 
             val team = arena.getTeam(player)!!
             // call custom event
-            Bukkit.getPluginManager().callEvent(PlayerInvisibilityPotionEvent(
+            plugin.server.pluginManager.callEvent(PlayerInvisibilityPotionEvent(
                 PlayerInvisibilityPotionEvent.Type.ADDED,
                 player,
                 team.arena
@@ -78,7 +78,7 @@ class InvisibilityPotionListener(private val plugin: BedWars) : Listener {
             for (p1 in player.world.players) {
                 // hide player armor to spectators & other teams
                 if (arena.isSpectator(p1) || team !== arena.getTeam(p1)) {
-                    BedWars.nms.hideArmor(player, p1)
+                    nms.hideArmor(player, p1)
                 }
             }
         }

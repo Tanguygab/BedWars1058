@@ -41,7 +41,7 @@ class WorldZipper(private val worldName: String, private val replace: Boolean) {
     }
 
     private val worldFolder get() = File(Bukkit.getWorldContainer(), worldName)
-    private val backupFile get() = File(File(BedWars.plugin.dataFolder, "Cache"), "$worldName.zip")
+    private val backupFile get() = File(File(BedWars.INSTANCE.dataFolder, "Cache"), "$worldName.zip")
 
     private fun exists() = worldFolder.isDirectory()
 

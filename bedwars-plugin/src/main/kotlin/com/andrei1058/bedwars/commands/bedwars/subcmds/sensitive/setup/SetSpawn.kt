@@ -19,20 +19,20 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
+import com.andrei1058.bedwars.api.util.Utils.message
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.arena.SetupSession
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.commands.Misc
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
-class SetSpawn(private val parent: ParentCommand) : SetupCommand("setSpawn") {
+class SetSpawn(parent: MainCommand) : SetupCommand(parent, "setSpawn") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         if (args.isEmpty()) {
-            sender.sendMessage("${session.prefix}${ChatColor.RED}Usage: /${BedWars.MAIN_COMMAND} setSpawn <team>")
+            sender.sendMessage("${session.prefix}${ChatColor.RED}Usage: /${parent.commandName} setSpawn <team>")
             val teams = session.config.getConfigurationSection("Team") ?: return
 
             for (team in teams.getKeys(false)) {
@@ -40,7 +40,7 @@ class SetSpawn(private val parent: ParentCommand) : SetupCommand("setSpawn") {
                 sender.message(
                     "${session.prefix}Set spawn for: ${session.getColoredTeamName(team)} ${ChatColor.getLastColors(session.prefix)}(click to set)",
                     "${ChatColor.WHITE}Set spawn for ${session.getColoredTeamName(team)}",
-                    "/${BedWars.MAIN_COMMAND} setSpawn $team"
+                    "/${parent.commandName} setSpawn $team"
                 )
             }
             return
@@ -55,14 +55,14 @@ class SetSpawn(private val parent: ParentCommand) : SetupCommand("setSpawn") {
             for (team in teams.getKeys(false)) sender.message(
                 "${ChatColor.GOLD} ▪ ${session.getColoredTeamName(team)} ${ChatColor.getLastColors(session.prefix)}(click to set)",
                 "${ChatColor.WHITE}Set spawn for ${session.getColoredTeamName(team)}",
-                "/${BedWars.MAIN_COMMAND} setSpawn $team"
+                "/${parent.commandName} setSpawn $team"
             )
             return
         }
 
         val spawn = "Team.$teamName.Spawn"
         if (spawn in session.config) {
-            com.andrei1058.bedwars.commands.Misc.removeArmorStand(
+            Misc.removeArmorStand(
                 "spawn",
                 session.config.getArenaLoc(spawn)!!,
                 session.config.getString(spawn)
@@ -72,7 +72,7 @@ class SetSpawn(private val parent: ParentCommand) : SetupCommand("setSpawn") {
         session.config.saveArenaLoc(spawn, sender.location)
         val team = session.getColoredTeamName(teamName)
         sender.sendMessage("${ChatColor.GOLD} ▪ Spawn set for: $team")
-        com.andrei1058.bedwars.commands.Misc.createArmorStand(
+        Misc.createArmorStand(
             "$team ${ChatColor.GOLD}SPAWN SET",
             sender.location,
             session.config.stringLocationArenaFormat(sender.location)
@@ -86,7 +86,7 @@ class SetSpawn(private val parent: ParentCommand) : SetupCommand("setSpawn") {
                 val y = y.toDouble()
                 for (z in -radius..<radius) {
                     val b = l.clone().add(x, y, z.toDouble()).block
-                    if (!BedWars.nms.isBed(b.type)) continue
+                    if (!plugin.versionSupport.isBed(b.type)) continue
 
                     sender.teleportSafe(b.location)
                     Bukkit.dispatchCommand(sender, "${parent.commandName} setBed $teamName")

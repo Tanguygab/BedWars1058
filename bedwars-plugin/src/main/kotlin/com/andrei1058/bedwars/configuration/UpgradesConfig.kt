@@ -55,7 +55,7 @@ class UpgradesConfig(plugin: Plugin) : ConfigManager(plugin, "upgrades2", plugin
                 16 to arrayOf("enchant-item: PROTECTION_ENVIRONMENTAL,4,armor"),
             )
 
-            defaultUpgradeTiers("miner", getForCurrentVersion("GOLDEN_PICKAXE", "GOLD_PICKAXE", "GOLD_PICKAXE"),
+            defaultUpgradeTiers("miner", getForCurrentVersion("GOLDEN_PICKAXE", "GOLD_PICKAXE"),
                 2 to arrayOf("player-effect: FAST_DIGGING,0,0,team"),
                 4 to arrayOf("player-effect: FAST_DIGGING,1,0,team"),
             )

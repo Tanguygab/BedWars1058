@@ -19,11 +19,10 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
+import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.api.arena.team.TeamColor.Companion.enName
 import com.andrei1058.bedwars.api.arena.team.TeamColor.Companion.getChatColor
-import com.andrei1058.bedwars.api.command.ParentCommand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.arena.SetupSession
 import net.md_5.bungee.api.chat.ClickEvent
@@ -32,16 +31,16 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCreateTeams") {
+class AutoCreateTeams(parent: MainCommand) : SetupCommand(parent, "autoCreateTeams") {
 
     @Suppress("DEPRECATION")
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         if (session.setupType != SetupType.ASSISTED) return
 
-        if (is13Higher()) {
+        if (plugin.versionSupport.version > 5) {
             if (timeOut.containsKey(sender) && timeOut[sender]!! >= System.currentTimeMillis() && teamsFound13.containsKey(sender)) {
-                for (tf in teamsFound13.get(sender)!!) {
-                    Bukkit.dispatchCommand(sender, BedWars.MAIN_COMMAND + " createTeam " + enName(tf) + " " + enName(tf))
+                for (tf in teamsFound13[sender]!!) {
+                    Bukkit.dispatchCommand(sender, parent.commandName + " createTeam " + enName(tf) + " " + enName(tf))
                 }
                 if (session.config.get("waiting.Pos1") == null) {
                     sender.sendMessage("")
@@ -49,17 +48,17 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
                     sender.sendMessage("§fIf you'd like the lobby to disappear when the game starts,")
                     sender.sendMessage("§fplease use the following commands like a world edit selection.")
                     sender.message(
-                        "§c ▪ §7/" + BedWars.MAIN_COMMAND + " waitingPos 1",
+                        "§c ▪ §7/" + parent.commandName + " waitingPos 1",
                         "§dSet pos 1",
                         "/${parent.commandName} waitingPos 1"
                     )
                     sender.message(
-                        "§c ▪ §7/" + BedWars.MAIN_COMMAND + " waitingPos 2",
+                        "§c ▪ §7/" + parent.commandName + " waitingPos 2",
                         "§dSet pos 2",
                         "/${parent.commandName} waitingPos 2"
                     )
                     sender.sendMessage("")
-                    sender.sendMessage("§7This step is OPTIONAL. If you wan to skip it do §6/" + BedWars.MAIN_COMMAND)
+                    sender.sendMessage("§7This step is OPTIONAL. If you wan to skip it do §6/" + parent.commandName)
                 }
                 return
             }
@@ -92,7 +91,7 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
                 }
             }
             if (found.isEmpty()) {
-                sender.sendMessage("§6 ▪ §7No new teams were found.\n§6 ▪ §7Manually create teams with: §6/${BedWars.MAIN_COMMAND} createTeam")
+                sender.sendMessage("§6 ▪ §7No new teams were found.\n§6 ▪ §7Manually create teams with: §6/${parent.commandName} createTeam")
                 return
             }
             if (timeOut.containsKey(sender)) {
@@ -111,7 +110,7 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
             sender.message(
                 "§6 ▪ §7§lClick here to create found teams.",
                 "§fClick to create found teams!",
-                "/" + parent.commandName + " " + subCommandName,
+                "/" + parent.commandName + " " + name,
                 ClickEvent.Action.RUN_COMMAND
             )
             return
@@ -119,7 +118,7 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
 
         if (timeOut.containsKey(sender) && timeOut[sender]!! >= System.currentTimeMillis() && teamsFoundOld.containsKey(sender)) {
             for (tf in teamsFoundOld[sender]!!) {
-                Bukkit.dispatchCommand(sender, BedWars.MAIN_COMMAND + " createTeam " + enName(tf) + " " + enName(tf))
+                Bukkit.dispatchCommand(sender, parent.commandName + " createTeam " + enName(tf) + " " + enName(tf))
             }
             if (session.config.get("waiting.Pos1") == null) {
                 sender.sendMessage("")
@@ -127,17 +126,17 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
                 sender.sendMessage("§fIf you'd like the lobby to disappear when the game starts,")
                 sender.sendMessage("§fplease use the following commands like a world edit selection.")
                 sender.message(
-                    "§c ▪ §7/${BedWars.MAIN_COMMAND} waitingPos 1",
+                    "§c ▪ §7/${parent.commandName} waitingPos 1",
                     "§dSet pos 1",
                     "/${parent.commandName} waitingPos 1"
                 )
                 sender.message(
-                    "§c ▪ §7/${BedWars.MAIN_COMMAND} waitingPos 2",
+                    "§c ▪ §7/${parent.commandName} waitingPos 2",
                     "§dSet pos 2",
                     "/${parent.commandName} waitingPos 2"
                 )
                 sender.sendMessage("")
-                sender.sendMessage("§7This step is OPTIONAL. If you wan to skip it do §6/" + BedWars.MAIN_COMMAND)
+                sender.sendMessage("§7This step is OPTIONAL. If you wan to skip it do §6/" + parent.commandName)
             }
             return
         }
@@ -171,7 +170,7 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
             }
         }
         if (found.isEmpty()) {
-            sender.sendMessage("§6 ▪ §7No new teams were found.\n§6 ▪ §7Manually create teams with: §6/" + BedWars.MAIN_COMMAND + " createTeam")
+            sender.sendMessage("§6 ▪ §7No new teams were found.\n§6 ▪ §7Manually create teams with: §6/" + parent.commandName + " createTeam")
             return
         }
         if (timeOut.containsKey(sender)) {
@@ -190,7 +189,7 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
         sender.message(
             "§6 ▪ §7§lClick here to create found teams.",
             "§fClick to create found teams!",
-            "/${parent.commandName} $subCommandName",
+            "/${parent.commandName} $name",
             ClickEvent.Action.RUN_COMMAND
         )
     }
@@ -199,10 +198,5 @@ class AutoCreateTeams(private val parent: ParentCommand) : SetupCommand("autoCre
         private val timeOut = mutableMapOf<Player, Long>()
         private val teamsFoundOld = mutableMapOf<Player, MutableList<Byte>>()
         private val teamsFound13 = mutableMapOf<Player, MutableList<String>>()
-
-        /**
-         * Check if server version is 1.13 or higher
-         */
-        fun is13Higher() = BedWars.nms.version > 5
     }
 }

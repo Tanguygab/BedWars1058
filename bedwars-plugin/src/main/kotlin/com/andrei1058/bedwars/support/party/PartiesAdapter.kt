@@ -26,10 +26,10 @@ import com.andrei1058.bedwars.api.configuration.ConfigPath
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-class PartiesAdapter : com.andrei1058.bedwars.api.party.Party {
+class PartiesAdapter(plugin: BedWars) : com.andrei1058.bedwars.api.party.Party {
     //Support for Parties by AlessioDP
     private val api: PartiesAPI = Parties.getApi()
-    private val requiredRankToSelect = BedWars.config.getInt(ConfigPath.GENERAL_ALESSIODP_PARTIES_RANK)
+    private val requiredRankToSelect = plugin.mainConfig.getInt(ConfigPath.GENERAL_ALESSIODP_PARTIES_RANK)
     override val isInternal = false
 
     private val Player.partyPlayer get() = api.getPartyPlayer(uniqueId)

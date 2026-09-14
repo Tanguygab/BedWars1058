@@ -19,37 +19,30 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
-import com.andrei1058.bedwars.arena.Misc.msgHoverClick
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Permissions
 import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class SetupArena(private val parent: ParentCommand) : SubCommand(
+class SetupArena(parent: MainCommand) : SubCommand(
+    parent,
     "setupArena",
     Permissions.PERMISSION_SETUP_ARENA,
     priority = 2
 ) {
-    init {
-        displayInfo = msgHoverClick(
-            "§6 ▪ §7/${parent.commandName} setupArena §6<worldName>",
-            "§fCreate or edit an arena.\n'_' and '-' will not be displayed in the arena's name.",
-            "/${parent.commandName} setupArena ",
-            ClickEvent.Action.SUGGEST_COMMAND
-        )
-    }
+    override val description = createDescription(
+        "Create or edit an arena.\n'_' and '-' will not be displayed in the arena's name.",
+        syntax = "<worldName>",
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
-        if (!MainCommand.isLobbySet(sender)) return true
+        if (!isLobbySet(sender)) return true
         if (args.size != 1) {
-            sender.sendMsg("Usage: §o/${parent.commandName} $subCommandName <mapName>", true)
+            sender.sendMsg("Usage: §o/${parent.commandName} $name <mapName>", true)
             return true
         }
         val arg = args[0]
@@ -61,11 +54,11 @@ class SetupArena(private val parent: ParentCommand) : SubCommand(
             sender.sendMsg("$arg mustn't contain this symbol: ${ChatColor.RED}+", true)
             return true
         }
-        //if (!BedWars.api.restoreAdapter.isWorld(arg)) {
+        //if (!plugin.restoreAdapter.isWorld(arg)) {
         //    sender.sendMsg("$arg doesn't exist!", true)
         //    return true
         //}
-        if (BedWars.plugin.arenaManager.getArena(arg) != null && !BedWars.autoscale) {
+        if (plugin.arenaManager.getArena(arg) != null && !plugin.autoScale) {
             sender.sendMsg("Please disable it first!", true)
             return true
         }
@@ -73,18 +66,9 @@ class SetupArena(private val parent: ParentCommand) : SubCommand(
             sender.sendMsg("You're already in a setup session!", true)
             return true
         }
-        SetupSession(sender, arg)
+        SetupSession(plugin, sender, arg)
         return true
     }
 
-    override val tabComplete get() = BedWars.api.restoreAdapter.worldsList
-
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
-        if (sender !is Player) return false
-
-        if (api.arenaManager.isInArena(sender)) return false
-
-        if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        return canUse(sender)
-    }
+    override val tabComplete get() = plugin.restoreAdapter.worldsList
 }

@@ -27,10 +27,10 @@ import com.andrei1058.bedwars.arena.Arena
 import org.bukkit.Bukkit
 
 class PerMinuteTask(arena: Arena) {
-    private val xp = BedWars.plugin.levelsConfig.getInt("xp-rewards.per-minute")
+    private val xp = BedWars.INSTANCE.levelsConfig.getInt("xp-rewards.per-minute")
     private val task = if (xp >= 1) {
         val delay = (60 * 20).toLong()
-        Bukkit.getScheduler().runTaskTimer(BedWars.plugin, Runnable {
+        Bukkit.getScheduler().runTaskTimer(BedWars.INSTANCE, Runnable {
             for (p in arena.players) {
                 PlayerLevel.getLevelByPlayer(p.uniqueId).addXp(xp, PlayerXpGainEvent.XpSource.PER_MINUTE)
                 p.sendMessage(Language.getMsg(p, Messages.XP_REWARD_PER_MINUTE).replace("{xp}", "$xp"))

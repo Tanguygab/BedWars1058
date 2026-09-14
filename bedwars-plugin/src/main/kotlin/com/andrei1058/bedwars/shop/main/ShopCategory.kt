@@ -20,13 +20,13 @@
 package com.andrei1058.bedwars.shop.main
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.shop.ShopCache
-import com.andrei1058.bedwars.shop.ShopManager
-import com.andrei1058.bedwars.shop.ShopManager.Companion.hideItemStuff
+import com.andrei1058.bedwars.shop.ShopConfig
+import com.andrei1058.bedwars.shop.ShopConfig.Companion.hideItemStuff
 import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
@@ -56,29 +56,31 @@ class ShopCategory(val name: String, yml: YamlConfiguration) {
     init {
         BedWars.debug("Loading shop category: $name")
 
+        val plugin = BedWars.INSTANCE
         var material = yml.getString(name + ConfigPath.SHOP_CATEGORY_ITEM_MATERIAL)
         if (material == null) {
-            BedWars.plugin.logger.severe("Category material not set at: $name")
+            plugin.logger.severe("Category material not set at: $name")
             material = "AIR"
             isLoaded = false
         }
 
         if (name + ConfigPath.SHOP_CATEGORY_SLOT !in yml) {
-            BedWars.plugin.logger.severe("Category slot not set at: $name")
+            plugin.logger.severe("Category slot not set at: $name")
             isLoaded = false
         }
 
         if (slot !in 1..8) {
-            BedWars.plugin.logger.severe("Slot must be n > 1 and n < 9 at: $name")
+            plugin.logger.severe("Slot must be n > 1 and n < 9 at: $name")
             isLoaded = false
         }
 
-        for (sc in ShopManager.shop.categoryList) {
+        for (sc in ShopConfig.shop.categoryList) {
             if (sc.slot != slot) continue
-            BedWars.plugin.logger.severe("Slot is already in use at: $name")
+            plugin.logger.severe("Slot is already in use at: $name")
         }
 
-        itemStack = BedWars.nms.createItemStack(
+        val nms = plugin.versionSupport
+        itemStack = nms.createItemStack(
             material,
             yml.getInt(name + ConfigPath.SHOP_CATEGORY_ITEM_AMOUNT, 1),
             yml.getInt(name + ConfigPath.SHOP_CATEGORY_ITEM_DATA).toShort()
@@ -87,19 +89,19 @@ class ShopCategory(val name: String, yml: YamlConfiguration) {
 
         if (yml.get(name + ConfigPath.SHOP_CATEGORY_ITEM_ENCHANTED) != null) {
             if (yml.getBoolean(name + ConfigPath.SHOP_CATEGORY_ITEM_ENCHANTED)) {
-                itemStack = ShopManager.enchantItem(itemStack)
+                itemStack = ShopConfig.enchantItem(itemStack)
             }
         }
 
         // potion display color based on NBT tag
         val potionDisplay = yml.getString("$name.category-item.potion-display")
         if (!potionDisplay.isNullOrEmpty()) {
-            itemStack = BedWars.nms.setTag(itemStack, "Potion", potionDisplay)
+            itemStack = nms.setTag(itemStack, "Potion", potionDisplay)
         }
         // 1.16+ custom color
         val potionColor = yml.getString("$name.category-item.potion-color")
         if (!potionColor.isNullOrEmpty()) {
-            itemStack = BedWars.nms.setTag(itemStack, "CustomPotionColor", potionColor)
+            itemStack = nms.setTag(itemStack, "CustomPotionColor", potionColor)
         }
 
         itemStack = hideItemStuff(itemStack)

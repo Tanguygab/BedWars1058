@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(libs.paperlib)
     compileOnly(libs.spigot.api)
     api(libs.sidebar.base)
 }

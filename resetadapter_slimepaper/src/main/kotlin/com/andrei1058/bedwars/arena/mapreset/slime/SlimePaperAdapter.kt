@@ -44,7 +44,7 @@ class SlimePaperAdapter(plugin: Plugin) : SlimeAdapterCommon<SlimePlugin>(
     override fun loadWorld(arena: IArena, spawn: List<String>) {
         // Note that this method should be called asynchronously
         var world = plugin.loadWorld(loader, arena.name, true, buildPropertyMap(spawn))
-        if (api.serverType == ServerType.BUNGEE && api.isAutoScale) {
+        if (api.serverType == ServerType.BUNGEE && api.autoScale) {
             world = world.clone(arena.worldName)
         }
 
@@ -71,7 +71,7 @@ class SlimePaperAdapter(plugin: Plugin) : SlimeAdapterCommon<SlimePlugin>(
         if (api.serverType == ServerType.BUNGEE) {
             if (api.arenaManager.gamesBeforeRestart == 0) {
                 if (api.arenaManager.arenas.values.firstOrNull()?.status == GameState.RESTARTING) {
-                    val command = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)!!
+                    val command = api.configs.main.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)!!
                     log.info("Dispatching command: $command")
                     server.dispatchCommand(server.consoleSender, command)
                 }

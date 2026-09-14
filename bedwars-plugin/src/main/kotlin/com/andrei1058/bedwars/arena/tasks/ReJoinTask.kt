@@ -28,10 +28,11 @@ class ReJoinTask(
     val arena: IArena,
     private val team: ITeam
 ) : Runnable {
-    private val task = BedWars.plugin.server.scheduler.runTaskLater(
-        BedWars.plugin,
+    private val plugin = BedWars.INSTANCE
+    private val task = plugin.server.scheduler.runTaskLater(
+        plugin,
         this,
-        BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_REJOIN_TIME) * 20L
+        plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_REJOIN_TIME) * 20L
     )
 
     override fun run() {

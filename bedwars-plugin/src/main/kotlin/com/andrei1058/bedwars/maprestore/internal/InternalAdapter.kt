@@ -78,7 +78,7 @@ class InternalAdapter(plugin: Plugin) : RestoreAdapter<BedWars>(
             if (api.serverType == ServerType.BUNGEE) {
                 if (api.arenaManager.gamesBeforeRestart == 0) {
                     if (api.arenaManager.arenas.isEmpty()) {
-                        val command = api.configs.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)
+                        val command = api.configs.main.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_RESTART_CMD)
                         log.info("Dispatching command: $command")
                         server.dispatchCommand(server.consoleSender, command!!)
                     }

@@ -24,28 +24,28 @@ import com.andrei1058.bedwars.api.events.player.PlayerJoinArenaEvent
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.vipfeatures.api.IVipFeatures
 import com.andrei1058.vipfeatures.api.event.BlockChangeEvent
-import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.util.Vector
 
-class VipListeners(private val api: IVipFeatures) : Listener {
+class VipListeners(private val plugin: BedWars, private val api: IVipFeatures) : Listener {
     @EventHandler
     fun onServerJoin(e: PlayerJoinEvent) {
-        if (BedWars.serverType == ServerType.MULTIARENA) {
-            Bukkit.getScheduler().runTaskLater(BedWars.plugin, Runnable { api.givePlayerItemStack(e.player) }, 10L)
+        if (plugin.serverType == ServerType.MULTIARENA) {
+            plugin.run(delay = 10) { api.givePlayerItemStack(e.player) }
         }
     }
 
     @EventHandler
     fun onArenaJoin(e: PlayerJoinArenaEvent) {
-        Bukkit.getScheduler().runTaskLater(BedWars.plugin, Runnable { api.givePlayerItemStack(e.player) }, 10L)
+        plugin.run(delay = 10) { api.givePlayerItemStack(e.player) }
     }
 
     @EventHandler
     fun onBockChange(e: BlockChangeEvent) {
-        val a = BedWars.api.arenaManager.getArena(e.location.world!!.name) ?: return
+        val a = plugin.arenaManager.getArena(e.location.world!!.name) ?: return
+        val nms = plugin.versionSupport
         for (t in a.teams) {
             for (x in -1..1) {
                 for (z in -1..1) {
@@ -53,13 +53,13 @@ class VipListeners(private val api: IVipFeatures) : Listener {
                         e.location.blockY == t.bed.blockY &&
                         e.location.blockZ == t.bed.blockZ
                     ) {
-                        if (BedWars.nms.isBed(t.bed.clone().add(x.toDouble(), 0.0, z.toDouble()).block.type))
+                        if (nms.isBed(t.bed.clone().add(x.toDouble(), 0.0, z.toDouble()).block.type))
                             e.isCancelled = true
                         return
                     }
                 }
             }
         }
-        a.placed.add(Vector(e.location.blockX, e.location.blockY, e.location.blockZ))
+        a.placed += Vector(e.location.blockX, e.location.blockY, e.location.blockZ)
     }
 }

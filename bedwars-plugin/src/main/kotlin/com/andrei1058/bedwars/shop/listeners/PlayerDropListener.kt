@@ -53,7 +53,7 @@ class PlayerDropListener(private val plugin: BedWars) : Listener {
     }
 
     private fun ItemStack.isShopUpgrade(): Boolean {
-        val identifier = BedWars.nms.getShopUpgradeIdentifier(this)
+        val identifier = plugin.versionSupport.getShopUpgradeIdentifier(this)
         return identifier.isNotBlank() && identifier != "null"
     }
 }

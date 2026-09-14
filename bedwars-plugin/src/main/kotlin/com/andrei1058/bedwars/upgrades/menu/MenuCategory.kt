@@ -29,8 +29,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.ItemStack
 
-class MenuCategory(override val name: String, displayItem: ItemStack) : MenuContent {
-    private val displayItem = BedWars.nms.addCustomData(displayItem, "MCONT_$name")
+class MenuCategory(private val plugin: BedWars, override val name: String, displayItem: ItemStack) : MenuContent {
+    private val displayItem = plugin.versionSupport.addCustomData(displayItem, "MCONT_$name")
 
     private val menuContentBySlot = mutableMapOf<Int, MenuContent>()
 
@@ -72,9 +72,9 @@ class MenuCategory(override val name: String, displayItem: ItemStack) : MenuCont
         val lore = Language.getList(player, Messages.UPGRADES_CATEGORY_ITEM_LORE_PATH + name.replace("category-", "")).toMutableList()
 
         if (name.equals("traps", ignoreCase = true)) {
-            var queueLimit = BedWars.api.upgradesManager.configuration.getInt(team.arena.group.lowercase() + "-upgrades-settings.trap-queue-limit")
+            var queueLimit = plugin.upgradesManager.configuration.getInt(team.arena.group.lowercase() + "-upgrades-settings.trap-queue-limit")
             if (queueLimit == 0) {
-                queueLimit = BedWars.api.upgradesManager.configuration.getInt("default-upgrades-settings.trap-queue-limit")
+                queueLimit = plugin.upgradesManager.configuration.getInt("default-upgrades-settings.trap-queue-limit")
             }
             if (queueLimit == team.activeTraps.size) {
                 lore += ""
@@ -87,7 +87,7 @@ class MenuCategory(override val name: String, displayItem: ItemStack) : MenuCont
     }
 
     override fun onClick(player: Player, clickType: ClickType, team: ITeam) {
-        val upgradesManager = BedWars.api.upgradesManager
+        val upgradesManager = plugin.upgradesManager
         if (name.equals("category-traps", ignoreCase = true)) {
             var queueLimit = upgradesManager.configuration.getInt(team.arena.group.lowercase() + "-upgrades-settings.trap-queue-limit")
             if (queueLimit == 0) {

@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Italian : Language(BedWars.plugin, "it") {
+class Italian : Language(BedWars.INSTANCE, "it") {
     init {
         this.options().copyDefaults(true)
         this.options().header("Traduzione in italiano di Fabian03#4583 aggiornata da Xx_yuri2005_xX")

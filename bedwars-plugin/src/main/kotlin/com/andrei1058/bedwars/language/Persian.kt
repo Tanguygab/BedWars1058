@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Persian : Language(BedWars.plugin, "fa") {
+class Persian : Language(BedWars.INSTANCE, "fa") {
     init {
         this.options().header("Translation by Alijk#2951")
         this.options().copyDefaults(true)

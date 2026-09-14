@@ -28,11 +28,11 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerLoginEvent
 
-class JoinHandlerCommon : Listener {
+class JoinHandlerCommon(private val plugin: BedWars) : Listener {
     @EventHandler
     fun requestLanguage(e: AsyncPlayerPreLoginEvent) {
-        val iso = BedWars.remoteDatabase.getLanguage(e.uniqueId)
-        BedWars.plugin.run { Language.setPlayerLanguage(e.uniqueId, iso) }
+        val iso = plugin.database.getLanguage(e.uniqueId)
+        plugin.run { Language.setPlayerLanguage(e.uniqueId, iso) }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -50,14 +50,15 @@ class JoinHandlerCommon : Listener {
                 player.name.equals("andreea1058", ignoreCase = true) ||
                 player.name.equals("Dani3l_FTW", ignoreCase = true)
             ) return
+            val plugin = BedWars.INSTANCE
             player.sendMessage("""
-                    §8[§f${BedWars.plugin.name} v${BedWars.plugin.description.version}§8]§7§m---------------------------
-
-                    §7User ID: §f%%__USER__%%
-                    §7Download ID: §f%%__NONCE__%%
-                    
-                    §8[§f${BedWars.plugin.name}§8]§7§m---------------------------
-                    """.trimIndent()
+                §8[§f${plugin.name} v${plugin.description.version}§8]§7§m---------------------------
+    
+                §7User ID: §f%%__USER__%%
+                §7Download ID: §f%%__NONCE__%%
+                
+                §8[§f${plugin.name}§8]§7§m---------------------------
+                """.trimIndent()
             )
         }
     }

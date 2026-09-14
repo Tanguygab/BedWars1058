@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.arena
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.configuration.ConfigPath
@@ -31,7 +31,6 @@ import com.andrei1058.bedwars.listeners.arenaselector.ArenaSelectorListener
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
@@ -41,16 +40,17 @@ import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
 object ArenaGUI {
-    private val yml: YamlConfiguration = BedWars.config
+    private val plugin = BedWars.INSTANCE
+    private val config = plugin.mainConfig
 
-    private val cooldown = HashMap<UUID?, Long?>()
+    private val cooldown = mutableMapOf<UUID, Long>()
 
     fun refreshInv(player: Player?, arena: IArena?, players: Int) {
         if (player == null) return
         val inventory = player.openInventory.topInventory
         val ash = inventory.holder as? ArenaSelectorHolder ?: return
 
-        val arenaManager = BedWars.plugin.arenaManager
+        val arenaManager = plugin.arenaManager
         var arenas: Collection<IArena> = arenaManager.arenas.values
         if (!ash.group.equals("default", ignoreCase = true)) {
            arenas = arenas.filter { it.group.equals(ash.group, ignoreCase = true) }
@@ -71,14 +71,14 @@ object ArenaGUI {
                 else -> continue
             }
 
-            val item = BedWars.nms.createItemStack(
-                yml.getString(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_MATERIAL.replace("%path%", status))!!,
+            val item = plugin.versionSupport.createItemStack(
+                config.getString(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_MATERIAL.replace("%path%", status))!!,
                 1,
-                yml.getInt(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_DATA.replace("%path%", status)).toShort()
+                config.getInt(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_DATA.replace("%path%", status)).toShort()
             )
 
             item.editMeta {
-                if (yml.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_ENCHANTED.replace("%path%", status))) {
+                if (config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_ENCHANTED.replace("%path%", status))) {
                     addEnchant(Enchantment.LURE, 1, true)
                     addItemFlags(ItemFlag.HIDE_ENCHANTS)
                 }
@@ -101,7 +101,7 @@ object ArenaGUI {
             }
             inventory.setItem(
                 slot,
-                BedWars.nms.addCustomData(item, ArenaSelectorListener.ARENA_SELECTOR_GUI_IDENTIFIER + a.name)
+                plugin.versionSupport.addCustomData(item, ArenaSelectorListener.ARENA_SELECTOR_GUI_IDENTIFIER + a.name)
             )
             ++arenaKey
         }
@@ -111,7 +111,7 @@ object ArenaGUI {
     fun openGui(player: Player, group: String) {
         if (isOnCooldown(player)) return
         setCooldown(player)
-        var size = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_SETTINGS_SIZE)
+        var size = config.getInt(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_SETTINGS_SIZE)
         if (size % 9 != 0) size = 27
         if (size > 54) size = 54
         val ash = ArenaSelectorHolder(group)
@@ -119,23 +119,23 @@ object ArenaGUI {
         ash.inv = inv
 
         //ash.setInv(inv);
-        val skippedSlotMaterial = BedWars.config.getString(ConfigPath
+        val skippedSlotMaterial = config.getString(ConfigPath
             .GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_MATERIAL
             .replace("%path%", "skipped-slot")
         )!!.uppercase()
         if (skippedSlotMaterial != "none" && skippedSlotMaterial != "air") {
-            var i = BedWars.nms.createItemStack(
+            var i = plugin.versionSupport.createItemStack(
                 skippedSlotMaterial,
                 1,
-                BedWars.config.getInt(ConfigPath
+                config.getInt(ConfigPath
                     .GENERAL_CONFIGURATION_ARENA_SELECTOR_STATUS_DATA
                     .replace("%path%", "skipped-slot")
                 ).toShort()
             )
-            i = BedWars.nms.addCustomData(i, "RUNCOMMAND_bw join random")
+            i = plugin.versionSupport.addCustomData(i, "RUNCOMMAND_bw join random")
 
-            val serverIP = BedWars.config.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP)!!
-            val poweredBy = BedWars.config.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_POWERED_BY)!!
+            val serverIP = config.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP)!!
+            val poweredBy = config.getString(ConfigPath.GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_POWERED_BY)!!
 
             i.editMeta {
                 setDisplayName(ChatColor.translateAlternateColorCodes('&', Language
@@ -161,7 +161,7 @@ object ArenaGUI {
         playSound("arena-selector-open", player)
     }
 
-    private val usedSlots = BedWars.config
+    private val usedSlots = config
         .getString(ConfigPath.GENERAL_CONFIGURATION_ARENA_SELECTOR_SETTINGS_USE_SLOTS)!!
         .split(",")
         .mapNotNull { it.toIntOrNull() }

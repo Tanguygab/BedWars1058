@@ -43,14 +43,14 @@ class LevelListeners(private val plugin: BedWars) : Listener {
     fun onPlayerJoin(e: PlayerJoinEvent) {
         plugin.run(async = true) {
             val uuid = e.getPlayer().uniqueId
-            val levelData = BedWars.remoteDatabase.getLevelData(uuid)
+            val levelData = plugin.database.getLevelData(uuid)
             PlayerLevel.getLevelByPlayer(uuid).lazyLoad((levelData[0] as Int?)!!, (levelData[1] as Int?)!!)
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerQuit(e: PlayerQuitEvent) {
-        BedWars.plugin.run(async = true) {
+        plugin.run(async = true) {
             PlayerLevel.getLevelByPlayer(e.player.uniqueId).destroy()
         }
     }
@@ -93,7 +93,7 @@ class LevelListeners(private val plugin: BedWars) : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onArenaLeave(e: PlayerLeaveArenaEvent) {
-        BedWars.plugin.run(async = true) { PlayerLevel.getLevelByPlayer(e.player.uniqueId).updateDatabase() }
+        plugin.run(async = true) { PlayerLevel.getLevelByPlayer(e.player.uniqueId).updateDatabase() }
     }
 
     @EventHandler

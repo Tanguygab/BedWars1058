@@ -19,7 +19,7 @@
  */
 package com.andrei1058.bedwars.halloween.shop
 
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.shop.IBuyItem
 import com.andrei1058.bedwars.api.arena.shop.IContentTier

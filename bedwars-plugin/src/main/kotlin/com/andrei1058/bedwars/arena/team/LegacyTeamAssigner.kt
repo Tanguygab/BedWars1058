@@ -19,8 +19,7 @@
  */
 package com.andrei1058.bedwars.arena.team
 
-import com.andrei1058.bedwars.BedWars.Companion.party
-import com.andrei1058.bedwars.api.BedWars
+import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.arena.team.ITeamAssigner
@@ -30,9 +29,11 @@ import org.bukkit.entity.Player
 
 object LegacyTeamAssigner : ITeamAssigner {
     override fun assignTeams(arena: IArena) {
+        val plugin = BedWars.INSTANCE
         //Check who is having parties
         val skip = mutableListOf<Player>()
         val owners = mutableListOf<Player>()
+        val party = plugin.partyUtil
         for (p in arena.players) {
             if (party.hasParty(p) && party.isOwner(p)) {
                 owners += p
@@ -56,7 +57,7 @@ object LegacyTeamAssigner : ITeamAssigner {
 
                 for (member in party.getMembers(player)) {
                     if (member === player) continue
-                    val ia = BedWars.INSTANCE.arenaManager.getArena(member) ?: continue
+                    val ia = plugin.arenaManager.getArena(member) ?: continue
                     if (ia != arena) continue
 
                     player.assignTeam(team, arena)

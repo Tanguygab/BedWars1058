@@ -23,7 +23,6 @@ import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.api.events.ArenaEvent
 import com.andrei1058.bedwars.api.events.gameplay.GameStateChangeEvent
 import com.andrei1058.bedwars.api.events.server.ArenaEnableEvent
 import org.bukkit.Material
@@ -40,6 +39,9 @@ class BlockStatusListener : Listener {
          * Update sign block
          */
         fun updateBlock(arena: IArena) {
+            val plugin = BedWars.INSTANCE
+            val nms = plugin.versionSupport
+            val config = plugin.configs.signs
             for (sign in arena.signs) {
                 val state = sign.state
                 if (state !is Sign) continue
@@ -49,8 +51,8 @@ class BlockStatusListener : Listener {
                     GameState.STARTING -> ConfigPath.SIGNS_STATUS_BLOCK_PLAYING_MATERIAL to ConfigPath.SIGNS_STATUS_BLOCK_PLAYING_DATA
                     GameState.RESTARTING -> ConfigPath.SIGNS_STATUS_BLOCK_RESTARTING_MATERIAL to ConfigPath.SIGNS_STATUS_BLOCK_RESTARTING_DATA
                 }
-                BedWars.nms.setJoinSignBackground(state, Material.valueOf(BedWars.signs!!.getString(path)!!))
-                BedWars.nms.setJoinSignBackgroundBlockData(state, BedWars.signs!!.getInt(data).toByte())
+                nms.setJoinSignBackground(state, Material.valueOf(config.getString(path)!!))
+                nms.setJoinSignBackgroundBlockData(state, config.getInt(data).toByte())
             }
         }
     }

@@ -41,7 +41,7 @@ class UpgradeTier(
     val cost: Int,
     val currency: Material
 ) {
-    val displayItem = BedWars.nms.addCustomData(displayItem, "MCONT_$parentName")
+    val displayItem = BedWars.INSTANCE.versionSupport.addCustomData(displayItem, "MCONT_$parentName")
     val upgradeActions = mutableListOf<UpgradeAction>()
 
     init {
@@ -58,8 +58,10 @@ class UpgradeTier(
             ).replace("{tier}", name), mutableListOf("&cLore not set")
         )
 
-        for (action in BedWars.api.upgradesManager.configuration.getStringList("$parentName.$name.receive")) {
-            val type = action.lowercase().trim().split(":")
+        val plugin = BedWars.INSTANCE
+        val logger = plugin.logger
+        for (action in plugin.upgradesManager.configuration.getStringList("$parentName.$name.receive")) {
+            val type = action.trim().lowercase().split(":")
             if (type.size < 2) continue
 
             val arg = type[0].trim()
@@ -69,12 +71,12 @@ class UpgradeTier(
             upgradeActions += when (arg) {
                 "enchant-item" -> {
                     if (data.size < 3) {
-                        BedWars.plugin.logger.warning("Invalid $arg at upgrades2: $parentName.$name")
+                        logger.warning("Invalid $arg at upgrades2: $parentName.$name")
                         continue
                     }
                     val e = Enchantment.getByName(data0)
                     if (e == null) {
-                        BedWars.plugin.logger.warning("Invalid enchantment $data0 at upgrades2: $parentName.$name")
+                        logger.warning("Invalid enchantment $data0 at upgrades2: $parentName.$name")
                         continue
                     }
                     val apply = when (data[2].lowercase()) {
@@ -82,7 +84,7 @@ class UpgradeTier(
                         "armor" -> EnchantItemAction.ApplyType.ARMOR
                         "bow" -> EnchantItemAction.ApplyType.BOW
                         else -> {
-                            BedWars.plugin.logger.warning("Invalid apply type ${data[2]} at upgrades2: $parentName.$name")
+                            logger.warning("Invalid apply type ${data[2]} at upgrades2: $parentName.$name")
                             continue
                         }
                     }
@@ -92,19 +94,19 @@ class UpgradeTier(
 
                 "player-effect" -> {
                     if (data.size < 4) {
-                        BedWars.plugin.logger.warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
+                        logger.warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
                         continue
                     }
                     val pe = PotionEffectType.getByName(data0)
                     if (pe == null) {
-                        BedWars.plugin.logger.warning("Invalid potion effect ${data[0]} at upgrades2: $parentName.$name")
+                        logger.warning("Invalid potion effect ${data[0]} at upgrades2: $parentName.$name")
                         continue
                     }
                     val applyType = when (data[3].lowercase()) {
                         "team" -> PlayerEffectAction.ApplyType.TEAM
                         "base" -> PlayerEffectAction.ApplyType.BASE
                         else -> {
-                            BedWars.plugin.logger.warning("Invalid apply type ${data[3]} at upgrades2: $parentName.$name")
+                            logger.warning("Invalid apply type ${data[3]} at upgrades2: $parentName.$name")
                             continue
                         }
                     }
@@ -115,8 +117,7 @@ class UpgradeTier(
 
                 "generator-edit" -> {
                     if (data.size < 4) {
-                        BedWars.plugin.logger
-                            .warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
+                        logger.warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
                         continue
                     }
                     val genType = when (data0) {
@@ -124,7 +125,7 @@ class UpgradeTier(
                         "IRON", "I" -> GeneratorEditAction.ApplyType.IRON
                         "EMERALD", "E" -> GeneratorEditAction.ApplyType.EMERALD
                         else -> {
-                            BedWars.plugin.logger.warning("Invalid generator type $data0 at upgrades2: $parentName.$name")
+                            logger.warning("Invalid generator type $data0 at upgrades2: $parentName.$name")
                             continue
                         }
                     }
@@ -132,7 +133,7 @@ class UpgradeTier(
                     val amount = data[2].toIntOrNull()
                     val limit = data[3].toIntOrNull()
                     if (spawn == null || amount == null || limit == null) {
-                        BedWars.plugin.logger.warning("Invalid generator configuration $data0 at upgrades2: $parentName.$name")
+                        logger.warning("Invalid generator configuration $data0 at upgrades2: $parentName.$name")
                         continue
                     }
                     GeneratorEditAction(genType, amount, spawn, limit)
@@ -140,12 +141,12 @@ class UpgradeTier(
 
                 "dragon" -> {
                     if (data.isEmpty()) {
-                        BedWars.plugin.logger.warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
+                        logger.warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
                         continue
                     }
                     val dragons = data0.toIntOrNull()
                     if (dragons == null) {
-                        BedWars.plugin.logger.warning("Invalid dragon amount at upgrades2: $parentName.$name")
+                        logger.warning("Invalid dragon amount at upgrades2: $parentName.$name")
                         continue
                     }
                     DragonAction(dragons)
@@ -154,13 +155,12 @@ class UpgradeTier(
                 "command" -> {
                     // once-as-console,command
                     if (data.size < 2) {
-                        BedWars.plugin.logger
-                            .warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
+                        logger.warning("Invalid ${type[0]} at upgrades2: $parentName.$name")
                         continue
                     }
                     val cmdType = CommandType.entries.find { it.name == data0 }
                     if (cmdType == null) {
-                        BedWars.plugin.logger.warning("Invalid command type $data0 at upgrades2: $parentName.$name")
+                        logger.warning("Invalid command type $data0 at upgrades2: $parentName.$name")
                         continue
                     }
                     // re-do here because the first one does a trim on data

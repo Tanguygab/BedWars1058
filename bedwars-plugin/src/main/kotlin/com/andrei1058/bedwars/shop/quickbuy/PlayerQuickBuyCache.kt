@@ -20,12 +20,12 @@
 package com.andrei1058.bedwars.shop.quickbuy
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.shop.ShopCache
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import com.andrei1058.bedwars.shop.main.CategoryContent
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -43,13 +43,15 @@ class PlayerQuickBuyCache(player: Player) {
     private val updateSlots = HashMap<Int, String>()
 
     init {
-        val emptyItem = BedWars.nms.createItemStack(
-            BedWars.shop.getString(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_MATERIAL)!!,
-            BedWars.shop.getInt(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_AMOUNT),
-            BedWars.shop.getInt(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_DATA).toShort()
+        val plugin = BedWars.INSTANCE
+        val config = plugin.shopManager.config
+        val emptyItem = plugin.versionSupport.createItemStack(
+            config.getString(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_MATERIAL)!!,
+            config.getInt(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_AMOUNT),
+            config.getInt(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_DATA).toShort()
         )
-        this.emptyItem = if (BedWars.shop.getBoolean(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_ENCHANTED))
-            ShopManager.enchantItem(emptyItem)
+        this.emptyItem = if (config.getBoolean(ConfigPath.SHOP_SETTINGS_QUICK_BUY_EMPTY_ENCHANTED))
+            ShopConfig.enchantItem(emptyItem)
         else emptyItem
         quickBuyCaches[this.player] = this
     }
@@ -114,7 +116,8 @@ class PlayerQuickBuyCache(player: Player) {
     }
 
     fun pushChangesToDB() {
-        BedWars.plugin.run(async = true) { BedWars.remoteDatabase.pushQuickBuyChanges(updateSlots, player, elements) }
+        val plugin = BedWars.INSTANCE
+        plugin.run(async = true) { plugin.database.pushQuickBuyChanges(updateSlots, player, elements) }
     }
 
     companion object {

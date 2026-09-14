@@ -41,7 +41,7 @@ class PreLoadedParty(private val owner: String) {
 
         for (player in members) {
             if (!player.name.equals(this.owner, ignoreCase = true)) {
-                BedWars.party.addMember(owner, player)
+                BedWars.INSTANCE.partyUtil.addMember(owner, player)
             }
         }
         preLoadedParties.remove(this.owner)

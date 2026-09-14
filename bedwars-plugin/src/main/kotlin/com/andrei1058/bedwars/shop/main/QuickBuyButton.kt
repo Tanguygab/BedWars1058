@@ -19,7 +19,7 @@
  */
 package com.andrei1058.bedwars.shop.main
 
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.language.Language
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

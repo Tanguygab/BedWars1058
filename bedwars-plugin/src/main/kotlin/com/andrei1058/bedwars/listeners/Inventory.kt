@@ -44,7 +44,7 @@ class Inventory(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onClose(e: InventoryCloseEvent) {
         val player = e.player as? Player ?: return
-        if (BedWars.nms.getInventoryName(e) != SetupSession.INVENTORY_NAME) return
+        if (plugin.versionSupport.getInventoryName(e) != SetupSession.INVENTORY_NAME) return
 
         val ss = SetupSession.getSession(player.uniqueId) ?: return
         if (ss.setupType == null) ss.cancel()
@@ -93,7 +93,7 @@ class Inventory(private val plugin: BedWars) : Listener {
 
         if (e.slotType == InventoryType.SlotType.ARMOR && arena != null && player.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
             player.closeInventory()
-            player.world.players.forEach { BedWars.nms.hideArmor(player, it) }
+            player.world.players.forEach { plugin.versionSupport.hideArmor(player, it) }
         }
 
         val item = e.currentItem ?: return
@@ -115,7 +115,7 @@ class Inventory(private val plugin: BedWars) : Listener {
         }*/
         if (arena != null) {
             //Prevent players from moving items in stats GUI
-            if (BedWars.nms.getInventoryName(e) == Language
+            if (plugin.versionSupport.getInventoryName(e) == Language
                 .getMsg(player, Messages.PLAYER_STATS_GUI_INV_NAME)
                 .replace("{playername}", player.name)
                 .replace("{player}", player.displayName)
@@ -132,13 +132,13 @@ class Inventory(private val plugin: BedWars) : Listener {
         }
 
         if (!item.hasItemMeta() || !item.itemMeta!!.hasDisplayName()) return
-        if (BedWars.serverType == ServerType.MULTIARENA && player.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true)) {
+        if (plugin.serverType == ServerType.MULTIARENA && player.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true)) {
             e.isCancelled = true
         }
 
         /* Check setup gui items */
         val ss = SetupSession.getSession(player.uniqueId)
-        if (ss != null && BedWars.nms.getInventoryName(e) == SetupSession.INVENTORY_NAME) {
+        if (ss != null && plugin.versionSupport.getInventoryName(e) == SetupSession.INVENTORY_NAME) {
             ss.setupType = when (e.slot) {
                 SetupSession.ADVANCED_SLOT -> SetupType.ADVANCED
                 SetupSession.ASSISTED_SLOT -> SetupType.ASSISTED
@@ -163,16 +163,14 @@ class Inventory(private val plugin: BedWars) : Listener {
         e.arena.players.forEach { it.closeInventory() }
     }
 
-    companion object {
-        /**
-         * Check if an item is command-item
-         */
-        private fun isCommandItem(item: ItemStack): Boolean {
-            if (item.type == Material.AIR) return false
-            if (!BedWars.nms.isCustomBedWarsItem(item)) return false
+    /**
+     * Check if an item is command-item
+     */
+    private fun isCommandItem(item: ItemStack): Boolean {
+        if (item.type == Material.AIR) return false
+        if (!plugin.versionSupport.isCustomBedWarsItem(item)) return false
 
-            val customData = BedWars.nms.getCustomData(item)!!.split("_")
-            return customData.size >= 2 && customData[0] == "RUNCOMMAND"
-        }
+        val customData = plugin.versionSupport.getCustomData(item)!!.split("_")
+        return customData.size >= 2 && customData[0] == "RUNCOMMAND"
     }
 }

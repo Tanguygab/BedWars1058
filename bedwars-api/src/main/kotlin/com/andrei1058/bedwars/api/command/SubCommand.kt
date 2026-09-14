@@ -20,17 +20,15 @@
 package com.andrei1058.bedwars.api.command
 
 import com.andrei1058.bedwars.api.BedWars
-import net.md_5.bungee.api.ChatColor
+import com.andrei1058.bedwars.api.util.Utils
 import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.ComponentBuilder
-import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.command.CommandSender
 
 abstract class SubCommand(
-    val subCommandName: String,
+    protected open val parent: ParentCommand,
+    val name: String,
     private val permission: String? = null,
-    val isShown: Boolean = true,
     /**
      * This is the command priority in the sub-commands list
      * You may use this method if you set showInList true
@@ -38,6 +36,7 @@ abstract class SubCommand(
      */
     val priority: Int = 20
 ) {
+    protected open val plugin = BedWars.INSTANCE
     /**
      * Get command description for subCommands list
      */
@@ -45,7 +44,26 @@ abstract class SubCommand(
      * This is the command information in the subCommands list of the target parent
      */
     // Display name/ info in subCommands list
-    var displayInfo: TextComponent? = null
+    open val description: TextComponent? = null
+
+    private fun String.spaced(prefix: String = " ") = if (isEmpty()) "" else "$prefix$this"
+    fun createDescription(
+        description: String = "",
+        syntax: String = "",
+        status: String = "",
+        suffix: String = "",
+        argument: String = "",
+        error: Boolean = false
+    ): TextComponent {
+        val suggest = syntax.isEmpty()
+        val prefix = if (error) "§c▪ §7Usage: §e" else "§6 ▪ §7"
+        return Utils.component(
+            "$prefix/${parent.commandName} $name${argument.spaced()}${syntax.spaced("§6 ")}${status.spaced()}${suffix.spaced("         §8 - §e")}",
+            "§f$description",
+            "/${parent.commandName} $name${if (suggest) "" else " "}",
+            if (suggest) ClickEvent.Action.SUGGEST_COMMAND else ClickEvent.Action.RUN_COMMAND
+        )
+    }
 
     /**
      * Check if player has permission to use the command
@@ -54,10 +72,8 @@ abstract class SubCommand(
 
     /**
      * Check if a sender can see/ use the sub cmd
-     *
-     * @param api BedWars api instance
      */
-    open fun canSee(sender: CommandSender, api: BedWars) = canUse(sender)
+    open fun canSee(sender: CommandSender) = canUse(sender)
 
     /**
      * Add your sub-command code under this method
@@ -68,14 +84,5 @@ abstract class SubCommand(
      * Manage sub-command tab complete
      */
     open val tabComplete = emptyList<String>()
-
-    fun createTC(text: String, suggest: String, hover: String) = TextComponent(text).apply {
-        clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggest)
-        hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(hover).create())
-    }
-
-    protected fun CommandSender.sendMsg(message: String, error: Boolean = false) {
-        sendMessage("${if (error) ChatColor.RED else ChatColor.GOLD}▪ ${ChatColor.GRAY}$message")
-    }
 
 }

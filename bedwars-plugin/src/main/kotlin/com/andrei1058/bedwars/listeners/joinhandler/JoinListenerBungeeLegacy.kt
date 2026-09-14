@@ -20,7 +20,6 @@
 package com.andrei1058.bedwars.listeners.joinhandler
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.BedWars.Companion.api
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
@@ -86,10 +85,10 @@ class JoinListenerBungeeLegacy(private val plugin: BedWars) : Listener {
         // If arena is full
         if (arena.players.size >= arena.maxPlayers) {
             // Vip join feature
-            if (api.isVIP(p)) {
+            if (plugin.isVIP(p)) {
                 var canJoin = false
                 for (inGame in arena.players) {
-                    if (!api.isVIP(inGame)) {
+                    if (!plugin.isVIP(inGame)) {
                         canJoin = true
                         inGame.kickPlayer(Language.getMsg(inGame, Messages.ARENA_JOIN_VIP_KICK))
                         break
@@ -128,7 +127,7 @@ class JoinListenerBungeeLegacy(private val plugin: BedWars) : Listener {
         if (arenaManager.arenas.isEmpty()) {
             // Show setup commands if there is no arena available
             if (player.hasPermission("bw.setup")) {
-                player.performCommand(BedWars.MAIN_COMMAND)
+                player.performCommand(plugin.mainCommand.name)
             }
             return
         }

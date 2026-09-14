@@ -19,16 +19,16 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-class SetWaitingSpawn : SetupCommand("setWaitingSpawn") {
+class SetWaitingSpawn(parent: MainCommand) : SetupCommand(parent, "setWaitingSpawn") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         sender.sendMessage("§6 ▪ §7Waiting spawn set for §e${session.worldName}§7!")
         session.config.saveArenaLoc("waiting.Loc", sender.location)
-        Bukkit.dispatchCommand(sender, BedWars.MAIN_COMMAND + if (session.setupType == SetupType.ASSISTED) " autocreateteams" else "")
+        Bukkit.dispatchCommand(sender, parent.commandName + if (session.setupType == SetupType.ASSISTED) " autocreateteams" else "")
     }
 }

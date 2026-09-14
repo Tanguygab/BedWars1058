@@ -25,7 +25,6 @@ import com.andrei1058.bedwars.api.arena.team.TeamColor
 import com.andrei1058.bedwars.api.events.gameplay.EggBridgeBuildEvent
 import com.andrei1058.bedwars.configuration.Sounds
 import com.andrei1058.bedwars.listeners.EggBridge
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Egg
@@ -38,7 +37,8 @@ class EggBridgeTask(
     val projectile: Egg,
     val teamColor: TeamColor
 ) : Runnable {
-    private val task = Bukkit.getScheduler().runTaskTimer(BedWars.plugin, this, 0, 1)
+    private val plugin = BedWars.INSTANCE
+    private val task = plugin.server.scheduler.runTaskTimer(plugin, this, 0, 1)
 
     private val deltas = arrayOf(
         Vector(0.0, 2.0, 0.0),
@@ -69,11 +69,12 @@ class EggBridgeTask(
         val block = location.block
         if (block.type != Material.AIR) return
 
-        block.type = BedWars.nms.woolMaterial()
-        BedWars.nms.setBlockTeamColor(block, teamColor)
+        val nms = plugin.versionSupport
+        block.type = nms.woolMaterial()
+        nms.setBlockTeamColor(block, teamColor)
         arena.addPlacedBlock(block)
-        Bukkit.getPluginManager().callEvent(EggBridgeBuildEvent(teamColor, arena, block))
-        location.world!!.playEffect(location, BedWars.nms.eggBridge, 3)
+        plugin.server.pluginManager.callEvent(EggBridgeBuildEvent(teamColor, arena, block))
+        location.world!!.playEffect(location, nms.eggBridge, 3)
         Sounds.playSound("egg-bridge-block", player)
     }
 

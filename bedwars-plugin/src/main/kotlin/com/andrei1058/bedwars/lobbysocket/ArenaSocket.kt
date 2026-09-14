@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap
 object ArenaSocket {
     var lobbies = mutableListOf<String>()
     private val sockets = ConcurrentHashMap<String, RemoteLobby>()
-    private val serverName get() = BedWars.config.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID)
+    private val serverName get() = BedWars.INSTANCE.mainConfig.getString(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_SERVER_ID)
 
     /**
      * Send arena data to the lobbies.
@@ -98,7 +98,7 @@ object ArenaSocket {
         init {
             if (`in` != null && out != null) {
                 debug("RemoteLobby created: $lobby $socket")
-                BedWars.plugin.run(async = true) {
+                BedWars.INSTANCE.run(async = true) {
                     while (compute) {
                         if (`in`.hasNext()) {
                             val msg = `in`.next()
@@ -107,7 +107,7 @@ object ArenaSocket {
                             val json = try {
                                 JsonParser.parseString(msg).getAsJsonObject() ?: continue
                             } catch (_: JsonSyntaxException) {
-                                BedWars.plugin.logger.warning("Received bad data from: ${socket.inetAddress}")
+                                BedWars.INSTANCE.logger.warning("Received bad data from: ${socket.inetAddress}")
                                 continue
                             }
                             if (!json.has("type")) continue
@@ -123,7 +123,7 @@ object ArenaSocket {
                                 "Q" -> {
                                     val p = Bukkit.getPlayer(json.get("name").asString)
                                     if (p == null || !p.isOnline) continue
-                                    val a = BedWars.plugin.arenaManager.getArena(p) ?: continue
+                                    val a = BedWars.INSTANCE.arenaManager.getArena(p) ?: continue
                                     out.println(JsonObject().apply {
                                         addProperty("type", "Q")
                                         addProperty("name", p.name)

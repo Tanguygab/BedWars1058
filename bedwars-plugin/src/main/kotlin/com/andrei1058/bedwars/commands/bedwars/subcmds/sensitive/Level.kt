@@ -19,15 +19,10 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.BedWars.Companion.api
-import com.andrei1058.bedwars.BedWars.Companion.remoteDatabase
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.events.player.PlayerXpGainEvent
-import com.andrei1058.bedwars.arena.Misc.msgHoverClick
-import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.api.util.Utils.message
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Permissions
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.Bukkit
@@ -35,15 +30,11 @@ import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class Level(private val parent: ParentCommand) : SubCommand("level", Permissions.PERMISSION_LEVEL, priority = 10) {
-    init {
-        displayInfo = msgHoverClick(
-            "§6 ▪ §7/${parent.commandName} $subCommandName §8      - §eclick for details",
-            "§fManage a player level.",
-            "/${parent.commandName} $subCommandName",
-            ClickEvent.Action.RUN_COMMAND
-        )
-    }
+class Level(parent: MainCommand) : SubCommand(parent, "level", Permissions.PERMISSION_LEVEL, priority = 10) {
+    override val description = createDescription(
+        "Manage a player level.",
+        suffix = "click for details"
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         val arg = if (args.isEmpty()) "" else args[0].lowercase()
@@ -66,16 +57,16 @@ class Level(private val parent: ParentCommand) : SubCommand("level", Permissions
                     return true
                 }
 
-                api.levelsUtil.setLevel(target, level)
-                val config = BedWars.plugin.levelsConfig
+                plugin.levelManager.setLevel(target, level)
+                val config = plugin.levelsConfig
 
                 val nextLevelCost = config.getInt("levels.$level.rankup-cost", config.getInt("levels.others.rankup-cost"))
 
                 val levelName = config.getString("levels.$level.name") ?: config.getString("levels.others.name")
 
 
-                BedWars.plugin.run(async = true) {
-                    remoteDatabase.setLevelData(target.uniqueId, level, 0, levelName, nextLevelCost)
+                plugin.run(async = true) {
+                    plugin.database.setLevelData(target.uniqueId, level, 0, levelName, nextLevelCost)
                     sender.sendMessage("${ChatColor.GOLD} ▪ ${ChatColor.GRAY}${target.name} level was set to: $level")
                     sender.sendMessage("${ChatColor.GOLD} ▪ ${ChatColor.GRAY}The player may need to rejoin to see it updated.")
                 }
@@ -98,11 +89,11 @@ class Level(private val parent: ParentCommand) : SubCommand("level", Permissions
                     return true
                 }
 
-                api.levelsUtil.addXp(target, amount, PlayerXpGainEvent.XpSource.OTHER)
+                plugin.levelManager.addXp(target, amount, PlayerXpGainEvent.XpSource.OTHER)
 
-                BedWars.plugin.run(async = true) {
-                    val data = remoteDatabase.getLevelData(target.uniqueId)
-                    remoteDatabase.setLevelData(
+                plugin.run(async = true) {
+                    val data = plugin.database.getLevelData(target.uniqueId)
+                    plugin.database.setLevelData(
                         target.uniqueId,
                         (data[0] as Int?)!!,
                         (data[1] as Int?)!! + amount,
@@ -120,26 +111,17 @@ class Level(private val parent: ParentCommand) : SubCommand("level", Permissions
                     return true
                 }
                 sender.message(
-                    "§6 ▪ §7/${parent.commandName} $subCommandName setLevel §o<player> <level>",
-                    "Set a player level.", "/${parent.commandName} $subCommandName setLevel",
+                    "§6 ▪ §7/${parent.commandName} $name setLevel §o<player> <level>",
+                    "Set a player level.", "/${parent.commandName} $name setLevel",
                     ClickEvent.Action.SUGGEST_COMMAND
                 )
                 sender.message(
-                    "§6 ▪ §7/${parent.commandName} $subCommandName giveXp §o<player> <amount>",
-                    "Give Xp to a player.", "/${parent.commandName} $subCommandName giveXp",
+                    "§6 ▪ §7/${parent.commandName} $name giveXp §o<player> <amount>",
+                    "Give Xp to a player.", "/${parent.commandName} $name giveXp",
                     ClickEvent.Action.SUGGEST_COMMAND
                 )
             }
         }
         return true
-    }
-
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
-        if (sender !is Player) return false
-
-        if (api.arenaManager.isInArena(sender)) return false
-
-        if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        return canUse(sender)
     }
 }

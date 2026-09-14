@@ -46,22 +46,22 @@ class QuitAndTeleportListener(private val plugin: BedWars) : Listener {
         //Save preferred language
         val uuid = player.uniqueId
         if (uuid in Language.langByPlayer) {
-            BedWars.plugin.run(async = true) {
+            plugin.run(async = true) {
                 var iso = Language.langByPlayer[uuid]!!.iso
                 if (Language.isLanguageExist(iso)) {
-                    if (iso in BedWars.config.getStringList(ConfigPath.GENERAL_CONFIGURATION_DISABLED_LANGUAGES))
+                    if (iso in plugin.mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_DISABLED_LANGUAGES))
                         iso = Language.defaultLanguage.iso
-                    BedWars.remoteDatabase.setLanguage(uuid, iso)
+                    plugin.database.setLanguage(uuid, iso)
                 }
                 Language.langByPlayer.remove(uuid)
             }
         }
 
-        if (BedWars.serverType != ServerType.SHARED) {
+        if (plugin.serverType != ServerType.SHARED) {
             e.quitMessage = null
         }
         // Manage internal parties
-        val party = BedWars.party
+        val party = plugin.partyUtil
         if (party.isInternal) {
             if (party.hasParty(player)) {
                 party.removeFromParty(player)

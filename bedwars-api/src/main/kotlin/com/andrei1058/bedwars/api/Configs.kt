@@ -6,12 +6,12 @@ interface Configs {
     /**
      * Get plugin main configuration.
      */
-    val mainConfig: ConfigManager
-    val signsConfig: ConfigManager?
-    val generatorsConfig: ConfigManager
+    val main: ConfigManager
+    val signs: ConfigManager
+    val generators: ConfigManager
     /**
      * Get shop configuration.
      */
-    val shopConfig: ConfigManager
-    val upgradesConfig: ConfigManager
+    val shop: ConfigManager
+    val upgrades: ConfigManager
 }

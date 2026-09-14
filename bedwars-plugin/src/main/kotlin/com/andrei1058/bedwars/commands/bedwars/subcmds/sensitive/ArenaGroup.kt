@@ -19,14 +19,10 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.arena.Misc.msgHoverClick
-import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.ArenaConfig
 import com.andrei1058.bedwars.configuration.Permissions
 import net.md_5.bungee.api.chat.ClickEvent
@@ -36,26 +32,23 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.io.File
 
-class ArenaGroup(private val parent: ParentCommand) : SubCommand(
+class ArenaGroup(parent: MainCommand) : SubCommand(
+    parent,
     "arenaGroup",
     Permissions.PERMISSION_ARENA_GROUP,
     priority = 8
 ) {
-    init {
-        displayInfo = msgHoverClick(
-            "§6 ▪ §7/" + parent.commandName + " " + subCommandName + " §8- §eclick for details",
-            "§fManage arena groups.",
-            "/" + parent.commandName + " " + subCommandName,
-            ClickEvent.Action.RUN_COMMAND
-        )
-    }
+    override val description = createDescription(
+        "Manage arena groups.",
+        suffix = "click for details",
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
-        if (!MainCommand.isLobbySet(sender)) return true
+        if (!isLobbySet(sender)) return true
 
         val arg = if (args.isEmpty()) "" else args[0].lowercase()
-        val groups = BedWars.config.getStringList(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS)
+        val groups = plugin.mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS)
 
         when (arg) {
             "create" -> {
@@ -73,7 +66,7 @@ class ArenaGroup(private val parent: ParentCommand) : SubCommand(
                     return true
                 }
 
-                BedWars.config[ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS] = groups + group
+                plugin.mainConfig[ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS] = groups + group
                 sender.sendMessage("§6 ▪ §7Group created!")
             }
             "remove" -> {
@@ -86,7 +79,7 @@ class ArenaGroup(private val parent: ParentCommand) : SubCommand(
                     sender.sendMessage("§c▪ §7This group doesn't exist!")
                     return true
                 }
-                BedWars.config[ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS] = groups - group
+                plugin.mainConfig[ConfigPath.GENERAL_CONFIGURATION_ARENA_GROUPS] = groups - group
                 sender.sendMessage("§6 ▪ §7Group deleted!")
             }
             "list" -> {
@@ -109,14 +102,14 @@ class ArenaGroup(private val parent: ParentCommand) : SubCommand(
                     return true
                 }
 
-                val arenaFile = File(BedWars.plugin.dataFolder, "/Arenas/$arenaName.yml")
+                val arenaFile = File(plugin.dataFolder, "/Arenas/$arenaName.yml")
                 if (!arenaFile.exists()) {
                     sender.sendMessage("§c▪ §7Arena $arenaName doesn't exist!")
                     return true
                 }
-                val cm = ArenaConfig(BedWars.plugin, arenaName, BedWars.plugin.dataFolder.path + "/Arenas")
-                cm.set("group", group)
-                val arena = BedWars.plugin.arenaManager.getArena(arenaName)
+                val cm = ArenaConfig(plugin, arenaName, plugin.dataFolder.path + "/Arenas")
+                cm["group"] = group
+                val arena = plugin.arenaManager.getArena(arenaName)
                 if (arena != null) {
                     arena.group = group
                 }
@@ -137,18 +130,9 @@ class ArenaGroup(private val parent: ParentCommand) : SubCommand(
     }
 
     private fun Player.sendCommand(usage: String, description: String, action: ClickEvent.Action = ClickEvent.Action.SUGGEST_COMMAND) = message(
-        "§6 ▪ §7/${parent.commandName} $subCommandName $usage",
+        "§6 ▪ §7/${parent.commandName} ${this@ArenaGroup.name} $usage",
         description,
-        "/${parent.commandName} $subCommandName ${usage.split(" ", limit = 2).first()}",
+        "/${parent.commandName} ${this@ArenaGroup.name} ${usage.split(" ", limit = 2).first()}",
         action
     )
-
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
-        if (sender !is Player) return false
-
-        if (api.arenaManager.isInArena(sender)) return false
-
-        if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        return canUse(sender)
-    }
 }

@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Portuguese : Language(BedWars.plugin, "pt") {
+class Portuguese : Language(BedWars.INSTANCE, "pt") {
     init {
         this.options().copyDefaults(true)
         this.addDefault(Messages.PREFIX, "")

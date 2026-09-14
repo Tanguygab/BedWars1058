@@ -19,23 +19,16 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.api.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.arena.Misc
 import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.commands.bedwars.subcmds.CooldownCommand
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdLeave(parent: ParentCommand) : CooldownCommand("leave", 2500, isShown = false, priority = 19) {
-    init {
-        displayInfo = createTC(
-            "§6 ▪ §7/${parent.commandName} $subCommandName",
-            "/${parent.commandName} $subCommandName",
-            "§fLeave an arena."
-        )
-    }
+class CmdLeave(parent: MainCommand) : CooldownCommand(parent, "leave", 2500, priority = 19) {
+    override val description = createDescription("Leave an arena.")
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
@@ -43,22 +36,18 @@ class CmdLeave(parent: ParentCommand) : CooldownCommand("leave", 2500, isShown =
 
         if (isOnCooldown(uuid)) return true
         setCooldown(uuid)
-        val arena = BedWars.INSTANCE.arenaManager.getArena(sender)
+        val arena = plugin.arenaManager.getArena(sender)
 
         Misc.moveToLobbyOrKick(sender, arena, arena?.isSpectator(uuid) == true)
         return true
     }
 
-    override fun canSee(sender: CommandSender, api: BedWars): Boolean {
+    override fun canSee(sender: CommandSender): Boolean {
         if (sender !is Player) return false
 
-        if (api.serverType == ServerType.SHARED && !api.arenaManager.isInArena(sender)) return false
+        if (plugin.serverType == ServerType.SHARED && !plugin.arenaManager.isInArena(sender)) return false
 
         if (SetupSession.isInSetupSession(sender.uniqueId)) return false
         return canUse(sender)
-    }
-
-    companion object {
-
     }
 }

@@ -19,12 +19,12 @@
  */
 package com.andrei1058.bedwars.commands.party
 
-import com.andrei1058.bedwars.BedWars.Companion.party
+import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
+import com.andrei1058.bedwars.api.util.Utils
 import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.command.ConsoleCommandSender
@@ -40,6 +40,7 @@ class PartyCommand(name: String) : BukkitCommand(name) {
             sendPartyCmds(p)
             return true
         }
+        val party = BedWars.INSTANCE.partyUtil
         when (args[0].lowercase()) {
             "invite" -> {
                 if (args.size == 1) {
@@ -60,13 +61,12 @@ class PartyCommand(name: String) : BukkitCommand(name) {
                         "{playername}" to p.name,
                         "{player}" to args[1]
                     )
-                    val tc = TextComponent(Language.getMsg(
-                            p,
-                            Messages.COMMAND_PARTY_INVITE_SENT_TARGET_RECEIVE_MSG
-                        ).replace("{player}", p.name)
-                    )
-                    tc.clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/party accept " + p.name)
-                    player.spigot().sendMessage(tc)
+                    player.spigot().sendMessage(Utils.component(
+                        Language.getMsg(p, Messages.COMMAND_PARTY_INVITE_SENT_TARGET_RECEIVE_MSG).replace("{player}", p.name),
+                        "",
+                        "/party accept ${p.name}",
+                        ClickEvent.Action.RUN_COMMAND
+                    ))
                     partySessionRequest[p.uniqueId] = player.uniqueId
                 } else p.sendLangMsg(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{player}" to args[1])
             }

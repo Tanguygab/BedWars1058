@@ -19,19 +19,18 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
+import com.andrei1058.bedwars.api.util.Utils.message
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.arena.SetupSession
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-class WaitingPos(private val parent: ParentCommand) : SetupCommand("waitingPos") {
+class WaitingPos(parent: MainCommand) : SetupCommand(parent, "waitingPos") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         val pos1 = "waiting.Pos1" in session.config
         val pos2 = "waiting.Pos2" in session.config
 
-        var message = "§c▪ §7Usage: /${BedWars.MAIN_COMMAND} $subCommandName 1 or 2"
+        var message = "§c▪ §7Usage: /${parent.commandName} $name 1 or 2"
         if (args.isNotEmpty()) {
             val pos = args[0]
             if (pos == "1" || pos == "2") {
@@ -47,7 +46,7 @@ class WaitingPos(private val parent: ParentCommand) : SetupCommand("waitingPos")
         }
 
         if (pos1 && pos2) {
-            Bukkit.dispatchCommand(sender, "${BedWars.MAIN_COMMAND} cmds")
+            Bukkit.dispatchCommand(sender, "${parent.commandName} cmds")
             sender.sendMessage("§6 ▪ §7Set teams spawn if you didn't!")
         }
     }
@@ -55,7 +54,7 @@ class WaitingPos(private val parent: ParentCommand) : SetupCommand("waitingPos")
     private fun Player.askForPosition(position: Int) {
         sendMessage("§c ▪ §7Set the remaining position:")
         message(
-            "§c ▪ §7/${BedWars.MAIN_COMMAND} waitingPos $position",
+            "§c ▪ §7/${parent.commandName} waitingPos $position",
             "§dSet pos $position",
             "/${parent.commandName} waitingPos $position"
         )

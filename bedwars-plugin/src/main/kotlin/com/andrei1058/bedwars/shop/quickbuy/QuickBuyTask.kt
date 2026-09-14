@@ -21,14 +21,15 @@ package com.andrei1058.bedwars.shop.quickbuy
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import org.bukkit.Bukkit
 import org.bukkit.scheduler.BukkitRunnable
 import java.util.UUID
 
 class QuickBuyTask(private val uuid: UUID) : BukkitRunnable() {
+    private val plugin = BedWars.INSTANCE
     init {
-        runTaskLaterAsynchronously(BedWars.plugin, (20 * 7).toLong())
+        runTaskLaterAsynchronously(plugin, (20 * 7).toLong())
     }
 
     override fun run() {
@@ -44,10 +45,9 @@ class QuickBuyTask(private val uuid: UUID) : BukkitRunnable() {
             return
         }
 
-        val shop = BedWars.shop
-        if (BedWars.remoteDatabase.hasQuickBuy(uuid)) {
+        if (plugin.database.hasQuickBuy(uuid)) {
             // slot, identifier
-            val items = BedWars.remoteDatabase.getQuickBuySlots(uuid, PlayerQuickBuyCache.quickSlots)
+            val items = plugin.database.getQuickBuySlots(uuid, PlayerQuickBuyCache.quickSlots)
             if (items.isEmpty()) return
             for ((key, value) in items) {
                 if (value.isBlank()) continue
@@ -57,18 +57,19 @@ class QuickBuyTask(private val uuid: UUID) : BukkitRunnable() {
             return
         }
 
-        val quickShop = shop.getConfigurationSection(ConfigPath.SHOP_QUICK_DEFAULTS_PATH) ?: return
+        val config = plugin.shopManager.config
+        val quickShop = config.getConfigurationSection(ConfigPath.SHOP_QUICK_DEFAULTS_PATH) ?: return
         for (key in quickShop.getKeys(false)) {
-            val path = shop.getString("${ConfigPath.SHOP_QUICK_DEFAULTS_PATH}.$key.path") ?: continue
+            val path = config.getString("${ConfigPath.SHOP_QUICK_DEFAULTS_PATH}.$key.path") ?: continue
 
-            val slotString = shop.getString("${ConfigPath.SHOP_QUICK_DEFAULTS_PATH}.$key.slot")
+            val slotString = config.getString("${ConfigPath.SHOP_QUICK_DEFAULTS_PATH}.$key.slot")
             val slot = slotString?.toIntOrNull()
             if (slot == null) {
                 BedWars.debug("$slotString must be an integer!")
                 continue
             }
 
-            for (category in ShopManager.shop.categoryList) {
+            for (category in ShopConfig.shop.categoryList) {
                 for (content in category.categoryContentList) {
                     if (content.identifier != path) continue
                     cache.setElement(slot, content)

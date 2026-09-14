@@ -23,9 +23,8 @@ import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigManager
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.configuration.GameMainOverridable
-import org.bukkit.plugin.Plugin
 
-class ArenaConfig(plugin: Plugin, name: String, dir: String) : ConfigManager(plugin, name, dir) {
+class ArenaConfig(private val plugin: BedWars, name: String, dir: String) : ConfigManager(plugin, name, dir) {
     init {
         options().setHeader(listOf(
             "${plugin.name} arena configuration file.",
@@ -89,7 +88,7 @@ class ArenaConfig(plugin: Plugin, name: String, dir: String) : ConfigManager(plu
             throw RuntimeException("Given path is not game-overridable: $path")
         }
 
-        return get(path, BedWars.config.get(path))
+        return get(path, plugin.mainConfig.get(path))
     }
 
     fun getGameOverridableBoolean(path: String) = getGameOverridableValue(path) as? Boolean ?: false

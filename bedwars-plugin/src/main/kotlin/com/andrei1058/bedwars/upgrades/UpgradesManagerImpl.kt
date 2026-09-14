@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.upgrades
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.UpgradesManager
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.language.Language
@@ -41,7 +41,7 @@ import org.bukkit.inventory.ItemStack
 import java.io.File
 import java.util.UUID
 
-class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
+class UpgradesManagerImpl(private val plugin: BedWars) : UpgradesManager {
     private val upgradeViewers = mutableSetOf<UUID>()
 
     //store lower case names
@@ -133,7 +133,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
         val groupName = groupName.lowercase()
         if (!configuration.isSet("$groupName-upgrades-settings.menu-content")) return false
         if (menuByName.containsKey(groupName)) return false
-        val um = InternalMenu(groupName)
+        val um = InternalMenu(plugin, groupName)
         for (component in configuration.getStringList("$groupName-upgrades-settings.menu-content")) {
             val data = component.split(",")
             if (data.size <= 1) continue
@@ -168,7 +168,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
         if (!name.startsWith("category-")) return false
         if (configuration.get(name) == null) return false
         if (getMenuContent(name) != null) return false
-        val uc = MenuCategory(name, createDisplayItem(name))
+        val uc = MenuCategory(plugin, name, createDisplayItem(name))
         for (component in configuration.getStringList("$name.category-content")) {
             val data = component.split(",")
             if (data.size <= 1) continue
@@ -222,7 +222,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
         if (configuration.get(name) == null) return false
         if (configuration.get("$name.tier-1") == null) return false
         if (getMenuContent(name) != null) return false
-        val mu = MenuUpgrade(name)
+        val mu = MenuUpgrade(plugin, name)
 
         for (s in configuration.getConfigurationSection(name)!!.getKeys(false)) {
             if (!s.startsWith("tier-")) continue
@@ -269,7 +269,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
         if (!name.startsWith("separator-")) return false
         if (configuration.get(name) == null) return false
         if (getMenuContent(name) != null) return false
-        val ms = MenuSeparator(name, createDisplayItem(name))
+        val ms = MenuSeparator(plugin, name, createDisplayItem(name))
         menuContentByName[name.lowercase()] = ms
         BedWars.debug("Registering upgrade: $name")
         return true
@@ -307,6 +307,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
         }
 
         val bt = MenuBaseTrap(
+            plugin,
             name,
             createDisplayItem(name),
             configuration.getInt("$name.cost"),
@@ -329,7 +330,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
             val amount = BedWars.economy.getMoney(player)
             return if (amount % 2 == 0.0) amount.toInt() else (amount - 1).toInt()
         }
-        return BedWars.api.shopUtil.calculateMoney(player, currency)
+        return plugin.shopManager.calculateMoney(player, currency)
     }
 
     /**
@@ -338,7 +339,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
      */
     fun getCurrency(name: String?): Material? {
         if (name.isNullOrEmpty()) return null
-        return BedWars.api.shopUtil.getCurrency(name)
+        return plugin.shopManager.getCurrency(name)
     }
 
     /**
@@ -351,7 +352,7 @@ class UpgradesManagerImpl(plugin: BedWars) : UpgradesManager {
     fun getMenuContent(item: ItemStack?): MenuContent? {
         if (item == null) return null
 
-        var identifier = BedWars.nms.getCustomData(item) ?: return null
+        var identifier = plugin.versionSupport.getCustomData(item) ?: return null
         if (!identifier.startsWith("MCONT_")) return null
 
         identifier = identifier.removePrefix("MCONT_")

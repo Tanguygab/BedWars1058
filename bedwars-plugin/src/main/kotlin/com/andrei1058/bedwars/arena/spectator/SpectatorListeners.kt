@@ -52,9 +52,9 @@ class SpectatorListeners(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onSpectatorItemInteract(e: PlayerInteractEvent) {
         val player = e.player
-        val item = BedWars.nms.getItemInHand(player)
+        val item = plugin.versionSupport.getItemInHand(player)
         if (item.type == Material.AIR) return
-        if (!BedWars.nms.isCustomBedWarsItem(item)) return
+        if (!plugin.versionSupport.isCustomBedWarsItem(item)) return
         val arena = plugin.arenaManager.getArena(player) ?: return
         if (!arena.isSpectator(player)) return
 
@@ -90,8 +90,9 @@ class SpectatorListeners(private val plugin: BedWars) : Listener {
         if (!arena.isSpectator(player)) return
 
         // Teleporter heads
-        if (!BedWars.nms.isPlayerHead(item.type, 3) || !BedWars.nms.itemStackDataCompare(item, 3.toShort())) return
-        val data = BedWars.nms.getCustomData(item) ?: return
+        val nms = plugin.versionSupport
+        if (!nms.isPlayerHead(item.type, 3) || !nms.itemStackDataCompare(item, 3.toShort())) return
+        val data = nms.getCustomData(item) ?: return
         e.isCancelled = true
 
         if (TeleporterGUI.NBT_SPECTATOR_TELEPORTER_GUI_HEAD !in data) return
@@ -151,7 +152,7 @@ class SpectatorListeners(private val plugin: BedWars) : Listener {
             gameMode = GameMode.SPECTATOR
             spectatorTarget = target
         }
-        BedWars.nms.sendTitle(
+        plugin.versionSupport.sendTitle(
             spectator,
             event.title(spectator)
                 .replace("{player}", target.displayName)
@@ -177,7 +178,7 @@ class SpectatorListeners(private val plugin: BedWars) : Listener {
         player.gameMode = GameMode.ADVENTURE
         player.allowFlight = true
         player.isFlying = true
-        BedWars.nms.sendTitle(
+        plugin.versionSupport.sendTitle(
             player,
             event.title(player),
             event.subTitle(player),

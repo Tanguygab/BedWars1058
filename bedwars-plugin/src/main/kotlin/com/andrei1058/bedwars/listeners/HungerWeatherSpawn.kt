@@ -34,8 +34,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.event.weather.WeatherChangeEvent
 
 class HungerWeatherSpawn(private val plugin: BedWars) : Listener {
-    private val hungerWaiting = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_WAITING)
-    private val hungerIngame = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_INGAME)
+    private val hungerWaiting = plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_WAITING)
+    private val hungerIngame = plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_HUNGER_INGAME)
 
     @EventHandler
     fun onFoodChange(e: FoodLevelChangeEvent) {
@@ -44,7 +44,7 @@ class HungerWeatherSpawn(private val plugin: BedWars) : Listener {
         val arena = plugin.arenaManager.getArena(player)
 
         // Don't cancel hunger for shared mode outside of arena
-        if (arena == null && BedWars.serverType == ServerType.SHARED) return
+        if (arena == null && plugin.serverType == ServerType.SHARED) return
 
         // Cancel hunger in MULTIARENA lobby and for spectators
         if (arena == null || arena.isSpectator(player)) {
@@ -65,7 +65,7 @@ class HungerWeatherSpawn(private val plugin: BedWars) : Listener {
     fun onWeatherChange(e: WeatherChangeEvent) {
         if (!e.toWeatherState()) return
 
-        if (BedWars.serverType != ServerType.SHARED) {
+        if (plugin.serverType != ServerType.SHARED) {
             e.isCancelled = true
             return
         }
@@ -79,7 +79,7 @@ class HungerWeatherSpawn(private val plugin: BedWars) : Listener {
     fun onCreatureSpawn(e: CreatureSpawnEvent) {
         if (e.spawnReason == CreatureSpawnEvent.SpawnReason.CUSTOM) return
 
-        if (BedWars.serverType == ServerType.BUNGEE) {
+        if (plugin.serverType == ServerType.BUNGEE) {
             e.isCancelled = true
             return
         }
@@ -96,10 +96,10 @@ class HungerWeatherSpawn(private val plugin: BedWars) : Listener {
         arenaManager.getArena(e.player) ?: return
         /* remove empty bottle */
         when (e.item.type) {
-            Material.GLASS_BOTTLE -> BedWars.nms.minusAmount(player, e.item, 1)
+            Material.GLASS_BOTTLE -> plugin.versionSupport.minusAmount(player, e.item, 1)
             Material.MILK_BUCKET -> {
                 e.isCancelled = true
-                BedWars.nms.minusAmount(player, e.item, 1)
+                plugin.versionSupport.minusAmount(player, e.item, 1)
                 val task = plugin.server.scheduler.runTaskLater(plugin, Runnable {
                     arenaManager.magicMilk.remove(player.uniqueId)
                     BedWars.debug("PlayerItemConsumeEvent player $player was removed from magicMilk")

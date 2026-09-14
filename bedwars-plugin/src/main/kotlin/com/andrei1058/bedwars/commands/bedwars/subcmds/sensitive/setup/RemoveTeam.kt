@@ -19,30 +19,31 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
 import com.andrei1058.bedwars.api.arena.team.TeamColor.Companion.getChatColor
 import com.andrei1058.bedwars.api.configuration.ConfigPath
+import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.Misc
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.configuration.Sounds.playSound
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
-class RemoveTeam : SetupCommand("removeTeam") {
+class RemoveTeam(parent: MainCommand) : SetupCommand(parent, "removeTeam") {
 
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
+        val nms = plugin.versionSupport
         if (args.isEmpty()) {
-            sender.sendMessage("${session.prefix}${ChatColor.RED}Usage: /${BedWars.MAIN_COMMAND} removeTeam <teamName>")
+            sender.sendMessage("${session.prefix}${ChatColor.RED}Usage: /${parent.commandName} removeTeam <teamName>")
             val teams = session.config.getConfigurationSection("Team") ?: return
 
             sender.sendMessage(session.prefix + "Available teams: ")
             for (team in teams.getKeys(false)) sender.message(
                 "${ChatColor.GOLD} ▪ ${getChatColor(team)}$team",
                 "${ChatColor.GRAY}Remove ${getChatColor(team)}$team ${ChatColor.GRAY}(click to remove)",
-                "/${BedWars.MAIN_COMMAND} removeTeam $team",
+                "/${parent.commandName} removeTeam $team",
                 ClickEvent.Action.RUN_COMMAND
             )
             return
@@ -51,7 +52,7 @@ class RemoveTeam : SetupCommand("removeTeam") {
         val team = args[0]
         if ("Team.$team.Color" !in session.config) {
             sender.sendMessage("${session.prefix}This team doesn't exist: $team")
-            BedWars.nms.sendTitle(sender, " ", "${ChatColor.RED}Team not found: $team", 5, 40, 5)
+            nms.sendTitle(sender, " ", "${ChatColor.RED}Team not found: $team", 5, 40, 5)
             playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
             return
         }
@@ -67,7 +68,7 @@ class RemoveTeam : SetupCommand("removeTeam") {
         }
 
         sender.sendMessage(session.prefix + "Team removed: " + session.getColoredTeamName(team))
-        BedWars.nms.sendTitle(sender, " ", "${ChatColor.GREEN}Team removed: ${session.getColoredTeamName(team)}", 5, 40, 5)
+        nms.sendTitle(sender, " ", "${ChatColor.GREEN}Team removed: ${session.getColoredTeamName(team)}", 5, 40, 5)
         playSound(ConfigPath.SOUNDS_BOUGHT, sender)
         session.config["Team.$team"] = null
     }

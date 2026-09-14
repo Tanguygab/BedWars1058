@@ -37,7 +37,7 @@ class TeamAssigner : ITeamAssigner {
             val teams = mutableListOf<MutableList<Player>>()
 
             for (player in arena.players) {
-                val members = BedWars.party.getMembers(player).toMutableList()
+                val members = BedWars.INSTANCE.partyUtil.getMembers(player).toMutableList()
                 if (members.isEmpty()) continue
                 members.removeIf { !arena.isPlayer(it) }
                 teams += members

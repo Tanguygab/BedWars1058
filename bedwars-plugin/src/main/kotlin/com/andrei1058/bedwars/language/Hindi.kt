@@ -27,7 +27,7 @@ import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
 
-class Hindi : Language(BedWars.plugin, "hi") {
+class Hindi : Language(BedWars.INSTANCE, "hi") {
     init {
         this.options().copyDefaults(true)
         this.addDefault(Messages.PREFIX, "")

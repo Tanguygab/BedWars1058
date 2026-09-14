@@ -24,7 +24,7 @@ import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 
-class English : Language(BedWars.plugin, "en") {
+class English : Language(BedWars.INSTANCE, "en") {
     init {
         val mainCmd = BedWars.MAIN_COMMAND
         this.apply {

@@ -21,7 +21,7 @@ package com.andrei1058.bedwars.listeners.joinhandler
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.arena.ReJoin
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -39,21 +39,22 @@ class JoinListenerMultiArena(private val plugin: BedWars) : Listener {
 
         // Show commands if player is op and there is no set arenas
         if (player.isOp && plugin.arenaManager.arenas.isEmpty()) {
-            player.performCommand(BedWars.MAIN_COMMAND)
+            player.performCommand(plugin.mainCommand.name)
         }
 
         val reJoin = ReJoin.getPlayer(player)
 
+        val nms = plugin.versionSupport
         plugin.run(delay = 14) {
             // Hide new player to players and spectators, and vice versa
             // Players from lobby will remain visible
             for (online in Bukkit.getOnlinePlayers()) {
                 if (plugin.arenaManager.isInArena(online)) {
-                    BedWars.nms.hidePlayer(online, player)
-                    BedWars.nms.hidePlayer(player, online)
+                    nms.hidePlayer(online, player)
+                    nms.hidePlayer(player, online)
                 } else {
-                    BedWars.nms.showPlayer(online, player)
-                    BedWars.nms.showPlayer(player, online)
+                    nms.showPlayer(online, player)
+                    nms.showPlayer(player, online)
                 }
             }
 
@@ -66,7 +67,7 @@ class JoinListenerMultiArena(private val plugin: BedWars) : Listener {
         if (reJoin != null && reJoin.canReJoin()) return
 
         // Teleport to lobby location
-        val lobbyLocation = BedWars.config.getConfigLoc("lobbyLoc")
+        val lobbyLocation = plugin.mainConfig.getConfigLoc("lobbyLoc")
         if (lobbyLocation?.world != null) {
             player.teleportSafe(lobbyLocation)
         }

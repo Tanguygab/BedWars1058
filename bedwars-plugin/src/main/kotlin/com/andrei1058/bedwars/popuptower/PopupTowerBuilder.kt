@@ -468,13 +468,14 @@ object PopupTowerBuilder {
 
     fun build(loc: Location, originBlock: Block, color: TeamColor, player: Player, positions: Array<String>) {
         // Consume exactly one item from player's hand, preserving original behavior
-        val item = BedWars.api.versionSupport.getItemInHand(player)
+        val plugin = BedWars.INSTANCE
+        val item = plugin.versionSupport.getItemInHand(player)
         if (item.amount <= 0) {
             player.inventory.setItemInHand(null)
         } else item.amount -= 1
 
         var amount = 0
-        BedWars.plugin.repeat(0, 1) { task ->
+        plugin.repeat(0, 1) { task ->
             Sounds.playSoundArea("pop-up-tower-build", loc, 1.0f, 0.5f)
 
             (0..<2).forEach {
@@ -492,7 +493,7 @@ object PopupTowerBuilder {
     }
 
     fun handleTowerPlace(player: Player, block: Block) {
-        val arena = BedWars.plugin.arenaManager.getArena(player) ?: return
+        val arena = BedWars.INSTANCE.arenaManager.getArena(player) ?: return
 
         // Centralized placement entrypoint for popup towers
         val loc = block.location
@@ -527,10 +528,11 @@ object PopupTowerBuilder {
         if (target.type != Material.AIR) return
 
         // Reuse BreakPlace protection around spawns/shops/upgrades/generators
-        val arena = BedWars.plugin.arenaManager.getArena(player)!!
+        val plugin = BedWars.INSTANCE
+        val arena = plugin.arenaManager.getArena(player)!!
         if (BreakPlace.isProtectedLocation(arena, target.location)) return
 
-        if (ladder) BedWars.nms.placeLadder(block, x, y, z, arena, ladderData)
-        else BedWars.nms.placeTowerBlocks(block, arena, color, x, y, z)
+        if (ladder) plugin.versionSupport.placeLadder(block, x, y, z, arena, ladderData)
+        else plugin.versionSupport.placeTowerBlocks(block, arena, color, x, y, z)
     }
 }

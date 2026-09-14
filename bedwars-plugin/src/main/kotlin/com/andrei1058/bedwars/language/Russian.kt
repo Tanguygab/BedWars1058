@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Russian : Language(BedWars.plugin, "ru") {
+class Russian : Language(BedWars.INSTANCE, "ru") {
     init {
         this.addDefault(Messages.PREFIX, "")
         this.addDefault("name", "Pусский")

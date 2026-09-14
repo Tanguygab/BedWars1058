@@ -82,12 +82,13 @@ object PlayerDrops {
         // victim's inventory
         if (victimsTeam == killersTeam && victim == killer) return true
 
+        val nms = BedWars.INSTANCE.versionSupport
         // if final kill give items at kill drops location (team generator)
         if (victimsTeam.isBedDestroyed) {
             for (i in inventory) {
                 if (i.type == Material.AIR) continue
-                if (BedWars.nms.isArmor(i) || BedWars.nms.isBow(i) || BedWars.nms.isSword(i) || BedWars.nms.isTool(i)) continue
-                if (BedWars.nms.getShopUpgradeIdentifier(i).trim().isNotEmpty()) continue
+                if (nms.isArmor(i) || nms.isBow(i) || nms.isSword(i) || nms.isTool(i)) continue
+                if (nms.getShopUpgradeIdentifier(i).trim().isNotEmpty()) continue
                 if (arena.getTeam(killer) != null) {
                     val v = victimsTeam.killDropsLocation
                     killer.world.dropItemNaturally(Location(arena.world, v.getX(), v.getY(), v.getZ()), i)

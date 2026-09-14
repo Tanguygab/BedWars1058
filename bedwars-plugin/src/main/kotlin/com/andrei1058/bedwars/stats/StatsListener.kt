@@ -34,23 +34,22 @@ import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.time.Instant
 
-class StatsListener(private val manager: StatsManagerImpl) : Listener {
+class StatsListener(private val plugin: BedWars, private val manager: StatsManagerImpl) : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     fun onAsyncPreLoginEvent(event: AsyncPlayerPreLoginEvent) {
         if (event.loginResult != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             // Do nothing if login fails
             return
         }
-        val stats = BedWars.remoteDatabase.fetchStats(event.uniqueId)
+        val stats = plugin.database.fetchStats(event.uniqueId)
         manager.put(event.uniqueId, stats)
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     fun onPlayerLoginEvent(event: PlayerLoginEvent) {
-        if (event.result != PlayerLoginEvent.Result.ALLOWED) {
-            // Prevent memory leak if login fails
-            manager.remove(event.player.uniqueId)
-        }
+        if (event.result == PlayerLoginEvent.Result.ALLOWED) return
+        // Prevent memory leak if login fails
+        manager.remove(event.player.uniqueId)
     }
 
     @EventHandler
@@ -100,7 +99,7 @@ class StatsListener(private val manager: StatsManagerImpl) : Listener {
             // store games played
             // give if he remained in this arena till the end even if was eliminated
             // for those who left games played are updated in arena leave listener
-            val playerArena = BedWars.plugin.arenaManager.getArena(player)
+            val playerArena = plugin.arenaManager.getArena(player)
             if (playerArena != null && playerArena == event.arena) {
                 stats.gamesPlayed += 1
             }
@@ -124,7 +123,7 @@ class StatsListener(private val manager: StatsManagerImpl) : Listener {
         }
 
         //save or replace stats for player - run later because PlayerKillEvent is triggered after PlayerLeaveArenaEvent
-        BedWars.plugin.run(async = true, delay = 10) { BedWars.remoteDatabase.saveStats(playerStats) }
+        plugin.run(async = true, delay = 10) { plugin.database.saveStats(playerStats) }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

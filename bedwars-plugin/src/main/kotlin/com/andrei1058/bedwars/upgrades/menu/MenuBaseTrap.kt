@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.upgrades.menu
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.events.upgrades.UpgradeBuyEvent
@@ -53,13 +53,14 @@ import org.bukkit.potion.PotionEffectType
  * @param currency    currency cost.
  */
 class MenuBaseTrap(
+    private val plugin: BedWars,
     override val name: String,
     displayItem: ItemStack,
     private val cost: Int,
     private val currency: Material?
 ) : MenuContent,
     EnemyBaseEnterTrap, TeamUpgrade {
-    override val itemStack = BedWars.nms.addCustomData(displayItem, "MCONT_$name")
+    override val itemStack = plugin.versionSupport.addCustomData(displayItem, "MCONT_$name")
     private val trapActions = mutableListOf<TrapAction>()
 
     override val tierCount get() = trapActions.size
@@ -73,7 +74,7 @@ class MenuBaseTrap(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + nPath,
             mutableListOf("&cLore not set")
         )
-        if (BedWars.api.upgradesManager.configuration.getBoolean("$name.custom-announce")) {
+        if (plugin.upgradesManager.configuration.getBoolean("$name.custom-announce")) {
             Language.saveIfNotExists(
                 Messages.UPGRADES_TRAP_CUSTOM_MSG + nPath,
                 "Edit path: " + Messages.UPGRADES_TRAP_CUSTOM_MSG + nPath
@@ -89,19 +90,19 @@ class MenuBaseTrap(
         }
 
 
-        for (action in BedWars.api.upgradesManager.configuration.getStringList("$name.receive")) {
+        for (action in plugin.upgradesManager.configuration.getStringList("$name.receive")) {
             val type = action.trim().split(":")
             if (type.size < 2) continue
             val data = type[1].trim().lowercase().split(",")
             trapActions += when (type[0].trim().lowercase()) {
                 "player-effect" -> {
                     if (data.size < 4) {
-                        BedWars.plugin.logger.warning("Invalid ${type[0]} at upgrades2: $name")
+                        plugin.logger.warning("Invalid ${type[0]} at upgrades2: $name")
                         continue
                     }
                     val pe = PotionEffectType.getByName(data[0].uppercase())
                     if (pe == null) {
-                        BedWars.plugin.logger.warning("Invalid potion effect ${data[0]} at upgrades2: $name")
+                        plugin.logger.warning("Invalid potion effect ${data[0]} at upgrades2: $name")
                         continue
                     }
                     val applyType = when (data[3].lowercase()) {
@@ -109,7 +110,7 @@ class MenuBaseTrap(
                         "base" -> PlayerEffectAction.ApplyType.BASE
                         "enemy", "enemies" -> PlayerEffectAction.ApplyType.ENEMY
                         else -> {
-                            BedWars.plugin.logger.warning("Invalid apply type ${data[3]} at upgrades2: $name")
+                            plugin.logger.warning("Invalid apply type ${data[3]} at upgrades2: $name")
                             continue
                         }
                     }
@@ -120,12 +121,12 @@ class MenuBaseTrap(
 
                 "disenchant-item" -> {
                     if (data.size < 2) {
-                        BedWars.plugin.logger.warning("Invalid ${type[0]} at upgrades2: $name")
+                        plugin.logger.warning("Invalid ${type[0]} at upgrades2: $name")
                         continue
                     }
                     val re = Enchantment.getByName(data[0].uppercase())
                     if (re == null) {
-                        BedWars.plugin.logger.warning("Invalid enchantment ${data[0]} at upgrades2: $name")
+                        plugin.logger.warning("Invalid enchantment ${data[0]} at upgrades2: $name")
                         continue
                     }
                     val da = when (data[1].lowercase()) {
@@ -133,7 +134,7 @@ class MenuBaseTrap(
                         "armor" -> DisenchantAction.ApplyType.ARMOR
                         "bow" -> DisenchantAction.ApplyType.BOW
                         else -> {
-                            BedWars.plugin.logger.warning("Invalid apply type ${data[3]} at upgrades2: $name")
+                            plugin.logger.warning("Invalid apply type ${data[3]} at upgrades2: $name")
                             continue
                         }
                     }
@@ -142,12 +143,12 @@ class MenuBaseTrap(
 
                 "remove-effect" -> {
                     if (data.isEmpty()) {
-                        BedWars.plugin.logger.warning("Invalid ${type[0]} at upgrades2: $name")
+                        plugin.logger.warning("Invalid ${type[0]} at upgrades2: $name")
                         continue
                     }
                     val pet = PotionEffectType.getByName(data[0].uppercase())
                     if (pet == null) {
-                        BedWars.plugin.logger.warning("Invalid potion effect ${data[0]} at upgrades2: $name")
+                        plugin.logger.warning("Invalid potion effect ${data[0]} at upgrades2: $name")
                         continue
                     }
                     RemoveEffectAction(pet)
@@ -159,7 +160,7 @@ class MenuBaseTrap(
 
     override fun getDisplayItem(player: Player, team: ITeam): ItemStack {
         var currency = currency
-        val upgrades = BedWars.api.upgradesManager
+        val upgrades = plugin.upgradesManager
         val arenaGroup = team.arena.group.lowercase()
         if (currency == null) {
             val st = upgrades.configuration.getString("$arenaGroup-upgrades-settings.trap-currency")
@@ -212,7 +213,7 @@ class MenuBaseTrap(
     }
 
     override fun onClick(player: Player, clickType: ClickType, team: ITeam) {
-        val upgrades = BedWars.api.upgradesManager
+        val upgrades = plugin.upgradesManager
         val arenaGroup = team.arena.group.lowercase()
 
         var queueLimit = upgrades.configuration.getInt("$arenaGroup-upgrades-settings.trap-queue-limit")
@@ -261,7 +262,7 @@ class MenuBaseTrap(
         if (currency == Material.AIR) {
             BedWars.economy.buyAction(player, money.toDouble())
         } else {
-            BedWars.api.shopUtil.takeMoney(player, currency, cost)
+            plugin.shopManager.takeMoney(player, currency, cost)
         }
         playSound(ConfigPath.SOUNDS_BOUGHT, player)
         team.activeTraps += this
@@ -289,7 +290,7 @@ class MenuBaseTrap(
     }
 
     override fun trigger(trapTeam: ITeam, player: Player) {
-        val upgrades = BedWars.api.upgradesManager
+        val upgrades = plugin.upgradesManager
         val soundName = upgrades.configuration.getString("$name.sound")
         val sound = Sound.entries.find { it.name == soundName }
         if (!playSound(sound, trapTeam.members)) {
@@ -303,7 +304,7 @@ class MenuBaseTrap(
             for (p in trapTeam.members) {
                 val trapName = ChatColor.stripColor(Language.getMsg(p, nameMsgPath))!!.replace("{color}", "")
                 p.sendLangMsg(Messages.UPGRADES_TRAP_DEFAULT_MSG, "{trap}" to trapName)
-                BedWars.nms.sendTitle(
+                plugin.versionSupport.sendTitle(
                     p,
                     Language.getMsg(p, Messages.UPGRADES_TRAP_DEFAULT_TITLE)
                         .replace("{trap}", trapName),
@@ -328,7 +329,7 @@ class MenuBaseTrap(
                 "{team}" to enemy,
                 "{color}" to color
             )
-            BedWars.nms.sendTitle(
+            plugin.versionSupport.sendTitle(
                 p,
                 Language.getMsg(p, Messages.UPGRADES_TRAP_CUSTOM_TITLE + name2)
                     .replace("{trap}", trapName)

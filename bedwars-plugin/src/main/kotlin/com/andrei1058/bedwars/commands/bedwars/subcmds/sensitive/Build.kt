@@ -19,35 +19,27 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive
 
-import com.andrei1058.bedwars.api.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
-import com.andrei1058.bedwars.arena.Misc.msgHoverClick
-import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Permissions
 import com.andrei1058.bedwars.listeners.BreakPlace
-import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class Build(parent: ParentCommand) : SubCommand(
+class Build(parent: MainCommand) : SubCommand(
+    parent,
     "build",
     Permissions.PERMISSION_BUILD,
     priority = 9
 ) {
-    init {
-        displayInfo = msgHoverClick(
-            "§6 ▪ §7/${parent.commandName} $subCommandName         §8 - §ebuild permission",
-            "§fEnable or disable build session\n§fso you can break or place blocks.",
-            "/${parent.commandName} $subCommandName",
-            ClickEvent.Action.RUN_COMMAND
-        )
-    }
+    override val description = createDescription(
+        "Enable or disable build session\nso you can break or place blocks.",
+        suffix = "build permission"
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
-        if (!MainCommand.isLobbySet(sender)) return true
+        if (!isLobbySet(sender)) return true
         sender.sendMsg(if (BreakPlace.isBuildSession(sender)) {
             BreakPlace.removeBuildSession(sender)
             "You can't place and break blocks anymore!"
@@ -56,14 +48,5 @@ class Build(parent: ParentCommand) : SubCommand(
             "You can place and break blocks now."
         })
         return true
-    }
-
-    override fun canSee(sender: CommandSender, api: BedWars): Boolean {
-        if (sender !is Player) return false
-
-        if (api.arenaManager.isInArena(sender)) return false
-
-        if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        return canUse(sender)
     }
 }

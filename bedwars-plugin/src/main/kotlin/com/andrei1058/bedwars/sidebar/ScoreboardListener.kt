@@ -20,7 +20,6 @@
 package com.andrei1058.bedwars.sidebar
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.BedWars.Companion.serverType
 import com.andrei1058.bedwars.api.events.player.*
 import com.andrei1058.bedwars.api.server.ServerType
 import org.bukkit.entity.Player
@@ -32,13 +31,13 @@ import org.bukkit.event.entity.EntityRegainHealthEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import kotlin.math.ceil
 
-class ScoreboardListener(private val manager: ScoreboardManagerImpl) : Listener {
+class ScoreboardListener(private val plugin: BedWars, private val manager: ScoreboardManagerImpl) : Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onPlayerDamage(e: EntityDamageEvent) {
         val player = e.entity
         if (player !is Player) return
 
-        val arena = BedWars.plugin.arenaManager.getArena(player) ?: return
+        val arena = plugin.arenaManager.getArena(player) ?: return
 
         val health = ceil((player.health - e.getFinalDamage())).toInt()
         manager.refreshHealth(arena, player, health)
@@ -49,7 +48,7 @@ class ScoreboardListener(private val manager: ScoreboardManagerImpl) : Listener 
         val player = e.entity
         if (player !is Player) return
 
-        val arena = BedWars.plugin.arenaManager.getArena(player) ?: return
+        val arena = plugin.arenaManager.getArena(player) ?: return
 
         val health = ceil(player.health + e.amount).toInt()
         manager.refreshHealth(arena, player, health)
@@ -76,7 +75,7 @@ class ScoreboardListener(private val manager: ScoreboardManagerImpl) : Listener 
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun serverJoin(e: PlayerJoinEvent) {
-        if (serverType == ServerType.MULTIARENA || serverType == ServerType.SHARED) {
+        if (plugin.serverType == ServerType.MULTIARENA || plugin.serverType == ServerType.SHARED) {
             // add player to scoreboard tab list
             manager.applyLobbyTab(e.player)
         }
@@ -84,7 +83,7 @@ class ScoreboardListener(private val manager: ScoreboardManagerImpl) : Listener 
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun arenaLeave(e: PlayerLeaveArenaEvent) {
-        if (serverType == ServerType.MULTIARENA || serverType == ServerType.SHARED) {
+        if (plugin.serverType == ServerType.MULTIARENA || plugin.serverType == ServerType.SHARED) {
             // add player to scoreboard tab list
             manager.applyLobbyTab(e.player)
         }

@@ -19,17 +19,17 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.Misc.removeArmorStand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.configuration.Sounds.playSound
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
-class RemoveGenerator : SetupCommand("removeGenerator") {
+class RemoveGenerator(parent: MainCommand) : SetupCommand(parent, "removeGenerator") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         if (args.isNotEmpty()) return
 
@@ -70,10 +70,11 @@ class RemoveGenerator : SetupCommand("removeGenerator") {
             }
         }
 
+        val nms = plugin.versionSupport
         if (nearest == null) {
             sender.sendMessage("${session.prefix}Could not find any nearby generator (Range 2x2).")
             sender.sendMessage("${session.prefix}You mast stand close to the generator hologram's you want to remove.")
-            BedWars.nms.sendTitle(sender, " ", "${ChatColor.RED}Could not find any nearby generator.", 5, 40, 5)
+            nms.sendTitle(sender, " ", "${ChatColor.RED}Could not find any nearby generator.", 5, 40, 5)
             playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
             return
         }
@@ -82,7 +83,7 @@ class RemoveGenerator : SetupCommand("removeGenerator") {
             val list = session.config.getStringList("generator.${toRemove[0]}")
             session.config.set("generator.${toRemove[0]}", list - toRemove[1])
             sender.sendMessage("${session.prefix}Removed ${toRemove[0]} generator at location: X:${nearest.blockX} Y:${nearest.blockY} Z:${nearest.z}")
-            BedWars.nms.sendTitle(sender, " ", "${ChatColor.GREEN}${toRemove[0]} generator removed.", 5, 40, 5)
+            nms.sendTitle(sender, " ", "${ChatColor.GREEN}${toRemove[0]} generator removed.", 5, 40, 5)
             playSound(ConfigPath.SOUNDS_BOUGHT, sender)
             removeArmorStand(toRemove[0], nearest, toRemove[1])
             return
@@ -92,7 +93,7 @@ class RemoveGenerator : SetupCommand("removeGenerator") {
             session.config.set("Team.${toRemove[2]}.Emerald", emptyList<Any>())
             session.config.set("Team.${toRemove[2]}.Iron", emptyList<Any>())
             session.config.set("Team.${toRemove[2]}.Gold", emptyList<Any>())
-            BedWars.nms.sendTitle(sender, " ", "${session.getColoredTeamName(toRemove[2])} generator was removed.", 5, 40, 5)
+            nms.sendTitle(sender, " ", "${session.getColoredTeamName(toRemove[2])} generator was removed.", 5, 40, 5)
             playSound(ConfigPath.SOUNDS_BOUGHT, sender)
             removeArmorStand(null, nearest, toRemove[1])
             sender.sendMessage("${session.prefix}${session.getColoredTeamName(toRemove[2])}${ChatColor.getLastColors(session.prefix)} generators were removed!")
@@ -102,7 +103,7 @@ class RemoveGenerator : SetupCommand("removeGenerator") {
         val list = session.config.getStringList("Team.${toRemove[2]}.${toRemove[0]}")
         session.config.set("Team.${toRemove[2]}.${toRemove[0]}", list - toRemove[1])
         sender.sendMessage("${session.prefix}Removed ${session.getColoredTeamName(toRemove[2])} ${ChatColor.getLastColors(session.prefix)}${toRemove[0]} generator at location: X:${nearest.blockX} Y:${nearest.blockY} Z:${nearest.z}")
-        BedWars.nms.sendTitle(sender, " ", "${session.getColoredTeamName(toRemove[2])} ${ChatColor.GREEN}${toRemove[0]} generator removed.", 5, 40, 5)
+        nms.sendTitle(sender, " ", "${session.getColoredTeamName(toRemove[2])} ${ChatColor.GREEN}${toRemove[0]} generator removed.", 5, 40, 5)
         playSound(ConfigPath.SOUNDS_BOUGHT, sender)
         removeArmorStand(toRemove[0], nearest, toRemove[1])
     }

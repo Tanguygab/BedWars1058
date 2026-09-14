@@ -1,5 +1,6 @@
 package com.andrei1058.bedwars.arena.upgrades
 
+import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.events.gameplay.GameEndEvent
 import com.andrei1058.bedwars.api.events.player.PlayerLeaveArenaEvent
 import com.andrei1058.bedwars.api.events.server.ArenaDisableEvent
@@ -8,14 +9,14 @@ import com.andrei1058.bedwars.api.events.upgrades.UpgradeBuyEvent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class HealPoolListner : Listener {
+class HealPoolListner(private val plugin: BedWars) : Listener {
     @EventHandler
     fun onTeamUpgrade(e: UpgradeBuyEvent) {
         if ("heal-pool" !in e.teamUpgrade.name) return
         val arena = e.arena
         val team = arena.getTeam(e.player) ?: return
         if (HealPoolTask.exists(arena, team)) return
-        HealPoolTask(team)
+        HealPoolTask(plugin, team)
     }
 
     @EventHandler

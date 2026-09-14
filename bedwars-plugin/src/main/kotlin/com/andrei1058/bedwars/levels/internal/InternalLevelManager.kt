@@ -20,10 +20,10 @@
 package com.andrei1058.bedwars.levels.internal
 
 import com.andrei1058.bedwars.api.events.player.PlayerXpGainEvent.XpSource
-import com.andrei1058.bedwars.api.levels.Level
+import com.andrei1058.bedwars.api.levels.LevelManager
 import org.bukkit.entity.Player
 
-class InternalLevel : Level {
+class InternalLevelManager : LevelManager {
     private val Player.lvl get() = PlayerLevel.getLevelByPlayer(uniqueId)
 
     override fun getLevel(player: Player) = player.lvl.levelName

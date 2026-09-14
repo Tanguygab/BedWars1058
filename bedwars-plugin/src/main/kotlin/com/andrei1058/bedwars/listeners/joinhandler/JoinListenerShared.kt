@@ -20,7 +20,6 @@
 package com.andrei1058.bedwars.listeners.joinhandler
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.arena.Arena
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -34,7 +33,7 @@ class JoinListenerShared(private val plugin: BedWars) : Listener {
 
         // Show commands if player is op and there is no set arenas
         if (player.isOp && plugin.arenaManager.arenas.isEmpty()) {
-            player.performCommand(BedWars.MAIN_COMMAND)
+            player.performCommand(plugin.mainCommand.name)
         }
 
         plugin.run(delay = 14) {
@@ -42,14 +41,14 @@ class JoinListenerShared(private val plugin: BedWars) : Listener {
             for (arena in plugin.arenaManager.arenas.values) {
                 for (inArena in arena.allPlayers) {
                     if (inArena == player) continue
-                    BedWars.nms.hidePlayer(player, inArena)
-                    BedWars.nms.hidePlayer(inArena, player)
+                    plugin.versionSupport.hidePlayer(player, inArena)
+                    plugin.versionSupport.hidePlayer(inArena, player)
                 }
             }
         }
 
         // Give scoreboard
-        if (player.world.name.equals(BedWars.lobbyWorld, ignoreCase = true)) {
+        if (player.world.name.equals(plugin.lobbyWorld, ignoreCase = true)) {
             plugin.scoreboardManager.giveSidebar(player, null, true)
         }
     }

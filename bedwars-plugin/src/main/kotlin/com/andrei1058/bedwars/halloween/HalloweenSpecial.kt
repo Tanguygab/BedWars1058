@@ -22,7 +22,7 @@ package com.andrei1058.bedwars.halloween
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.halloween.shop.PumpkinContent
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import org.bukkit.ChatColor
 import java.time.ZonedDateTime
 
@@ -34,7 +34,7 @@ object HalloweenSpecial {
      * Initialize Halloween Special.
      */
     fun init(plugin: BedWars) {
-        val enable = BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ENABLE_HALLOWEEN)
+        val enable = plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_ENABLE_HALLOWEEN)
         plugin.metrics.appendPie("halloween_special_enable") { "$enable" }
 
         if (!enable || enabled || !checkAvailabilityDate()) return
@@ -45,7 +45,7 @@ object HalloweenSpecial {
         plugin.registerEvents(HalloweenListener())
 
         // pumpkin in shop
-        val blockCategory = ShopManager.shop.categoryList.find { it.name == "blocks-category" }
+        val blockCategory = ShopConfig.shop.categoryList.find { it.name == "blocks-category" }
         if (blockCategory == null) return
 
         val content = PumpkinContent(blockCategory)

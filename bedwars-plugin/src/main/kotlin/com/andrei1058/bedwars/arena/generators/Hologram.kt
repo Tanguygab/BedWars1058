@@ -8,8 +8,8 @@ import com.andrei1058.bedwars.arena.generators.Generator.Companion.createArmorSt
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Player
 
-class HoloGram(generator: Generator, override var iso: String) : IGenHolo {
-    val lang = Language.getLang(iso)
+class Hologram(generator: Generator, override var iso: String) : IGenHolo {
+    val lang = Language.getLanguageByIso(iso)
     val tier = createArmorStand(
         lang.m(Messages.GENERATOR_HOLOGRAM_TIER)
             .replace("{tier}", lang.m(Messages.FORMATTING_GENERATOR_TIER1)),
@@ -35,10 +35,10 @@ class HoloGram(generator: Generator, override var iso: String) : IGenHolo {
 
     override fun updateForPlayer(player: Player, lang: String) {
         if (lang.equals(iso, ignoreCase = true)) return
-        BedWars.nms.apply {
+        BedWars.INSTANCE.versionSupport.apply {
             hideEntity(tier, player)
             hideEntity(timer, player)
-            hideEntity(this@HoloGram.name, player)
+            hideEntity(this@Hologram.name, player)
         }
     }
 

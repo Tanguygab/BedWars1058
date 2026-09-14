@@ -19,18 +19,14 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.arena.Misc.msgHoverClick
-import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Permissions
 import com.andrei1058.bedwars.support.citizens.JoinNPC
 import net.citizensnpcs.api.CitizensAPI
 import net.citizensnpcs.api.npc.NPC
 import net.md_5.bungee.api.ChatColor
-import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.ArmorStand
@@ -38,58 +34,55 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.util.BlockIterator
 
-class NPCCommand(parent: ParentCommand) : SubCommand("npc", Permissions.PERMISSION_NPC, priority = 12) {
-    //main usage
-    private val mainUsage = arrayOf(
-        msgHoverClick(
-            "§f\n§c▪ §7Usage: §e/${BedWars.MAIN_COMMAND} $subCommandName add",
-            "§fUse this command to create a join NPC.\n§fClick to see the syntax.",
-            "/${parent.commandName} $subCommandName add",
-            ClickEvent.Action.RUN_COMMAND
-        ),
-        msgHoverClick(
-            "§c▪ §7Usage: §e/${BedWars.MAIN_COMMAND} $subCommandName remove",
-            "§fStay in front of a NPC in order to remove it.",
-            "/${parent.commandName} $subCommandName remove",
-            ClickEvent.Action.SUGGEST_COMMAND
-        )
-    )
-    private val addUsage = arrayOf(
-        msgHoverClick(
-            "f\n§c▪ §7Usage: §e§o/${parent.commandName} $subCommandName add <skin> <arenaGroup> <§7line1§9\\n§7line2§e>\n§7You can use §e{players} §7for the players count in this arena §7group.",
-            "Click to use.",
-            "/${parent.commandName} $subCommandName add",
-            ClickEvent.Action.SUGGEST_COMMAND
-        )
+class NPCCommand(parent: MainCommand) : SubCommand(parent, "npc", Permissions.PERMISSION_NPC, priority = 12) {
+    override val description = createDescription(
+        "Create a join NPC\nClick for more details.",
+        suffix = "create a join NPC",
     )
 
-    init {
-        displayInfo = msgHoverClick(
-            "§6 ▪ §7/${parent.commandName} $subCommandName         §8   - §ecreate a join NPC",
-            "§fCreate a join NPC  \n§fClick for more details.",
-            "/${parent.commandName} $subCommandName",
-            ClickEvent.Action.RUN_COMMAND
+    private val mainUsage = arrayOf(
+        createDescription(
+            "Use this command to create a join NPC.\nClick to see the syntax.",
+            argument = "add",
+            error = true
+        ),
+        createDescription(
+            "Stay in front of a NPC in order to remove it.",
+            argument = "remove",
+            syntax = " ",
+            error = true
+        ),
+    )
+
+    private val addUsage = arrayOf(
+        createDescription(
+            "Click to use.",
+            argument = "add",
+            syntax = "<skin> <arenaGroup> <§7line1§9\\n§7line2§e>",
+            status = "\n§7You can use §e{players} §7for the players count in this arena §7group.",
+            error = true
         )
-    }
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player || !JoinNPC.isCitizensSupport) return false
+        val config = plugin.mainConfig
         when (args.getOrNull(0)) {
             "add" -> {
                 if (args.size < 4) {
                     sender.spigot().sendMessage(*addUsage)
                     return true
                 }
-                val npcs = if (BedWars.config.get(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE) == null) mutableListOf()
-                else BedWars.config.getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE).toMutableList()
 
                 val name = args.joinToString(" ").replace("${args[0]} ${args[1]} ${args[2]} ", "")
                 val npc = JoinNPC.spawnNPC(sender.location, name, args[2], args[1], null)
-                npcs.add("${BedWars.config.stringLocationConfigFormat(sender.location)},${args[1]},$name,${args[2]},${npc.id}")
+                val location = "${config.stringLocationConfigFormat(sender.location)},${args[1]},$name,${args[2]},${npc.id}"
 
                 sender.sendMessage("§a§c▪ §bNPC: ${name.replace("&", "§").replace("\\n", " ")} §bwas set!")
-                sender.sendMessage("§a§c▪ §bTarget groups: " + ChatColor.GOLD + args[2])
-                BedWars.config.set(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE, npcs)
+                sender.sendMessage("§a§c▪ §bTarget groups: ${ChatColor.GOLD}${args[2]}")
+
+                val npcs = config.getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE)
+                config[ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE] = npcs + location
             }
             "remove" -> {
                 val e = sender.getNearbyEntities(4.0, 4.0, 4.0)
@@ -98,7 +91,7 @@ class NPCCommand(parent: ParentCommand) : SubCommand("npc", Permissions.PERMISSI
                     sender.sendMessage(noNPCsMsg)
                     return true
                 }
-                if (BedWars.config.get(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE) == null) {
+                if (ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE !in config) {
                     sender.sendMessage("§c▪ §bThere aren't any NPCs set yet!")
                     return true
                 }
@@ -108,14 +101,14 @@ class NPCCommand(parent: ParentCommand) : SubCommand("npc", Permissions.PERMISSI
                     return true
                 }
 
-                val locations = BedWars.config
+                val locations = config
                     .getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE)
                     .filter { !it.split(",")[4].equals(npc.id.toString(), ignoreCase = true) }
                 JoinNPC.npcs.remove(npc.id)
                 npc.entity.getNearbyEntities(.0, 3.0, .0).forEach {
                     if (it.type == EntityType.ARMOR_STAND) it.remove()
                 }
-                BedWars.config.set(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE, locations)
+                config[ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE] = locations
                 npc.destroy()
                 sender.sendMessage("§c▪ §bThe target NPC was removed!")
             }
@@ -127,14 +120,7 @@ class NPCCommand(parent: ParentCommand) : SubCommand("npc", Permissions.PERMISSI
     override val tabComplete = listOf("remove", "add")
 
 
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
-        if (sender !is Player || !JoinNPC.isCitizensSupport) return false
-
-        if (api.arenaManager.isInArena(sender)) return false
-
-        if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        return canUse(sender)
-    }
+    override fun canSee(sender: CommandSender) = JoinNPC.isCitizensSupport && super.canSee(sender)
 
     companion object {
         /**

@@ -46,23 +46,23 @@ import org.bukkit.material.Openable
 import org.bukkit.metadata.FixedMetadataValue
 
 class Interact(private val plugin: BedWars) : Listener {
-    private val fireballSpeedMultiplier = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_SPEED_MULTIPLIER)
-    private val fireballCooldown = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_COOLDOWN)
-    private val fireballExplosionSize = BedWars.config.getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE).toFloat()
+    private val fireballSpeedMultiplier = plugin.mainConfig.getDouble(ConfigPath.GENERAL_FIREBALL_SPEED_MULTIPLIER)
+    private val fireballCooldown = plugin.mainConfig.getDouble(ConfigPath.GENERAL_FIREBALL_COOLDOWN)
+    private val fireballExplosionSize = plugin.mainConfig.getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE).toFloat()
 
     @EventHandler /* Handle custom items with commands on them */
     fun onItemCommand(e: PlayerInteractEvent) {
         val player = e.player
         if (e.action != Action.RIGHT_CLICK_BLOCK && e.action != Action.RIGHT_CLICK_AIR) return
 
-        val item = BedWars.nms.getItemInHand(player)
-        if (!BedWars.nms.isCustomBedWarsItem(item)) return
+        val item = plugin.versionSupport.getItemInHand(player)
+        if (!plugin.versionSupport.isCustomBedWarsItem(item)) return
 
-        val customData = BedWars.nms.getCustomData(item)!!.split("_")
+        val customData = plugin.versionSupport.getCustomData(item)!!.split("_")
         if (customData.size < 2 || customData[0] != "RUNCOMMAND") return
 
         e.setCancelled(true)
-        BedWars.plugin.run { Bukkit.dispatchCommand(player, customData[1]) }
+        plugin.run { Bukkit.dispatchCommand(player, customData[1]) }
     }
 
     @EventHandler(ignoreCancelled = true) //Check if player is opening an inventory
@@ -70,18 +70,18 @@ class Interact(private val plugin: BedWars) : Listener {
         if (e.action != Action.RIGHT_CLICK_BLOCK) return
         val block = e.clickedBlock ?: return
 
-        if ((BedWars.serverType !== ServerType.MULTIARENA ||
-                    block.world.name != BedWars.lobbyWorld ||
+        if ((plugin.serverType !== ServerType.MULTIARENA ||
+                    block.world.name != plugin.lobbyWorld ||
                     BreakPlace.isBuildSession(e.getPlayer())
-            ) && !BedWars.plugin.arenaManager.isInArena(e.player)
+            ) && !plugin.arenaManager.isInArena(e.player)
         ) return
 
         val type = block.type
-        if (type == BedWars.nms.materialCraftingTable() && BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_CRAFTING) ||
-            type == BedWars.nms.materialEnchantingTable() && BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_ENCHANTING) ||
-            type == Material.FURNACE && BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_FURNACE) ||
-            type == Material.BREWING_STAND && BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_BREWING_STAND) ||
-            type == Material.ANVIL && BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_ANVIL)
+        if (type == plugin.versionSupport.materialCraftingTable() && plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_CRAFTING) ||
+            type == plugin.versionSupport.materialEnchantingTable() && plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_ENCHANTING) ||
+            type == Material.FURNACE && plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_FURNACE) ||
+            type == Material.BREWING_STAND && plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_BREWING_STAND) ||
+            type == Material.ANVIL && plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_ANVIL)
         ) e.setCancelled(true)
     }
 
@@ -99,7 +99,7 @@ class Interact(private val plugin: BedWars) : Listener {
                     e.setCancelled(true)
                     return
                 }
-                if (BedWars.nms.isBed(block.type) && (!player.isSneaking || BedWars.nms.getItemInHand(player).type == Material.AIR)) {
+                if (plugin.versionSupport.isBed(block.type) && (!player.isSneaking || plugin.versionSupport.getItemInHand(player).type == Material.AIR)) {
                     e.setCancelled(true)
                     return
                 }
@@ -121,7 +121,7 @@ class Interact(private val plugin: BedWars) : Listener {
                         Material.CHEST,
                         Material.ENDER_CHEST,
                         Material.ANVIL,
-                        BedWars.nms.materialCraftingTable(),
+                        plugin.versionSupport.materialCraftingTable(),
                         Material.HOPPER,
                         Material.TRAPPED_CHEST -> e.setCancelled(true)
                         else -> {}
@@ -145,7 +145,7 @@ class Interact(private val plugin: BedWars) : Listener {
         if (e.action != Action.RIGHT_CLICK_BLOCK && e.action != Action.RIGHT_CLICK_AIR) return
         val inHand = e.item ?: return
         val a = arenaManager.getArena(player) ?: return
-        if (!a.isPlayer(player) || inHand.type != BedWars.nms.materialFireball()) return
+        if (!a.isPlayer(player) || inHand.type != plugin.versionSupport.materialFireball()) return
         e.setCancelled(true)
 
         if (System.currentTimeMillis() - (a.fireballCooldowns[player.uniqueId] ?: 0) <= fireballCooldown * 1000) return
@@ -153,12 +153,12 @@ class Interact(private val plugin: BedWars) : Listener {
 
         var fb = player.launchProjectile(Fireball::class.java)
         val direction = player.eyeLocation.direction
-        fb = BedWars.nms.setFireballDirection(fb, direction)
+        fb = plugin.versionSupport.setFireballDirection(fb, direction)
         fb.velocity = fb.direction.multiply(fireballSpeedMultiplier)
         //fb.setIsIncendiary(false); // apparently this on <12 makes the fireball not explode on hit. wtf bukkit?
         fb.yield = fireballExplosionSize
-        fb.setMetadata("bw1058", FixedMetadataValue(BedWars.plugin, "ceva"))
-        BedWars.nms.minusAmount(player, inHand, 1)
+        fb.setMetadata("bw1058", FixedMetadataValue(plugin, "ceva"))
+        plugin.versionSupport.minusAmount(player, inHand, 1)
     }
 
 
@@ -169,7 +169,7 @@ class Interact(private val plugin: BedWars) : Listener {
 
         if (frame.item.type == Material.AIR) {
             //prevent from putting upgradable items in it
-            val item = BedWars.nms.getItemInHand(player)
+            val item = plugin.versionSupport.getItemInHand(player)
             if (item.type != Material.AIR) {
                 val sc = ShopCache.getShopCache(player.uniqueId) ?: return
                 if (!InventoryListener.shouldCancelMovement(item, sc)) return
@@ -177,17 +177,17 @@ class Interact(private val plugin: BedWars) : Listener {
             }
             return
         }
-        val arena = BedWars.plugin.arenaManager.getArenaByWorld(player.world.name)
+        val arena = plugin.arenaManager.getArenaByWorld(player.world.name)
         if (arena != null ||
-            (BedWars.serverType == ServerType.MULTIARENA &&
-            BedWars.lobbyWorld == player.world.name &&
+            (plugin.serverType == ServerType.MULTIARENA &&
+            plugin.lobbyWorld == player.world.name &&
             !BreakPlace.isBuildSession(player))
         ) e.isCancelled = true
     }
 
     @EventHandler
     fun onEntityInteract(e: PlayerInteractEntityEvent) {
-        val arena = BedWars.plugin.arenaManager.getArena(e.player) ?: return
+        val arena = plugin.arenaManager.getArena(e.player) ?: return
         val location = e.rightClicked.location
         for (team in arena.teams) {
             val shop = team.shop!!
@@ -200,26 +200,26 @@ class Interact(private val plugin: BedWars) : Listener {
 
     @EventHandler
     fun onBedEnter(e: PlayerBedEnterEvent) {
-        if (BedWars.plugin.arenaManager.isInArena(e.player)) e.isCancelled = true
+        if (plugin.arenaManager.isInArena(e.player)) e.isCancelled = true
     }
 
     @EventHandler(ignoreCancelled = true)
     fun onArmorManipulate(e: PlayerArmorStandManipulateEvent) {
         //prevent from breaking generators
         val player = e.player
-        if (BedWars.plugin.arenaManager.isInArena(player)) e.isCancelled = true
+        if (plugin.arenaManager.isInArena(player)) e.isCancelled = true
 
         //prevent from stealing from armor stands in lobby
-        if (BedWars.serverType === ServerType.MULTIARENA &&
-            player.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true) &&
+        if (plugin.serverType === ServerType.MULTIARENA &&
+            player.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true) &&
             !BreakPlace.isBuildSession(player)
         ) e.isCancelled = true
     }
 
     @EventHandler
     fun onCrafting(e: PrepareItemCraftEvent) {
-        if (!BedWars.plugin.arenaManager.isInArena(e.view.player as? Player ?: return)) return
-        if (!BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_CRAFTING)) return
+        if (!plugin.arenaManager.isInArena(e.view.player as? Player ?: return)) return
+        if (!plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_CRAFTING)) return
         e.inventory.result = ItemStack(Material.AIR)
     }
 }

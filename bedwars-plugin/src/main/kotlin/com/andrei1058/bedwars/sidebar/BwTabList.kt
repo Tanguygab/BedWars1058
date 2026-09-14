@@ -21,7 +21,6 @@ package com.andrei1058.bedwars.sidebar
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.BedWars.Companion.chatSupport
-import com.andrei1058.bedwars.BedWars.Companion.serverType
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.configuration.ConfigPath
@@ -38,7 +37,7 @@ import java.util.UUID
 import kotlin.math.ceil
 import kotlin.math.min
 
-class BwTabList(private val sidebar: BwSidebar) {
+class BwTabList(private val plugin: BedWars, private val sidebar: BwSidebar) {
     // Player list container. Used to manipulate deployed player tab: lines ecc.
     // Key is player uuid.
     private val deployedPerPlayerTabList = mutableMapOf<UUID, PlayerTab>()
@@ -56,6 +55,7 @@ class BwTabList(private val sidebar: BwSidebar) {
     // concatenated later to playerTabIdentifier
     private val playerTabIdentifierDuplication = mutableMapOf<String, Int>()
 
+    private val config = plugin.mainConfig
     /**
      * Triggered when sidebar context changes.
      * Arena/ game state change.
@@ -75,10 +75,10 @@ class BwTabList(private val sidebar: BwSidebar) {
         val arena = sidebar.arena
         if (arena == null) {
             // if tab formatting is enabled in lobby world
-            if (BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_LOBBY) &&
-                BedWars.config.lobbyWorldName.isNotBlank()
+            if (config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_LOBBY) &&
+                config.lobbyWorldName.isNotBlank()
             ) {
-                val lobby = Bukkit.getWorld(BedWars.config.lobbyWorldName) ?: return
+                val lobby = Bukkit.getWorld(config.lobbyWorldName) ?: return
                 lobby.players.forEach { giveUpdateTabFormat(it) }
             }
             // sometimes due to timing issues player is not listed yet in lobby players
@@ -110,11 +110,11 @@ class BwTabList(private val sidebar: BwSidebar) {
             }
         }
 
-        if (BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_HEALTH_ENABLE)) {
-            handle.showPlayersHealth(line, BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_HEALTH_IN_TAB))
+        if (config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_HEALTH_ENABLE)) {
+            handle.showPlayersHealth(line, config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_HEALTH_IN_TAB))
         }
 
-        BedWars.plugin.run(delay = 10) {
+        plugin.run(delay = 10) {
             val handle = sidebar.handle ?: return@run
             val arena = sidebar.arena ?: return@run
             arena.players.forEach { handle.setPlayerHealth(it, ceil(it.health).toInt()) }
@@ -130,18 +130,18 @@ class BwTabList(private val sidebar: BwSidebar) {
     val isTabFormattingDisabled: Boolean get() {
             val arena = sidebar.arena
             if (arena == null) {
-                if (serverType == ServerType.SHARED &&
-                    BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_LOBBY) &&
-                    BedWars.config.lobbyWorldName.isNotBlank()
+                if (plugin.serverType == ServerType.SHARED &&
+                    config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_LOBBY) &&
+                    config.lobbyWorldName.isNotBlank()
                 ) {
-                    val lobby = Bukkit.getWorld(BedWars.config.lobbyWorldName)
+                    val lobby = Bukkit.getWorld(config.lobbyWorldName)
                     return lobby?.name != sidebar.player.world.name
                 }
 
-                return !BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_LOBBY)
+                return !config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_LOBBY)
             }
             // if tab formatting is disabled in status
-            return !BedWars.config.getBoolean(when (arena.status) {
+            return !config.getBoolean(when (arena.status) {
                 GameState.PLAYING -> ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_PLAYING
                 GameState.STARTING -> ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_STARTING
                 GameState.WAITING -> ConfigPath.SB_CONFIG_SIDEBAR_LIST_FORMAT_WAITING

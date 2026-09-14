@@ -29,7 +29,7 @@ import org.bukkit.Sound
 import org.bukkit.entity.Player
 
 
-object Sounds : ConfigManager(BedWars.plugin, "sounds", BedWars.plugin.dataFolder.path) {
+object Sounds : ConfigManager(BedWars.INSTANCE, "sounds", BedWars.INSTANCE.dataFolder.path) {
 
     fun init() {
         addDefSound(

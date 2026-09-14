@@ -42,9 +42,9 @@ class ArenaSelectorListener(private val plugin: BedWars) : Listener {
         e.isCancelled = true
 
         val item = e.currentItem ?: return
-        if (item.type == Material.AIR || !BedWars.nms.isCustomBedWarsItem(item)) return
+        if (item.type == Material.AIR || !plugin.versionSupport.isCustomBedWarsItem(item)) return
 
-        val data = BedWars.nms.getCustomData(item)!!
+        val data = plugin.versionSupport.getCustomData(item)!!
         if (data.startsWith("RUNCOMMAND", ignoreCase = true)) {
             Bukkit.dispatchCommand(player, data.split("_")[1])
         }

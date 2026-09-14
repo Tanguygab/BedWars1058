@@ -19,17 +19,17 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.entity.Player
 
-class SetSpectatorPos : SetupCommand("setSpectSpawn") {
+class SetSpectatorPos(parent: MainCommand) : SetupCommand(parent, "setSpectSpawn") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         sender.sendMessage(session.prefix + if (args.isEmpty()) {
             session.config.saveArenaLoc(ConfigPath.ARENA_SPEC_LOC, sender.location)
             "Spectator location set!"
-        } else "${ChatColor.RED}Usage: /${BedWars.MAIN_COMMAND} $subCommandName")
+        } else "${ChatColor.RED}Usage: /${parent.commandName} $name")
     }
 }

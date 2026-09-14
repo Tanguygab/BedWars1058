@@ -20,8 +20,8 @@
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
+import com.andrei1058.bedwars.api.util.Utils.message
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.arena.SetupSession
@@ -34,15 +34,16 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerator") {
+class AddGenerator(parent: MainCommand) : SetupCommand(parent, "addGenerator") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
+        val nms = plugin.versionSupport
         if (args.isEmpty() && session.setupType == SetupType.ASSISTED) {
             val team = session.nearestTeam
             if (team.isEmpty()) {
                 // save emerald or diamond generator if is standing on a block of this type
                 val block = sender.location.add(0.0, -1.0, 0.0).block.type
                 if (block == Material.DIAMOND_BLOCK || block == Material.EMERALD_BLOCK) {
-                    Bukkit.dispatchCommand(sender, "${parent.commandName} $subCommandName ${block.toString().substringBefore("_").lowercase()}")
+                    Bukkit.dispatchCommand(sender, "${parent.commandName} $name ${block.toString().substringBefore("_").lowercase()}")
                     return
                 }
 
@@ -51,22 +52,22 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
                 sender.message(
                     "${session.prefix}Make sure you set the team's spawn first!",
                     "${ChatColor.WHITE}Set a team spawn.",
-                    "/${parent.commandName} $subCommandName ",
+                    "/${parent.commandName} $name ",
                     ClickEvent.Action.SUGGEST_COMMAND
                 )
                 sender.message(
                     "${session.prefix}Or if you set the spawn and it wasn't found automatically try using: /bw addGenerator <team>",
                     "Add a team generator.",
-                    "/${parent.commandName} $subCommandName ",
+                    "/${parent.commandName} $name ",
                     ClickEvent.Action.SUGGEST_COMMAND
                 )
                 sender.message(
                     "${session.prefix}Other use: /bw addGenerator <emerald/ diamond>",
                     "Add an emerald/ diamond generator.",
-                    "/${parent.commandName} $subCommandName ",
+                    "/${parent.commandName} $name ",
                     ClickEvent.Action.SUGGEST_COMMAND
                 )
-                BedWars.nms.sendTitle(sender, " ", "${ChatColor.RED}Could not find any nearby team.", 5, 60, 5)
+                nms.sendTitle(sender, " ", "${ChatColor.RED}Could not find any nearby team.", 5, 60, 5)
                 playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
                 return
             }
@@ -84,7 +85,7 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
 
             Bukkit.dispatchCommand(sender, parent.commandName)
 
-            BedWars.nms.sendTitle(
+            nms.sendTitle(
                 sender,
                 " ",
                 "${ChatColor.GREEN}Generator set for team: ${session.getColoredTeamName(team)}",
@@ -106,7 +107,7 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
             for (location in locations) {
                 if (!session.config.compareArenaLoc(location, sender.location)) continue
                 sender.sendMessage(session.prefix + ChatColor.RED + "This generator was already set!")
-                BedWars.nms.sendTitle(
+                nms.sendTitle(
                     sender,
                     " ",
                     ChatColor.RED.toString() + "This generator was already set!",
@@ -131,7 +132,7 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
             if (session.setupType == SetupType.ASSISTED) {
                 Bukkit.dispatchCommand(sender, parent.commandName)
             }
-            BedWars.nms.sendTitle(
+            plugin.versionSupport.sendTitle(
                 sender,
                 " ",
                 "${ChatColor.GOLD}$gen${ChatColor.GREEN} generator added!",
@@ -157,7 +158,7 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
                     sender.sendMessage("${session.prefix}${ChatColor.RED}Could not find team: $team")
                     sender.sendMessage("${session.prefix}Use: /bw createTeam if you want to create one.")
                     session.displayAvailableTeams()
-                    BedWars.nms.sendTitle(
+                    nms.sendTitle(
                         sender,
                         " ",
                         "${ChatColor.RED}Could not find any nearby team.",
@@ -187,7 +188,7 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
             )
             sender.sendMessage("${session.prefix}$gen generator added for team: ${session.getColoredTeamName(team)}")
             saveTeamGen(sender.location, team, session, gen)
-            BedWars.nms.sendTitle(
+            nms.sendTitle(
                 sender,
                 " ",
                 "${ChatColor.GOLD}$gen${ChatColor.GREEN} generator for ${session.getColoredTeamName(team)}${ChatColor.GREEN} was added!",
@@ -204,7 +205,7 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
                 sender.sendMessage("${session.prefix}Could not find team: ${ChatColor.RED}$team")
                 sender.sendMessage("${session.prefix}Use: /bw createTeam if you want to create one.")
                 session.displayAvailableTeams()
-                BedWars.nms.sendTitle(sender, " ", "Could not find team: ${ChatColor.RED}$team", 5, 40, 5)
+                nms.sendTitle(sender, " ", "Could not find team: ${ChatColor.RED}$team", 5, 40, 5)
                 playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
                 return
             }
@@ -220,7 +221,7 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
             sender.sendMessage("${session.prefix}Generator set for team: ${session.getColoredTeamName(team)}")
             Bukkit.dispatchCommand(sender, parent.commandName)
 
-            BedWars.nms.sendTitle(
+            nms.sendTitle(
                 sender,
                 " ",
                 "${ChatColor.GREEN}Generator set for team: ${session.getColoredTeamName(team)}",
@@ -236,13 +237,13 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
             sender.message(
                 session.prefix + "/bw addGenerator (detect team automatically)",
                 "Add a team generator.",
-                "/${parent.commandName} $subCommandName ",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
             sender.message(
                 session.prefix + "/bw addGenerator <team>",
                 "Add a team generator.",
-                "/${parent.commandName} $subCommandName ",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
         }
@@ -250,21 +251,21 @@ class AddGenerator(private val parent: ParentCommand) : SetupCommand("addGenerat
             sender.message(
                 session.prefix + "/bw addGenerator <iron/ gold/ upgrade>",
                 "Add a team generator.\nThe team will be detected automatically.",
-                "/${parent.commandName} $subCommandName ",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
 
             sender.message(
                 session.prefix + "/bw addGenerator <iron/ gold/ upgrade> <team>",
                 "Add a team generator.",
-                "/${parent.commandName} $subCommandName ",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
         }
         sender.message(
             session.prefix + "/bw addGenerator <emerald/ diamond>",
             "Add an emerald/ diamond generator.",
-            "/${parent.commandName} $subCommandName ",
+            "/${parent.commandName} $name ",
             ClickEvent.Action.SUGGEST_COMMAND
         )
     }

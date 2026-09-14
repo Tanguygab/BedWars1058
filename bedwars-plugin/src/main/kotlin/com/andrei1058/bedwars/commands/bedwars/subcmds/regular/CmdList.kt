@@ -19,31 +19,25 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
 import com.andrei1058.bedwars.api.arena.team.TeamColor
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.api.server.SetupType
-import com.andrei1058.bedwars.arena.Misc
+import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdList(private val parent: ParentCommand) : SubCommand("cmds", priority = 11) {
-    init {
-        displayInfo = Misc.msgHoverClick(
-            "§6 ▪ §7/${parent.commandName} $subCommandName         §8 - §e view player cmds",
-            "§fView player commands.",
-            "/${parent.commandName} $subCommandName"
-        )
-    }
+class CmdList(parent: MainCommand) : SubCommand(parent, "cmds", priority = 11) {
+    override val description = createDescription(
+        "View player commands.",
+        suffix = "view player cmds"
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
@@ -53,12 +47,12 @@ class CmdList(private val parent: ParentCommand) : SubCommand("cmds", priority =
             return true
         }
 
-        val arenas = BedWars.plugin.arenaManager.arenas.size
+        val arenas = plugin.arenaManager.arenas.size
         sender.message("${ChatColor.BLUE}${ChatColor.BOLD}${MainCommand.dot} " +
-                "${ChatColor.GOLD}${BedWars.plugin.name} " +
-                "${ChatColor.GRAY}v${BedWars.plugin.description.version} by andrei1058",
+                "${ChatColor.GOLD}${plugin.name} " +
+                "${ChatColor.GRAY}v${plugin.description.version} by andrei1058",
             "${ChatColor.GRAY}Arenas: ${if (arenas == 0) ChatColor.RED else ChatColor.GREEN}$arenas",
-            BedWars.link,
+            plugin.description.website!!,
             ClickEvent.Action.OPEN_URL
         )
         sender.sendMessage(Language.getList(sender, Messages.COMMAND_MAIN).joinToString("\n"))
@@ -111,8 +105,8 @@ class CmdList(private val parent: ParentCommand) : SubCommand("cmds", priority =
         val setSpectatorSpawn = getMessage("setSpectSpawn", ConfigPath.ARENA_SPEC_LOC in config)
 
         player.sendMessage(
-            "\n${ChatColor.GRAY}${ChatColor.BOLD}${MainCommand.dot}${ChatColor.GOLD}${BedWars.plugin.description.name} " +
-                    "v${BedWars.plugin.description.version}${ChatColor.GRAY}- " +
+            "\n${ChatColor.GRAY}${ChatColor.BOLD}${MainCommand.dot}${ChatColor.GOLD}${plugin.description.name} " +
+                    "v${plugin.description.version}${ChatColor.GRAY}- " +
                     "${ChatColor.GREEN}${ss.worldName} commands"
         )
 
@@ -287,12 +281,4 @@ class CmdList(private val parent: ParentCommand) : SubCommand("cmds", priority =
         "/${parent.commandName} $subCommand",
         if (suggest) ClickEvent.Action.SUGGEST_COMMAND else ClickEvent.Action.RUN_COMMAND
     )
-
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
-        if (sender is Player) {
-            if (api.arenaManager.isInArena(sender)) return false
-            if (SetupSession.isInSetupSession(sender.uniqueId)) return false
-        }
-        return canUse(sender)
-    }
 }

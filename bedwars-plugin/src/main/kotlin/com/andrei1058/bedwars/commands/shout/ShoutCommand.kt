@@ -28,11 +28,11 @@ import org.bukkit.command.defaults.BukkitCommand
 import org.bukkit.entity.Player
 import java.util.UUID
 
-class ShoutCommand(name: String) : BukkitCommand(name) {
+class ShoutCommand(private val plugin: BedWars) : BukkitCommand("shout") {
     override fun execute(sender: CommandSender, label: String, args: Array<String>): Boolean {
         if (sender !is Player) return true
 
-        val arena = BedWars.api.arenaManager.getArena(sender)
+        val arena = plugin.arenaManager.getArena(sender)
         if (arena == null || arena.isSpectator(sender)) {
             sender.sendLangMsg(Messages.COMMAND_NOT_FOUND_OR_INSUFF_PERMS)
             return true
@@ -47,7 +47,7 @@ class ShoutCommand(name: String) : BukkitCommand(name) {
 
         fun updateShout(player: Player) {
             if (player.hasPermission("bw.shout.bypass")) return
-            shoutCooldown[player.uniqueId] = System.currentTimeMillis() + BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_SHOUT_COOLDOWN) * 1000L
+            shoutCooldown[player.uniqueId] = System.currentTimeMillis() + BedWars.INSTANCE.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_SHOUT_COOLDOWN) * 1000L
         }
 
         fun isShoutCooldown(player: Player): Boolean {

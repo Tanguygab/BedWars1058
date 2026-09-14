@@ -19,27 +19,27 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.server.SetupType
+import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.Misc.createArmorStand
 import com.andrei1058.bedwars.commands.Misc.removeArmorStand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.configuration.Sounds.playSound
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
-class SetBed(private val parent: ParentCommand) : SetupCommand("setBed") {
+class SetBed(parent: MainCommand) : SetupCommand(parent, "setBed") {
 
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
+        val nms = plugin.versionSupport
         if (args.isEmpty()) {
             val foundTeam = session.nearestTeam
             if (foundTeam.isNotEmpty()) {
-                Bukkit.dispatchCommand(sender, "${parent.commandName} $subCommandName $foundTeam")
+                Bukkit.dispatchCommand(sender, "${parent.commandName} $name $foundTeam")
                 return
             }
 
@@ -47,16 +47,16 @@ class SetBed(private val parent: ParentCommand) : SetupCommand("setBed") {
             sender.message(
                 "${session.prefix}Make sure you set the team's spawn first!",
                 "${ChatColor.WHITE}Set a team bed.",
-                "/${parent.commandName} $subCommandName ",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
             sender.message(
-                "${session.prefix}Or if you set the spawn and it wasn't found automatically try using: /bw $subCommandName <team>",
+                "${session.prefix}Or if you set the spawn and it wasn't found automatically try using: /bw $name <team>",
                 "Add a team bed.",
-                "/${parent.commandName} $subCommandName ",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
-            BedWars.nms.sendTitle(sender, " ", "${ChatColor.RED}Could not find any nearby team.", 5, 60, 5)
+            nms.sendTitle(sender, " ", "${ChatColor.RED}Could not find any nearby team.", 5, 60, 5)
             playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
             session.displayAvailableTeams()
             return
@@ -65,11 +65,11 @@ class SetBed(private val parent: ParentCommand) : SetupCommand("setBed") {
             sender.location.clone().add(0.0, -0.5, 0.0),
             sender.location.clone().add(0.0, 0.5, 0.0),
             sender.location
-        ).none { BedWars.nms.isBed(it.block.type) }
+        ).none { nms.isBed(it.block.type) }
 
         if (noBed) {
             sender.sendMessage("${session.prefix}${ChatColor.RED}You must stay on a bed while using this command!")
-            BedWars.nms.sendTitle(sender, " ", "${ChatColor.RED}You must stay on a bed.", 5, 40, 5)
+            nms.sendTitle(sender, " ", "${ChatColor.RED}You must stay on a bed.", 5, 40, 5)
             playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
             return
         }
@@ -83,7 +83,7 @@ class SetBed(private val parent: ParentCommand) : SetupCommand("setBed") {
             for (team in teams.getKeys(false)) sender.message(
                 "${ChatColor.GOLD} ▪ ${session.getColoredTeamName(team)}",
                 "${ChatColor.WHITE}Set bed for ${session.getColoredTeamName(team)}",
-                "/${BedWars.MAIN_COMMAND} setBed $team",
+                "/${parent.commandName} setBed $team",
             )
             return
         }
@@ -97,7 +97,7 @@ class SetBed(private val parent: ParentCommand) : SetupCommand("setBed") {
         session.config.saveArenaLoc("Team.$teamName.Bed", sender.location)
         sender.sendMessage("${session.prefix}Bed set for: $team")
 
-        BedWars.nms.sendTitle(sender, " ", "${ChatColor.GREEN}Bed set for: $team", 5, 40, 5)
+        nms.sendTitle(sender, " ", "${ChatColor.GREEN}Bed set for: $team", 5, 40, 5)
         playSound(ConfigPath.SOUNDS_BOUGHT, sender)
 
         if (session.setupType == SetupType.ASSISTED) Bukkit.dispatchCommand(sender, parent.commandName)

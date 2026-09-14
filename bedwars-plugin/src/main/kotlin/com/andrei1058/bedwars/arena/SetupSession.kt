@@ -20,8 +20,8 @@
 package com.andrei1058.bedwars.arena
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
-import com.andrei1058.bedwars.Utils.message
+import com.andrei1058.bedwars.api.util.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.api.arena.team.TeamColor
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.events.server.SetupSessionCloseEvent
@@ -30,24 +30,22 @@ import com.andrei1058.bedwars.api.server.ISetupSession
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.commands.Misc.createArmorStand
-import com.andrei1058.bedwars.commands.Misc.detectGenerators
 import com.andrei1058.bedwars.configuration.ArenaConfig
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.ClickEvent
-import org.bukkit.Location
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.UUID
 
 class SetupSession(
+    private val plugin: BedWars,
     override val player: Player,
     override val worldName: String
 ) : ISetupSession {
@@ -55,9 +53,6 @@ class SetupSession(
     override var setupType: SetupType? = null
     override lateinit var config: ArenaConfig
     var isStarted = false
-    var isAutoCreatedEmerald = false
-    var isAutoCreatedDiamond = false
-    val skipAutoCreateGen = mutableListOf<Location>()
 
     init {
         setupSessions.add(this)
@@ -71,8 +66,8 @@ class SetupSession(
      */
     fun startSetup(): Boolean {
         player.sendMessage("§6 ▪ §7Loading $worldName")
-        config = ArenaConfig(BedWars.plugin, worldName, BedWars.plugin.dataFolder.path + "/Arenas")
-        BedWars.api.restoreAdapter.onSetupSessionStart(this)
+        config = ArenaConfig(plugin, worldName, plugin.dataFolder.path + "/Arenas")
+        plugin.restoreAdapter.onSetupSessionStart(this)
         return true
     }
 
@@ -92,13 +87,13 @@ class SetupSession(
      * End setup session
      */
     fun done() {
-        BedWars.api.restoreAdapter.onSetupSessionClose(this)
+        plugin.restoreAdapter.onSetupSessionClose(this)
         setupSessions.remove(this)
-        if (BedWars.serverType != ServerType.BUNGEE) {
-            player.teleportSafe(BedWars.config.getConfigLoc("lobbyLoc") ?: Bukkit.getWorlds()[0].spawnLocation)
+        if (plugin.serverType != ServerType.BUNGEE) {
+            player.teleportSafe(plugin.mainConfig.getConfigLoc("lobbyLoc") ?: Bukkit.getWorlds()[0].spawnLocation)
         }
         player.removePotionEffect(PotionEffectType.SPEED)
-        if (BedWars.serverType == ServerType.MULTIARENA) BedWars.api.arenaManager.sendLobbyCommandItems(player)
+        if (plugin.serverType == ServerType.MULTIARENA) plugin.arenaManager.sendLobbyCommandItems(player)
         Bukkit.getPluginManager().callEvent(SetupSessionCloseEvent(this))
     }
 
@@ -107,7 +102,7 @@ class SetupSession(
             inventory.clear()
             teleportSafe(Bukkit.getWorld(worldName)!!.spawnLocation)
             gameMode = GameMode.CREATIVE
-            BedWars.plugin.run(delay = 5) {
+            plugin.run(delay = 5) {
                 allowFlight = true
                 isFlying = true
             }
@@ -115,6 +110,8 @@ class SetupSession(
             sendMessage("\n${ChatColor.WHITE}\n")
             sendMessage("\n ".repeat(9))
             sendMessage("${ChatColor.GREEN}You were teleported to the ${ChatColor.GOLD}$worldName${ChatColor.GREEN}'s spawn.")
+
+            val command = plugin.mainCommand.name
             if (setupType == SetupType.ASSISTED && "waiting.Loc" !in config) {
                 sendMessage("")
                 sendMessage("${ChatColor.GREEN}Hello $displayName!")
@@ -123,21 +120,21 @@ class SetupSession(
                 message(
                     "${ChatColor.BLUE}     ▪     ${ChatColor.GOLD}CLICK HERE TO SET THE WAITING LOBBY    ${ChatColor.BLUE} ▪",
                     "${ChatColor.LIGHT_PURPLE}Click to set the waiting spawn.",
-                    "/${BedWars.MAIN_COMMAND} setWaitingSpawn",
+                    "/$command setWaitingSpawn",
                 )
                 message(
-                    "${ChatColor.YELLOW}Or type: ${ChatColor.GRAY}/${BedWars.MAIN_COMMAND} to see the command list.",
+                    "${ChatColor.YELLOW}Or type: ${ChatColor.GRAY}/$command to see the command list.",
                     "${ChatColor.WHITE}Show commands list.",
-                    "/${BedWars.MAIN_COMMAND}",
+                    "/$command",
                     ClickEvent.Action.SUGGEST_COMMAND
                 )
-            } else Bukkit.dispatchCommand(this, "${BedWars.MAIN_COMMAND} cmds")
+            } else Bukkit.dispatchCommand(this, "$command cmds")
         }
 
 
         val w = Bukkit.getWorld(worldName)
         val keptEntities = arrayOf(EntityType.PLAYER, EntityType.PAINTING, EntityType.ITEM_FRAME)
-        BedWars.plugin.run(delay = 30) {
+        plugin.run(delay = 30) {
             w!!.entities.filter { it.type !in keptEntities }.forEach { it.remove() }
         }
         w!!.isAutoSave = false
@@ -145,7 +142,7 @@ class SetupSession(
         Bukkit.getPluginManager().callEvent(SetupSessionStartEvent(this))
         isStarted = true
 
-        BedWars.plugin.run(delay = 90) {
+        plugin.run(delay = 90) {
             for (team in teams) {
                 mapOf(
                     "Spawn" to "SPAWN SET",
@@ -225,29 +222,6 @@ class SetupSession(
                 .first ?: ""
             return team
         }
-
-    /**
-     * Find and set generators
-     */
-    fun autoSetGen(p: Player, command: String?, setupSession: SetupSession, type: Material?) {
-        if (type == Material.EMERALD_BLOCK) {
-            if (setupSession.isAutoCreatedEmerald) return
-            setupSession.isAutoCreatedEmerald = true
-        } else {
-            if (setupSession.isAutoCreatedDiamond) return
-            setupSession.isAutoCreatedDiamond = true
-        }
-        detectGenerators(p.location.add(0.0, -1.0, 0.0).block.location, setupSession)
-        BedWars.plugin.run(delay = 20) {
-            for (location in setupSession.skipAutoCreateGen) {
-                BedWars.plugin.run(delay = 20) {
-                    p.teleportSafe(location)
-                    val block = location.add(0.0, -1.0, 0.0).block
-                    Bukkit.dispatchCommand(p, command + block.type.toString().substringBefore("_").lowercase())
-                }
-            }
-        }
-    }
 
     companion object {
         val setupSessions = mutableListOf<SetupSession>()

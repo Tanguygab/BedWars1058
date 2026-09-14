@@ -20,7 +20,6 @@
 package com.andrei1058.bedwars.arena.tasks
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.AFKManager
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.NextEvent
 import com.andrei1058.bedwars.api.configuration.ConfigPath
@@ -30,20 +29,21 @@ import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.api.tasks.PlayingTask
 import com.andrei1058.bedwars.arena.Arena
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.potion.PotionEffectType
 
 class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
-    override var bedsDestroyCountdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_BEDS_DESTROY_COUNTDOWN)
+    private val plugin = BedWars.INSTANCE
+    private val config = plugin.mainConfig
+    override var bedsDestroyCountdown = config.getInt(ConfigPath.GENERAL_CONFIGURATION_BEDS_DESTROY_COUNTDOWN)
+    override var dragonSpawnCountdown = config.getInt(ConfigPath.GENERAL_CONFIGURATION_DRAGON_SPAWN_COUNTDOWN)
         private set
-    override var dragonSpawnCountdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_DRAGON_SPAWN_COUNTDOWN)
+    override var gameEndCountdown = config.getInt(ConfigPath.GENERAL_CONFIGURATION_GAME_END_COUNTDOWN)
         private set
-    override var gameEndCountdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_GAME_END_COUNTDOWN)
-        private set
-    override val bukkitTask = Bukkit.getScheduler().runTaskTimer(BedWars.plugin, this, 0, 20L)
+    override val bukkitTask = plugin.server.scheduler.runTaskTimer(plugin, this, 0, 20L)
 
     override fun run() {
+        val nms = plugin.versionSupport
         when (arena.nextEvent) {
             NextEvent.EMERALD_GENERATOR_TIER_II, NextEvent.EMERALD_GENERATOR_TIER_III, NextEvent.DIAMOND_GENERATOR_TIER_II, NextEvent.DIAMOND_GENERATOR_TIER_III -> {
                 if (arena.upgradeDiamondsCount > 0) {
@@ -61,7 +61,7 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
             NextEvent.BEDS_DESTROY -> run {
                 if (--bedsDestroyCountdown != 0) return@run
                 for (player in arena.allPlayers) {
-                    BedWars.nms.sendTitle(
+                    nms.sendTitle(
                         player,
                         Language.getMsg(player, Messages.NEXT_EVENT_TITLE_ANNOUNCE_BEDS_DESTROYED),
                         Language.getMsg(player, Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_BEDS_DESTROYED),
@@ -81,7 +81,7 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
                 if (--dragonSpawnCountdown != 0) return@run
 
                 for (p in arena.allPlayers) {
-                    BedWars.nms.sendTitle(
+                    nms.sendTitle(
                         p,
                         Language.getMsg(p, Messages.NEXT_EVENT_TITLE_ANNOUNCE_SUDDEN_DEATH),
                         Language.getMsg(p, Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_SUDDEN_DEATH),
@@ -108,7 +108,7 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
 
                     if (team.members.isEmpty()) continue
                     (0 ..< team.dragons).forEach { _ ->
-                        BedWars.nms.spawnDragon(arena.waitingLocation.add(0.0, 10.0, 0.0), team)
+                        nms.spawnDragon(arena.waitingLocation.add(0.0, 10.0, 0.0), team)
                     }
                 }
             }
@@ -133,7 +133,7 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
                         distance = p.location.distance(p2.location).toInt()
                     }
                 }
-                BedWars.nms.playAction(
+                nms.playAction(
                     p, Language.getMsg(p, Messages.FORMATTING_ACTION_BAR_TRACKING)
                         .replace("{team}", "${team.color.chat}${team.getDisplayName(Language.getLanguage(p))}")
                         .replace("{distance}", "${team.color.chat}$distance")
@@ -144,7 +144,7 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
         }
 
         /* AFK SYSTEM FOR PLAYERS */
-        val afkManager: AFKManager = BedWars.plugin.afkManager
+        val afkManager = plugin.afkManager
         for (p in arena.players) {
             afkManager.setAFK(p, afkManager.getAFKTime(p) + 1)
         }
@@ -153,9 +153,9 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
         if (!arena.respawnSessions.isEmpty()) {
             for ((player, cooldown) in arena.respawnSessions) {
                 if (cooldown <= 0) {
-                    val arena = BedWars.plugin.arenaManager.getArena(player)
+                    val arena = plugin.arenaManager.getArena(player)
                     if (arena == null) {
-                        this@GamePlayingTask.arena.respawnSessions.remove(player)
+                        this.arena.respawnSessions.remove(player)
                         continue
                     }
                     val t = arena.getTeam(player)
@@ -166,7 +166,7 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
                     } else arena.addSpectator(player, true, null)
                     continue
                 }
-                BedWars.nms.sendTitle(
+                nms.sendTitle(
                     player,
                     Language.getMsg(player, Messages.PLAYER_DIE_RESPAWN_TITLE).replace("{time}", "$cooldown"),
                     Language.getMsg(player, Messages.PLAYER_DIE_RESPAWN_SUBTITLE).replace("{time}", "$cooldown"),
@@ -191,12 +191,12 @@ class GamePlayingTask(override val arena: Arena) : Runnable, PlayingTask {
                 continue
             }
             for (p in player.world.players) {
-                BedWars.nms.showArmor(player, p)
+                nms.showArmor(player, p)
                 //nms.showPlayer(e.getKey(), p);
             }
             player.removePotionEffect(PotionEffectType.INVISIBILITY)
             arena.showTime.remove(player)
-            Bukkit.getPluginManager().callEvent(
+            plugin.server.pluginManager.callEvent(
                 PlayerInvisibilityPotionEvent(
                     PlayerInvisibilityPotionEvent.Type.REMOVED,
                     player,

@@ -24,7 +24,7 @@ import com.andrei1058.bedwars.BedWars.Companion.debug
 import com.andrei1058.bedwars.api.arena.shop.IBuyItem
 import com.andrei1058.bedwars.api.arena.shop.IContentTier
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.shop.ShopManager
+import com.andrei1058.bedwars.shop.ShopConfig
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
@@ -54,39 +54,41 @@ class ContentTier(path: String?, tierName: String, identifier: String, yml: Yaml
     init {
         debug("Loading content tier$path")
 
+        val plugin = BedWars.INSTANCE
         var material = yml.getString(path + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL)
         if (material == null) {
-            BedWars.plugin.logger.severe("tier-item material not set at $path")
+            plugin.logger.severe("tier-item material not set at $path")
             material = "AIR"
         }
 
         value = try {
             tierName.removePrefix("tier").toInt()
         } catch (_: Exception) {
-            BedWars.plugin.logger.severe("$path doesn't end with a number. It's not recognized as a tier!")
+            plugin.logger.severe("$path doesn't end with a number. It's not recognized as a tier!")
             0
         }
 
         if (!yml.contains(path + ConfigPath.SHOP_CONTENT_TIER_SETTINGS_COST)) {
-            BedWars.plugin.logger.severe("Cost not set for $path")
+            plugin.logger.severe("Cost not set for $path")
         }
         price = yml.getInt(path + ConfigPath.SHOP_CONTENT_TIER_SETTINGS_COST)
 
         var currency = yml.getString(path + ConfigPath.SHOP_CONTENT_TIER_SETTINGS_CURRENCY)
-        if (currency == null) BedWars.plugin.logger.severe("Currency not set for $path")
-        else if (currency.isEmpty()) BedWars.plugin.logger.severe("Invalid currency at $path")
+        if (currency == null) plugin.logger.severe("Currency not set for $path")
+        else if (currency.isEmpty()) plugin.logger.severe("Invalid currency at $path")
 
         this.currency = when (currency?.lowercase()) {
             "iron", "gold", "diamond", "vault", "emerald" -> CategoryContent.getCurrency(
                 yml.getString(path + ConfigPath.SHOP_CONTENT_TIER_SETTINGS_CURRENCY)!!.lowercase()
             )
             else -> {
-                BedWars.plugin.logger.severe("Invalid currency at $path")
+                plugin.logger.severe("Invalid currency at $path")
                 Material.IRON_INGOT
             }
         }
 
-        itemStack = BedWars.nms.createItemStack(
+        val nms = plugin.versionSupport
+        itemStack = nms.createItemStack(
             material,
             yml.getInt(path + ConfigPath.SHOP_CONTENT_TIER_ITEM_AMOUNT, 1),
             yml.getInt(path + ConfigPath.SHOP_CONTENT_TIER_ITEM_DATA).toShort()
@@ -94,18 +96,18 @@ class ContentTier(path: String?, tierName: String, identifier: String, yml: Yaml
 
 
         if (yml.getBoolean(path + ConfigPath.SHOP_CONTENT_TIER_ITEM_ENCHANTED)) {
-            itemStack = ShopManager.enchantItem(itemStack)
+            itemStack = ShopConfig.enchantItem(itemStack)
         }
 
         // potion display color based on NBT tag
         val potionDisplay = yml.getString("$path.tier-item.potion-display")
-        if (!potionDisplay.isNullOrEmpty()) itemStack = BedWars.nms.setTag(itemStack, "Potion", potionDisplay)
+        if (!potionDisplay.isNullOrEmpty()) itemStack = nms.setTag(itemStack, "Potion", potionDisplay)
 
         // 1.16+ custom color
         val potionColor = yml.getString("$path.tier-item.potion-color")
-        if (!potionColor.isNullOrEmpty()) itemStack = BedWars.nms.setTag(itemStack, "CustomPotionColor", potionColor)
+        if (!potionColor.isNullOrEmpty()) itemStack = nms.setTag(itemStack, "CustomPotionColor", potionColor)
 
-        itemStack = ShopManager.hideItemStuff(itemStack)
+        itemStack = ShopConfig.hideItemStuff(itemStack)
 
         var buyItem: IBuyItem?
         val section = yml.getConfigurationSection("$path.${ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH}")

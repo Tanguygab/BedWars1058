@@ -1,15 +1,15 @@
 package com.andrei1058.bedwars.commands.bedwars.subcmds
 
-import com.andrei1058.bedwars.api.command.SubCommand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class CooldownCommand(
+    parent: MainCommand,
     name: String,
     private val delay: Long,
-    isShown: Boolean,
     priority: Int
-) : SubCommand(name, isShown = isShown, priority = priority) {
+) : SubCommand(parent, name, priority = priority) {
 
     private val cooldowns = ConcurrentHashMap<UUID, Long>()
 

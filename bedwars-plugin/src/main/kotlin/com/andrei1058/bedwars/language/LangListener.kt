@@ -29,14 +29,14 @@ class LangListener(private val plugin: BedWars) : Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onLanguageChangeEvent(e: PlayerLangChangeEvent) {
         val player = e.player
-        if (!BedWars.config.lobbyWorldName.equals(player.world.name, ignoreCase = true)) return
+        if (!plugin.mainConfig.lobbyWorldName.equals(player.world.name, ignoreCase = true)) return
 
         plugin.run(delay = 10) {
             plugin.arenaManager.sendLobbyCommandItems(player)
             plugin.scoreboardManager.giveSidebar(player, plugin.arenaManager.getArena(player), false)
 
             // save to db
-            plugin.run(async = true) { BedWars.remoteDatabase.setLanguage(player.uniqueId, e.newLang) }
+            plugin.run(async = true) { plugin.database.setLanguage(player.uniqueId, e.newLang) }
         }
     }
 }

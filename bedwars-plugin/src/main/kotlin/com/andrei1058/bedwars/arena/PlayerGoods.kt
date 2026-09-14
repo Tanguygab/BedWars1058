@@ -91,7 +91,7 @@ internal class PlayerGoods private constructor(player: Player) {
 
         operator fun plusAssign(player: Player) {
             if (player in this) {
-                BedWars.plugin.logger.severe(player.name + " is already having a PlayerGoods vault :|")
+                BedWars.INSTANCE.logger.severe(player.name + " is already having a PlayerGoods vault :|")
                 return
             }
             goods[player.uniqueId] = PlayerGoods(player)

@@ -19,28 +19,24 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.arena.Misc
-import com.andrei1058.bedwars.arena.Misc.msgHoverClick
 import com.andrei1058.bedwars.arena.SetupSession
-import net.md_5.bungee.api.chat.ClickEvent
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
+import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import kotlin.math.min
 
-class ArenaList(private val parent: ParentCommand) : SubCommand("arenaList", priority = 3) {
-    init {
-        val arenas = Misc.getArenas()
-        displayInfo = msgHoverClick(
-            "§6 ▪ §7/${parent.commandName} $subCommandName${if (arenas.isEmpty()) " §c(0 set)" else " §a(" + arenas.size + " set)"}",
-            "§fShow available arenas",
-            "/${parent.commandName} $subCommandName",
-            ClickEvent.Action.RUN_COMMAND
+class ArenaList(parent: MainCommand) : SubCommand(parent, "arenaList", priority = 3) {
+    override val description: TextComponent get() {
+        val arenas = Misc.getArenas().size
+        return createDescription(
+            "Show available arenas",
+            status = "§${if (arenas == 0) "c" else "a"}($arenas set)",
         )
     }
 
@@ -49,13 +45,13 @@ class ArenaList(private val parent: ParentCommand) : SubCommand("arenaList", pri
 
         var page = args.getOrNull(1)?.toIntOrNull()?.coerceAtLeast(1) ?: 1
         var start = (page - 1) * ARENAS_PER_PAGE
-        val arenas = BedWars.api.arenaManager.arenas.values.toList()
+        val arenas = plugin.arenaManager.arenas.values.toList()
         if (arenas.size <= start) {
             page = 1
             start = 0
         }
 
-        sender.sendMessage(" \n§1|| §3${BedWars.plugin.name}§7 Instantiated games: \n ")
+        sender.sendMessage(" \n§1|| §3${plugin.name}§7 Instantiated games: \n ")
 
         if (arenas.isEmpty()) {
             sender.sendMessage("${ChatColor.RED}No arenas to display.")
@@ -78,9 +74,9 @@ class ArenaList(private val parent: ParentCommand) : SubCommand("arenaList", pri
         return true
     }
 
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
+    override fun canSee(sender: CommandSender): Boolean {
         if (sender is Player) {
-            if (api.arenaManager.isInArena(sender)) return false
+            if (plugin.arenaManager.isInArena(sender)) return false
 
             if (SetupSession.isInSetupSession(sender.uniqueId)) return false
         }

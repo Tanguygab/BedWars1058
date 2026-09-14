@@ -41,7 +41,7 @@ import java.util.UUID
 class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
     override val arenas = mutableMapOf<String, IArena>()
 
-    override var gamesBeforeRestart = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_MODE_GAMES_BEFORE_RESTART)
+    override var gamesBeforeRestart = plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_MODE_GAMES_BEFORE_RESTART)
     var magicMilk = mutableMapOf<UUID, Int>()
 
     /**
@@ -52,7 +52,7 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
     override val enableQueue = mutableListOf<IArena>()
 
     fun load() {
-        BedWars.api.restoreAdapter.convertWorlds()
+        plugin.restoreAdapter.convertWorlds()
 
         val dir = File(plugin.dataFolder, "/Arenas")
         if (!dir.exists()) return
@@ -64,7 +64,7 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
             }
         }
 
-        if (BedWars.serverType != ServerType.BUNGEE || BedWars.autoscale) {
+        if (plugin.serverType != ServerType.BUNGEE || plugin.autoScale) {
             files.forEach { loadArena(it.name.removeSuffix(".yml")) }
             return
         }
@@ -83,8 +83,8 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
 
 
     override fun joinRandomArena(p: Player): Boolean {
-        val amount = if (!BedWars.party.hasParty(p)) 1
-        else BedWars.party.getMembers(p).count { getArena(it)?.isSpectator(it) != false }
+        val amount = if (!plugin.partyUtil.hasParty(p)) 1
+        else plugin.partyUtil.getMembers(p).count { getArena(it)?.isSpectator(it) != false }
 
         val arenas = getSorted(arenas.values)
 
@@ -98,8 +98,8 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
     }
 
     override fun joinRandomFromGroup(player: Player, group: String): Boolean {
-        val amount = if (!BedWars.party.hasParty(player)) 1
-        else BedWars.party.getMembers(player).count { getArena(it)?.isSpectator(it) != false }
+        val amount = if (!plugin.partyUtil.hasParty(player)) 1
+        else plugin.partyUtil.getMembers(player).count { getArena(it)?.isSpectator(it) != false }
 
         val arenas = getSorted(arenas.values)
         val groups = group.split("+")
@@ -120,38 +120,38 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
     override fun loadArena(worldName: String, player: Player?): Arena? {
         val name = worldName
 
-        if (!BedWars.autoscale) {
+        if (!plugin.autoScale) {
             for (mm in enableQueue) {
                 if (mm.name.equals(name, ignoreCase = true)) {
-                    BedWars.plugin.logger.severe("Tried to load arena $name but it is already in the enable queue.")
+                    plugin.logger.severe("Tried to load arena $name but it is already in the enable queue.")
                     player?.sendMessage("${ChatColor.RED}Tried to load arena $name but it is already in the enable queue.")
                     return null
                 }
             }
             if (name in arenas) {
-                BedWars.plugin.logger.severe("Tried to load arena $name but it is already enabled.")
+                plugin.logger.severe("Tried to load arena $name but it is already enabled.")
                 player?.sendMessage("${ChatColor.RED}Tried to load arena $name but it is already enabled.")
                 return null
             }
         }
-        val worldName = if (!BedWars.autoscale) name else generateGameID()
+        val worldName = if (!plugin.autoScale) name else generateGameID()
         val config = ArenaConfig(plugin, name, plugin.dataFolder.path + "/Arenas")
 
         if ("Team" !in config) {
             player?.sendMessage("You didn't set any team for arena: $name")
-            BedWars.plugin.logger.severe("You didn't set any team for arena: $name")
+            plugin.logger.severe("You didn't set any team for arena: $name")
             return null
         }
 
         if (config.getConfigurationSection("Team")!!.getKeys(false).size < 2) {
             player?.sendMessage("§cYou must set at least 2 teams on: $name")
-            BedWars.plugin.logger.severe("You must set at least 2 teams on: $name")
+            plugin.logger.severe("You must set at least 2 teams on: $name")
             return null
         }
 
-        if (!BedWars.api.restoreAdapter.isWorld(name)) {
+        if (!plugin.restoreAdapter.isWorld(name)) {
             player?.sendMessage("${ChatColor.RED}There isn't any map called $name")
-            BedWars.plugin.logger.warning("There isn't any map called $name")
+            plugin.logger.warning("There isn't any map called $name")
             return null
         }
 
@@ -160,33 +160,33 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
             val color = config.getString("Team.$team.Color")
             if (color != null && TeamColor.entries.none { it.name.equals(color, ignoreCase = true) }) {
                 player?.sendMessage("§cInvalid color at team: $team in arena: $name")
-                BedWars.plugin.logger.severe("Invalid color at team: $team in arena: $name")
+                plugin.logger.severe("Invalid color at team: $team in arena: $name")
                 error = true
             }
             for (property in arrayOf("Color", "Spawn", "Bed", "Shop", "Upgrade", "Iron", "Gold")) {
                 if ("Team.$team.$property" in config) continue
                 player?.sendMessage("§c$property not set for $team team on: $name")
-                BedWars.plugin.logger.severe("$property not set for $team team on: $name")
+                plugin.logger.severe("$property not set for $team team on: $name")
                 error = true
             }
         }
 
         if ("generator.Diamond" !in config) {
             player?.sendMessage("§cThere isn't set any Diamond generator on: $name")
-            BedWars.plugin.logger.severe("There isn't set any Diamond generator on: $name")
+            plugin.logger.severe("There isn't set any Diamond generator on: $name")
         }
         if ("generator.Emerald" !in config) {
             player?.sendMessage("§cThere isn't set any Emerald generator on: $name")
-            BedWars.plugin.logger.severe("There isn't set any Emerald generator on: $name")
+            plugin.logger.severe("There isn't set any Emerald generator on: $name")
         }
         if ("waiting.Loc" !in config) {
             player?.sendMessage("§cWaiting spawn not set on: $name")
-            BedWars.plugin.logger.severe("Waiting spawn not set on: $name")
+            plugin.logger.severe("Waiting spawn not set on: $name")
             error = true
         }
         if (error) return null
 
-        return Arena(plugin.arenaManager, name, worldName, config).also { addToEnableQueue(it) }
+        return Arena(plugin, this, name, worldName, config).also { addToEnableQueue(it) }
     }
 
     override fun isInArena(player: Player) = arenas.values.any { it.isPlayer(player) || it.isSpectator(player) }
@@ -208,7 +208,7 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
         enableQueue.remove(arena)
         val queue = enableQueue.firstOrNull() ?: return
 
-        BedWars.api.restoreAdapter.onEnable(queue)
+        plugin.restoreAdapter.onEnable(queue)
         plugin.logger.info("Loading arena: ${queue.worldName}")
     }
 
@@ -217,13 +217,13 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
         plugin.logger.info("Arena ${arena.worldName} was added to the enable queue.")
         if (enableQueue.size != 1) return
 
-        BedWars.api.restoreAdapter.onEnable(arena)
+        plugin.restoreAdapter.onEnable(arena)
         plugin.logger.info("Loading arena: ${arena.worldName}")
     }
 
     // used for auto-scale conditions
     override fun canAutoScale(arena: String): Boolean {
-        if (!BedWars.autoscale || arenas.isEmpty()) return true
+        if (!plugin.autoScale || arenas.isEmpty()) return true
         if (enableQueue.any { it.name.equals(arena, true) }) return false
         if (gamesBeforeRestart != -1 && arenas.size >= gamesBeforeRestart) return false
 
@@ -237,7 +237,7 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
         }
 
         // check amount of active clones
-        return BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_AUTO_SCALE_LIMIT) > activeClones
+        return plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_AUTO_SCALE_LIMIT) > activeClones
     }
 
     fun getSorted(arenas: Collection<IArena>) = arenas.sortedWith { o1, o2 -> when {
@@ -258,53 +258,54 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
      * This will clear the inventory first.
      */
     fun sendLobbyCommandItems(player: Player) {
-        val path = BedWars.config.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_PATH) ?: return
-        if (!BedWars.config.lobbyWorldName.equals(player.world.name, ignoreCase = true)) return
+        val config = plugin.mainConfig
+        val path = config.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_PATH) ?: return
+        if (!plugin.mainConfig.lobbyWorldName.equals(player.world.name, ignoreCase = true)) return
         player.inventory.clear()
 
         plugin.run(true, 15) {
-            if (!BedWars.config.lobbyWorldName.equals(player.world.name, ignoreCase = true)) return@run
+            if (!config.lobbyWorldName.equals(player.world.name, ignoreCase = true)) return@run
 
             for (item in path.getKeys(false)) {
                 val material = ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_MATERIAL.replace("%path%", item)
-                if (material !in BedWars.config) {
+                if (material !in config) {
                     plugin.logger.severe("$material is not set!")
                     continue
                 }
 
                 val data = ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_DATA.replace("%path%", item)
-                if (data !in BedWars.config) {
+                if (data !in config) {
                     plugin.logger.severe("$data is not set!")
                     continue
                 }
 
                 val slot = ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_SLOT.replace("%path%", item)
-                if (slot !in BedWars.config) {
+                if (slot !in config) {
                     plugin.logger.severe("$slot is not set!")
                     continue
                 }
 
                 val enchanted = ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_ENCHANTED.replace("%path%", item)
-                if (enchanted !in BedWars.config) {
+                if (enchanted !in config) {
                     plugin.logger.severe("$enchanted is not set!")
                     continue
                 }
 
                 val command = ConfigPath.GENERAL_CONFIGURATION_LOBBY_ITEMS_COMMAND.replace("%path%", item)
-                if (command !in BedWars.config) {
+                if (command !in config) {
                     plugin.logger.severe("$command is not set!")
                     continue
                 }
 
-                player.inventory.setItem(BedWars.config.getInt(slot), Misc.createItem(
-                    Material.valueOf(BedWars.config.getString(material)!!),
-                    BedWars.config.getInt(data).toByte(),
-                    BedWars.config.getBoolean(enchanted),
+                player.inventory.setItem(config.getInt(slot), Misc.createItem(
+                    Material.valueOf(config.getString(material)!!),
+                    config.getInt(data).toByte(),
+                    config.getBoolean(enchanted),
                     SupportPAPI.support.replace(player, Language.getMsg(player, Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", item))),
                     SupportPAPI.support.replace(player, Language.getList(player, Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", item))),
                     player,
                     "RUNCOMMAND",
-                    BedWars.config.getString(command)!!
+                    config.getString(command)!!
                 ))
             }
         }

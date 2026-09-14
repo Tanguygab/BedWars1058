@@ -19,30 +19,30 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.message
-import com.andrei1058.bedwars.api.command.ParentCommand
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.server.SetupType
+import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.Misc.createArmorStand
 import com.andrei1058.bedwars.commands.Misc.removeArmorStand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import com.andrei1058.bedwars.configuration.Sounds.playSound
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
-class SetKillDropsLoc(private val parent: ParentCommand) : SetupCommand("setKillDrops") {
+class SetKillDropsLoc(parent: MainCommand) : SetupCommand(parent, "setKillDrops") {
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         val arena = session.config
+        val nms = plugin.versionSupport
         if (args.isEmpty()) {
             var foundTeam = ""
             var distance = 100.0
             val teams = session.config.getConfigurationSection("Team")
             if (teams == null) {
                 sender.sendMessage(session.prefix + "Please create teams first!")
-                BedWars.nms.sendTitle(sender, " ", ChatColor.RED.toString() + "Please create teams first!", 5, 40, 5)
+                nms.sendTitle(sender, " ", "${ChatColor.RED}Please create teams first!", 5, 40, 5)
                 playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
                 return
             }
@@ -65,7 +65,7 @@ class SetKillDropsLoc(private val parent: ParentCommand) : SetupCommand("setKill
                 val team = session.getColoredTeamName(foundTeam)
                 sender.sendMessage("${session.prefix}Kill drops set for team: $team")
                 createArmorStand("${ChatColor.GOLD}Kill drops $team", sender.location, null)
-                BedWars.nms.sendTitle(sender, " ", "${ChatColor.GREEN}Kill drops set for team: $team", 5, 40, 5)
+                nms.sendTitle(sender, " ", "${ChatColor.GREEN}Kill drops set for team: $team", 5, 40, 5)
                 playSound(ConfigPath.SOUNDS_BOUGHT, sender)
 
                 if (session.setupType == SetupType.ASSISTED) {
@@ -74,7 +74,7 @@ class SetKillDropsLoc(private val parent: ParentCommand) : SetupCommand("setKill
                 return
             }
 
-            sender.sendMessage("${session.prefix}${ChatColor.RED}Usage: /${BedWars.MAIN_COMMAND} setKillDrops <teamName>")
+            sender.sendMessage("${session.prefix}${ChatColor.RED}Usage: /${parent.commandName} setKillDrops <teamName>")
             return
         }
 
@@ -85,24 +85,24 @@ class SetKillDropsLoc(private val parent: ParentCommand) : SetupCommand("setKill
             sender.sendMessage(session.prefix + ChatColor.RED + "Could not find any nearby team.")
             sender.message(
                 session.prefix + "Make sure you set the team's spawn first!",
-                ChatColor.WHITE.toString() + "Set a team spawn.",
-                "/" + parent.commandName + " " + subCommandName + " ",
+                "${ChatColor.WHITE}Set a team spawn.",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
             sender.message(
-                session.prefix + "Or if you set the spawn and it wasn't found automatically try using: /bw " + subCommandName + " <team>",
+                session.prefix + "Or if you set the spawn and it wasn't found automatically try using: /bw " + name + " <team>",
                 "Set kill drops location for a team.",
-                "/" + parent.commandName + " " + subCommandName + " ",
+                "/${parent.commandName} $name ",
                 ClickEvent.Action.SUGGEST_COMMAND
             )
-            BedWars.nms.sendTitle(sender, " ", ChatColor.RED.toString() + "Could not find any nearby team.", 5, 60, 5)
+            nms.sendTitle(sender, " ", "${ChatColor.RED}Could not find any nearby team.", 5, 60, 5)
             playSound(ConfigPath.SOUNDS_INSUFF_MONEY, sender)
             return
         }
 
         if (args.size == 1) {
-            if (arena.get("Team." + args[0]) == null) {
-                sender.sendMessage(session.prefix + ChatColor.RED + "This team doesn't exist!")
+            if (arena.get("Team.${args[0]}") == null) {
+                sender.sendMessage("${session.prefix}${ChatColor.RED}This team doesn't exist!")
                 val teams = arena.getConfigurationSection("Team") ?: return
 
                 sender.sendMessage(session.prefix + "Available teams: ")
@@ -110,7 +110,7 @@ class SetKillDropsLoc(private val parent: ParentCommand) : SetupCommand("setKill
                     sender.message(
                         "${ChatColor.GOLD} ▪ Kill drops ${session.getColoredTeamName(team)} ${ChatColor.getLastColors(session.prefix)}(click to set)",
                         "${ChatColor.WHITE}Set Kill drops for ${session.getColoredTeamName(team)}",
-                        "/${BedWars.MAIN_COMMAND} setKillDrops $team",
+                        "/${parent.commandName} setKillDrops $team",
                         ClickEvent.Action.RUN_COMMAND
                     )
                 }

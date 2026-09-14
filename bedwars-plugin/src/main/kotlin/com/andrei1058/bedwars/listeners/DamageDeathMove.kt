@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.listeners
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.shop.ShopHolo
 import com.andrei1058.bedwars.api.arena.team.ITeam
@@ -52,23 +52,23 @@ import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.potion.PotionEffectType
 import java.text.DecimalFormat
 
-class DamageDeathMove : Listener {
-    private val tntJumpBarycenterAlterationInY = BedWars.config.getDouble(ConfigPath.GENERAL_TNT_JUMP_BARYCENTER_IN_Y)
-    private val tntJumpStrengthReductionConstant = BedWars.config.getDouble(ConfigPath.GENERAL_TNT_JUMP_STRENGTH_REDUCTION)
-    private val tntJumpYAxisReductionConstant = BedWars.config.getDouble(ConfigPath.GENERAL_TNT_JUMP_Y_REDUCTION)
-    private val tntDamageSelf = BedWars.config.getDouble(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_SELF)
-    private val tntDamageTeammates = BedWars.config.getDouble(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_TEAMMATES)
-    private val tntDamageOthers = BedWars.config.getDouble(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS)
+class DamageDeathMove(private val plugin: BedWars) : Listener {
+    private val tntJumpBarycenterAlterationInY = plugin.mainConfig.getDouble(ConfigPath.GENERAL_TNT_JUMP_BARYCENTER_IN_Y)
+    private val tntJumpStrengthReductionConstant = plugin.mainConfig.getDouble(ConfigPath.GENERAL_TNT_JUMP_STRENGTH_REDUCTION)
+    private val tntJumpYAxisReductionConstant = plugin.mainConfig.getDouble(ConfigPath.GENERAL_TNT_JUMP_Y_REDUCTION)
+    private val tntDamageSelf = plugin.mainConfig.getDouble(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_SELF)
+    private val tntDamageTeammates = plugin.mainConfig.getDouble(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_TEAMMATES)
+    private val tntDamageOthers = plugin.mainConfig.getDouble(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS)
 
     @EventHandler
     fun onDamage(e: EntityDamageEvent) {
         val entity = e.entity
-        if (BedWars.serverType == ServerType.MULTIARENA && entity.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true)) {
+        if (plugin.serverType == ServerType.MULTIARENA && entity.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true)) {
             e.isCancelled = true
         }
         if (entity !is Player) return
 
-        val arena = BedWars.plugin.arenaManager.getArena(entity) ?: return
+        val arena = plugin.arenaManager.getArena(entity) ?: return
 
         if (arena.status != GameState.PLAYING || arena.isSpectator(entity) || arena.isRespawning(entity)) {
             e.isCancelled = true
@@ -94,7 +94,7 @@ class DamageDeathMove : Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onBowHit(e: EntityDamageByEntityEvent) {
         val player = e.entity as? Player ?: return
-        val arena = BedWars.plugin.arenaManager.getArena(player) ?: return
+        val arena = plugin.arenaManager.getArena(player) ?: return
         if (arena.status != GameState.PLAYING) return
 
         val projectile = e.damager as? Projectile ?: return
@@ -118,28 +118,28 @@ class DamageDeathMove : Listener {
     fun onDamageByEntity(e: EntityDamageByEntityEvent) {
         val entity = e.entity
 
-        if (BedWars.serverType == ServerType.MULTIARENA && e.entity.location.world!!.name.equals(BedWars.lobbyWorld, ignoreCase = true)) {
+        if (plugin.serverType == ServerType.MULTIARENA && e.entity.location.world!!.name.equals(plugin.lobbyWorld, ignoreCase = true)) {
             e.isCancelled = true
         }
 
         if (entity !is Player) {
-            if (BedWars.nms.isDespawnable(e.getEntity())) {
+            if (plugin.versionSupport.isDespawnable(e.getEntity())) {
                 val damager = when (e.damager) {
                     is Player -> e.damager as Player
                     is Projectile -> (e.damager as Projectile).shooter as Player
                     is TNTPrimed -> (e.damager as TNTPrimed).source as? Player ?: return
                     else -> return
                 }
-                val arena = BedWars.plugin.arenaManager.getArena(damager) ?: return
+                val arena = plugin.arenaManager.getArena(damager) ?: return
 
                 // do not hurt own mobs
-                if (!arena.isPlayer(damager) || arena.getTeam(damager) === BedWars.nms.despawnables[entity.uniqueId]!!.team) {
+                if (!arena.isPlayer(damager) || arena.getTeam(damager) === plugin.versionSupport.despawnables[entity.uniqueId]!!.team) {
                     e.isCancelled = true
                 }
             }
             return
         }
-        val arena = BedWars.plugin.arenaManager.getArena(entity) ?: return
+        val arena = plugin.arenaManager.getArena(entity) ?: return
 
         if (arena.status != GameState.PLAYING || arena.isSpectator(entity) || arena.isRespawning(entity)) {
             e.isCancelled = true
@@ -221,10 +221,10 @@ class DamageDeathMove : Listener {
         // #274
         // if player gets hit show him
         if (!arena.showTime.containsKey(entity)) return
-        BedWars.plugin.run {
+        plugin.run {
             for (on in arena.world.players) {
-                BedWars.nms.showArmor(entity, on)
-                //BedWars.nms.showPlayer(p, on);
+                plugin.versionSupport.showArmor(entity, on)
+                //plugin.versionSupport.showPlayer(p, on);
             }
             arena.showTime.remove(entity)
             entity.removePotionEffect(PotionEffectType.INVISIBILITY)
@@ -241,8 +241,8 @@ class DamageDeathMove : Listener {
     fun onDeath(e: PlayerDeathEvent) {
         val victim = e.entity
         var killer = victim.killer
-        val arena = BedWars.plugin.arenaManager.getArena(victim) ?: return
-        if (BedWars.serverType === ServerType.MULTIARENA && BedWars.lobbyWorld == victim.world.name) e.deathMessage = null
+        val arena = plugin.arenaManager.getArena(victim) ?: return
+        if (plugin.serverType === ServerType.MULTIARENA && plugin.lobbyWorld == victim.world.name) e.deathMessage = null
 
         val victimsTeam = arena.getTeam(victim)
         if (arena.status != GameState.PLAYING || arena.isSpectator(victim) || victimsTeam == null) {
@@ -250,7 +250,7 @@ class DamageDeathMove : Listener {
             return
         }
 
-        BedWars.nms.clearArrowsFromPlayerBody(victim)
+        plugin.versionSupport.clearArrowsFromPlayerBody(victim)
 
         var message = Messages.PLAYER_DIE_UNKNOWN_REASON_REGULAR
         var cause = PlayerKillCause.UNKNOWN
@@ -299,9 +299,9 @@ class DamageDeathMove : Listener {
                 }
 
                 val lh = LastHit.getLastHit(victim) ?: return@run
-                if (lh.time < System.currentTimeMillis() - 15000 || !BedWars.nms.isDespawnable(lh.damager!!)) return@run
+                if (lh.time < System.currentTimeMillis() - 15000 || !plugin.versionSupport.isDespawnable(lh.damager!!)) return@run
 
-                val d = BedWars.nms.despawnables[lh.damager!!.uniqueId]!!
+                val d = plugin.versionSupport.despawnables[lh.damager!!.uniqueId]!!
                 killersTeam = d.team
                 message = if (d.entity.type == EntityType.IRON_GOLEM)
                     if (victimsTeam.isBedDestroyed) Messages.PLAYER_DIE_IRON_GOLEM_FINAL_KILL else Messages.PLAYER_DIE_IRON_GOLEM_REGULAR
@@ -359,7 +359,7 @@ class DamageDeathMove : Listener {
         }
 
         // send respawn packet
-        BedWars.plugin.run(delay = 3) { victim.spigot().respawn() }
+        plugin.run(delay = 3) { victim.spigot().respawn() }
 
         // reset last damager
         LastHit.getLastHit(victim)?.damager = null
@@ -374,7 +374,7 @@ class DamageDeathMove : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     fun onRespawn(e: PlayerRespawnEvent) {
         val player = e.player
-        val arena = BedWars.plugin.arenaManager.getArena(player)
+        val arena = plugin.arenaManager.getArena(player)
 
         if (arena == null) {
             val ss = SetupSession.getSession(player.uniqueId)
@@ -385,10 +385,7 @@ class DamageDeathMove : Listener {
         if (arena.isSpectator(player)) {
             e.setRespawnLocation(arena.spectatorLocation)
             val iso = Language.getLanguage(player).iso
-            arena.teams
-                .flatMap { it.generators }
-                .plus(arena.oreGenerators)
-                .forEach { it.updateHolograms(player, iso) }
+            arena.allGenerators.forEach { it.updateHolograms(player, iso) }
             for (sh in ShopHolo.shopHolo) {
                 if (sh.a === arena) {
                     sh.updateForPlayer(player, iso)
@@ -401,8 +398,8 @@ class DamageDeathMove : Listener {
         val t = arena.getTeam(player)
         if (t == null) {
             e.setRespawnLocation(arena.respawnLocation)
-            BedWars.plugin.logger.severe("${player.name} re-spawn error on ${arena.name}[${arena.worldName}] because the team was NULL and he was not spectating!")
-            BedWars.plugin.logger.severe("This is caused by one of your plugins: remove or configure any re-spawn related plugins.")
+            plugin.logger.severe("${player.name} re-spawn error on ${arena.name}[${arena.worldName}] because the team was NULL and he was not spectating!")
+            plugin.logger.severe("This is caused by one of your plugins: remove or configure any re-spawn related plugins.")
             arena.removePlayer(player, false)
             arena.removeSpectator(player, false)
             return
@@ -420,12 +417,12 @@ class DamageDeathMove : Listener {
                 "{TeamColor}" to "${t.color.chat}",
                 "{TeamName}" to t.getDisplayName(Language.getLanguage(it))
             ) }
-            BedWars.plugin.run(delay = 40) { arena.checkWinner() }
+            plugin.run(delay = 40) { arena.checkWinner() }
             return
         }
 
         //respawn session
-        val respawnTime = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_COUNTDOWN)
+        val respawnTime = plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_COUNTDOWN)
         if (respawnTime > 1) {
             e.setRespawnLocation(arena.respawnLocation)
             arena.startRespawnSession(player, respawnTime)
@@ -441,15 +438,15 @@ class DamageDeathMove : Listener {
     fun onMove(e: PlayerMoveEvent) {
         val to = e.to ?: return
         val player = e.player
-        val arena = BedWars.plugin.arenaManager.getArena(player)
+        val arena = plugin.arenaManager.getArena(player)
         if (arena == null) {
-            if (BedWars.serverType != ServerType.MULTIARENA ||
-                !BedWars.config.getBoolean(ConfigPath.LOBBY_VOID_TELEPORT_ENABLED) ||
-                !player.world.name.equals(BedWars.config.lobbyWorldName, ignoreCase = true) ||
-                to.y >= BedWars.config.getInt(ConfigPath.LOBBY_VOID_TELEPORT_HEIGHT)
+            if (plugin.serverType != ServerType.MULTIARENA ||
+                !plugin.mainConfig.getBoolean(ConfigPath.LOBBY_VOID_TELEPORT_ENABLED) ||
+                !player.world.name.equals(plugin.mainConfig.lobbyWorldName, ignoreCase = true) ||
+                to.y >= plugin.mainConfig.getInt(ConfigPath.LOBBY_VOID_TELEPORT_HEIGHT)
             ) return
 
-            player.teleportSafe(BedWars.config.getConfigLoc("lobbyLoc") ?: return)
+            player.teleportSafe(plugin.mainConfig.getConfigLoc("lobbyLoc") ?: return)
             return
         }
 
@@ -462,10 +459,7 @@ class DamageDeathMove : Listener {
             /* update armor-stands hidden by nms */
 
             val iso = Language.getLanguage(player).iso
-            arena.teams
-                .flatMap { it.generators }
-                .plus(arena.oreGenerators)
-                .forEach { it.updateHolograms(player, iso) }
+            arena.allGenerators.forEach { it.updateHolograms(player, iso) }
 
             for (sh in ShopHolo.shopHolo) {
                 if (sh.a === arena) {
@@ -477,12 +471,12 @@ class DamageDeathMove : Listener {
             if (!arena.showTime.isEmpty()) {
                 // generic hide packets
                 for ((key, value) in arena.showTime) {
-                    if (value > 1) BedWars.nms.hideArmor(key, player)
+                    if (value > 1) plugin.versionSupport.hideArmor(key, player)
                 }
                 // if the moving player has invisible armor
                 if (arena.showTime.containsKey(player)) {
                     for (p in arena.allPlayers) {
-                        BedWars.nms.hideArmor(player, p)
+                        plugin.versionSupport.hideArmor(player, p)
                     }
                 }
             }
@@ -499,7 +493,7 @@ class DamageDeathMove : Listener {
         }
         if (arena.status == GameState.PLAYING) {
             if (player.location.blockY <= arena.yKillHeight) {
-                BedWars.nms.voidKill(player)
+                plugin.versionSupport.voidKill(player)
             }
             for (t in arena.teams) {
                 if (player.location.distance(t.bed) < 4) {
@@ -519,7 +513,7 @@ class DamageDeathMove : Listener {
                 }
             }
             if (e.from !== to) {
-                BedWars.plugin.afkManager.setAFK(player, null)
+                plugin.afkManager.setAFK(player, null)
             }
             return
         }
@@ -533,7 +527,7 @@ class DamageDeathMove : Listener {
         val projectile = e.entity as? Snowball ?: return
         val shooter = projectile.shooter as? Player ?: return
 
-        val arena = BedWars.plugin.arenaManager.getArena(shooter) ?: return
+        val arena = plugin.arenaManager.getArena(shooter) ?: return
         if (!arena.isPlayer(shooter)) return
 
         spawnSilverFish(projectile.location, arena.getTeam(shooter)!!)
@@ -543,8 +537,8 @@ class DamageDeathMove : Listener {
     fun onItemFrameDamage(e: EntityDamageByEntityEvent) {
         val frame = e.entity as? ItemFrame ?: return
 
-        val arena = BedWars.plugin.arenaManager.getArenaByWorld(e.entity.world.name)
-        if (arena != null || BedWars.serverType == ServerType.MULTIARENA && BedWars.lobbyWorld == frame.world.name) {
+        val arena = plugin.arenaManager.getArenaByWorld(e.entity.world.name)
+        if (arena != null || plugin.serverType == ServerType.MULTIARENA && plugin.lobbyWorld == frame.world.name) {
             e.isCancelled = true
         }
     }
@@ -553,9 +547,9 @@ class DamageDeathMove : Listener {
     fun onEntityDeath(e: EntityDeathEvent) {
         val entity = e.entity
         // clean if necessary
-        BedWars.nms.despawnables.remove(entity.uniqueId)
+        plugin.versionSupport.despawnables.remove(entity.uniqueId)
 
-        if (BedWars.plugin.arenaManager.getArenaByWorld(entity.location.world!!.name) == null) return
+        if (plugin.arenaManager.getArenaByWorld(entity.location.world!!.name) == null) return
         if (entity.type != EntityType.IRON_GOLEM && entity.type != EntityType.SILVERFISH) return
 
         e.drops.clear()
@@ -564,22 +558,25 @@ class DamageDeathMove : Listener {
 
     @EventHandler
     fun onEat(e: PlayerItemConsumeEvent) {
-        if (e.item.type != BedWars.nms.materialCake()) return
-        if (BedWars.plugin.arenaManager.getArenaByWorld(e.player.world.name) != null) {
+        if (e.item.type != plugin.versionSupport.materialCake()) return
+        if (plugin.arenaManager.getArenaByWorld(e.player.world.name) != null) {
             e.isCancelled = true
         }
     }
 
-    companion object {
-        private val HEALTH_FORMAT = DecimalFormat("00.#")
-
-        private fun spawnSilverFish(loc: Location, t: ITeam) = BedWars.nms.spawnSilverfish(
+    private fun spawnSilverFish(loc: Location, t: ITeam) {
+        val config = plugin.shopManager.config
+        plugin.versionSupport.spawnSilverfish(
             loc,
             t,
-            BedWars.shop.getDouble(ConfigPath.SHOP_SPECIAL_SILVERFISH_SPEED),
-            BedWars.shop.getDouble(ConfigPath.SHOP_SPECIAL_SILVERFISH_HEALTH),
-            BedWars.shop.getInt(ConfigPath.SHOP_SPECIAL_SILVERFISH_DESPAWN),
-            BedWars.shop.getDouble(ConfigPath.SHOP_SPECIAL_SILVERFISH_DAMAGE)
+            config.getDouble(ConfigPath.SHOP_SPECIAL_SILVERFISH_SPEED),
+            config.getDouble(ConfigPath.SHOP_SPECIAL_SILVERFISH_HEALTH),
+            config.getInt(ConfigPath.SHOP_SPECIAL_SILVERFISH_DESPAWN),
+            config.getDouble(ConfigPath.SHOP_SPECIAL_SILVERFISH_DAMAGE)
         )
+    }
+
+    companion object {
+        private val HEALTH_FORMAT = DecimalFormat("00.#")
     }
 }

@@ -28,7 +28,6 @@ import com.andrei1058.bedwars.api.arena.shop.ShopHolo
 import com.andrei1058.bedwars.api.arena.team.ITeam
 import com.andrei1058.bedwars.api.arena.team.TeamColor
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.api.entity.Despawnable
 import com.andrei1058.bedwars.api.events.gameplay.GameEndEvent
 import com.andrei1058.bedwars.api.events.gameplay.GameStateChangeEvent
 import com.andrei1058.bedwars.api.events.gameplay.NextEventChangeEvent
@@ -47,6 +46,7 @@ import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.api.tasks.PlayingTask
 import com.andrei1058.bedwars.api.tasks.RestartingTask
 import com.andrei1058.bedwars.api.tasks.StartingTask
+import com.andrei1058.bedwars.api.util.Utils
 import com.andrei1058.bedwars.arena.generators.GeneratorOre
 import com.andrei1058.bedwars.arena.generators.Generator
 import com.andrei1058.bedwars.arena.stats.GameStatsManager
@@ -61,7 +61,7 @@ import com.andrei1058.bedwars.arena.team.TeamAssigner
 import com.andrei1058.bedwars.arena.upgrades.BaseListener
 import com.andrei1058.bedwars.configuration.ArenaConfig
 import com.andrei1058.bedwars.configuration.Sounds
-import com.andrei1058.bedwars.levels.internal.InternalLevel
+import com.andrei1058.bedwars.levels.internal.InternalLevelManager
 import com.andrei1058.bedwars.levels.internal.PerMinuteTask
 import com.andrei1058.bedwars.listeners.blockstatus.BlockStatusListener
 import com.andrei1058.bedwars.listeners.dropshandler.PlayerDrops
@@ -69,11 +69,10 @@ import com.andrei1058.bedwars.money.internal.MoneyPerMinuteTask
 import com.andrei1058.bedwars.shop.ShopCache
 import com.andrei1058.bedwars.sidebar.BwSidebar
 import com.andrei1058.bedwars.support.citizens.JoinNPC
-import com.andrei1058.bedwars.Utils.teleportSafe
+import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.support.papi.SupportPAPI
 import com.andrei1058.bedwars.support.vault.WithEconomy
 import net.md_5.bungee.api.chat.ClickEvent
-import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
@@ -90,6 +89,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("EqualsOrHashCode")
 class Arena(
+    private val plugin: BedWars,
     private val manager: ArenaManagerImpl,
     override val name: String,
     override var worldName: String,
@@ -112,7 +112,7 @@ class Arena(
             if (field == GameState.STARTING && value == GameState.WAITING) {
                 for (player in players) {
                     val lang = Language.getLanguage(player)
-                    BedWars.nms.sendTitle(
+                    plugin.versionSupport.sendTitle(
                         player,
                         lang.m(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_TITLE),
                         lang.m(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_SUB_TITLE),
@@ -143,7 +143,7 @@ class Arena(
     override var upgradeEmeraldsCount = 0
     override var isAllowSpectate = config.getBoolean("allowSpectate", true)
     override lateinit var world: World
-    override var group = config.getString("group").let { if (it != null && it in BedWars.config.getStringList("arenaGroups")) it else "Default" }
+    override var group = config.getString("group").let { if (it != null && it in plugin.mainConfig.getStringList("arenaGroups")) it else "Default" }
     override var teams = mutableListOf<BedWarsTeam>()
     override var placed = LinkedList<Vector>()
     override var nextEvents = mutableListOf<String>()
@@ -200,16 +200,16 @@ class Arena(
     val worldBorder = config.getInt("worldBorder").toDouble()
     override val yKillHeight = config.getInt(ConfigPath.ARENA_Y_LEVEL_KILL)
     override var startTime: Instant? = null
-    override var teamAssigner = if (BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_EXPERIMENTAL_TEAM_ASSIGNER))
+    override var teamAssigner = if (plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_EXPERIMENTAL_TEAM_ASSIGNER))
         TeamAssigner()
     else LegacyTeamAssigner
         set(value) {
             field = value
-            BedWars.plugin.logger.warning("Using ${value.javaClass.simpleName} team assigner on arena: $name")
+            plugin.logger.warning("Using ${value.javaClass.simpleName} team assigner on arena: $name")
         }
 
     override fun resetTeamAssigner() {
-        teamAssigner = if (BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_EXPERIMENTAL_TEAM_ASSIGNER))
+        teamAssigner = if (plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_EXPERIMENTAL_TEAM_ASSIGNER))
             TeamAssigner()
         else LegacyTeamAssigner
     }
@@ -233,7 +233,7 @@ class Arena(
      * Use this method when the world was loaded successfully.
      */
     override fun init(world: World) {
-        if (!BedWars.autoscale && manager.getArena(name) != null) return
+        if (!plugin.autoScale && manager.getArena(name) != null) return
         manager.removeFromEnableQueue(this)
 
         BedWars.debug("Initialized arena " + name + " with map " + world.name)
@@ -268,7 +268,7 @@ class Arena(
         //Create teams
         for (team in config.getConfigurationSection("Team")!!.getKeys(false)) {
             if (getTeam(team) != null) {
-                BedWars.plugin.logger.severe("A team with name: $team was already loaded for arena: $name")
+                plugin.logger.severe("A team with name: $team was already loaded for arena: $name")
                 continue
             }
             val bwt = BedWarsTeam(
@@ -298,16 +298,16 @@ class Arena(
 
         /* Check if lobby removal is set */
         if (!config.isSet(ConfigPath.ARENA_WAITING_POS1) && config.isSet(ConfigPath.ARENA_WAITING_POS2)) {
-            BedWars.plugin.logger.severe("Lobby Pos1 isn't set! The arena's lobby won't be removed!")
+            plugin.logger.severe("Lobby Pos1 isn't set! The arena's lobby won't be removed!")
         }
         if (config.isSet(ConfigPath.ARENA_WAITING_POS1) && !config.isSet(ConfigPath.ARENA_WAITING_POS2)) {
-            BedWars.plugin.logger.severe("Lobby Pos2 isn't set! The arena's lobby won't be removed!")
+            plugin.logger.severe("Lobby Pos2 isn't set! The arena's lobby won't be removed!")
         }
 
         /* Register arena signs */
         registerSigns()
         //Call event
-        Bukkit.getPluginManager().callEvent(ArenaEnableEvent(this))
+        plugin.server.pluginManager.callEvent(ArenaEnableEvent(this))
 
 
         changeStatus(GameState.WAITING)
@@ -318,16 +318,16 @@ class Arena(
             ::upgradeDiamondsCount to ConfigPath.GENERATOR_DIAMOND_TIER_II_START,
             ::upgradeEmeraldsCount to ConfigPath.GENERATOR_EMERALD_TIER_II_START
         ).forEach { (property, path) ->
-            property.set(BedWars.generatorsCfg.getInt(
-                if (BedWars.generatorsCfg["$group.$path"] == null
-                ) "Default.$path" else "$group.$path"
+            property.set(plugin.configs.generators.getInt(
+                "$group.$path",
+                plugin.configs.generators.getInt("Default.$path")
             ))
         }
-        BedWars.plugin.logger.info("Load done: $name")
+        plugin.logger.info("Load done: $name")
 
 
         // entity tracking range - player
-        val spigot = Bukkit.spigot().config
+        val spigot = plugin.server.spigot().config
         renderDistance = spigot.getInt(
             "world-settings.$worldName.entity-tracking-range.players",
             spigot.getInt("world-settings.default.entity-tracking-range.players")
@@ -348,14 +348,15 @@ class Arena(
         //
         if (manager.getArena(player) != null) return false
 
-        if (BedWars.party.hasParty(player)) {
+        val party = plugin.partyUtil
+        if (party.hasParty(player)) {
             if (!skipOwnerCheck) {
-                if (!BedWars.party.isOwner(player)) {
+                if (!party.isOwner(player)) {
                     player.sendLangMsg(Messages.COMMAND_JOIN_DENIED_NOT_PARTY_LEADER)
                     return false
                 }
 
-                val partySize = BedWars.party.getMembers(player).count {
+                val partySize = party.getMembers(player).count {
                     manager.getArena(it)?.isSpectator(it) != false
                 }
 
@@ -364,7 +365,7 @@ class Arena(
                     return false
                 }
 
-                for (mem in BedWars.party.getMembers(player)) {
+                for (mem in party.getMembers(player)) {
                     if (mem === player) continue
                     val arena = manager.getArena(mem)
                     if (arena != null) {
@@ -383,26 +384,26 @@ class Arena(
         leavingPlayers.remove(player)
 
         if (status == GameState.WAITING || (status == GameState.STARTING && (startingTask != null && startingTask!!.countdown > 1))) {
-            if (players.size >= maxPlayers && !BedWars.api.isVIP(player)) {
-                val text = TextComponent(Language.getMsg(player, Messages.COMMAND_JOIN_DENIED_IS_FULL))
-                text.clickEvent = ClickEvent(
-                    ClickEvent.Action.OPEN_URL,
-                    BedWars.config.getString("storeLink")
-                )
-                player.spigot().sendMessage(text)
+            if (players.size >= maxPlayers && !plugin.isVIP(player)) {
+                player.spigot().sendMessage(Utils.component(
+                    Language.getMsg(player, Messages.COMMAND_JOIN_DENIED_IS_FULL),
+                    "",
+                    plugin.mainConfig.getString("storeLink")!!,
+                    ClickEvent.Action.OPEN_URL
+                ))
                 return false
-            } else if (players.size >= maxPlayers && BedWars.api.isVIP(player)) {
+            } else if (players.size >= maxPlayers && plugin.isVIP(player)) {
                 var canJoin = false
-                for (on in ArrayList<Player>(players)) {
-                    if (!BedWars.api.isVIP(on)) {
+                for (on in players.toList()) {
+                    if (!plugin.isVIP(on)) {
                         canJoin = true
                         removePlayer(on, false)
-                        val vipKick = TextComponent(Language.getMsg(player, Messages.ARENA_JOIN_VIP_KICK))
-                        vipKick.clickEvent = ClickEvent(
-                            ClickEvent.Action.OPEN_URL,
-                            BedWars.config.getString("storeLink")
-                        )
-                        player.spigot().sendMessage(vipKick)
+                        player.spigot().sendMessage(Utils.component(
+                            Language.getMsg(player, Messages.ARENA_JOIN_VIP_KICK),
+                            "",
+                            plugin.mainConfig.getString("storeLink")!!,
+                            ClickEvent.Action.OPEN_URL
+                        ))
                         break
                     }
                 }
@@ -445,12 +446,8 @@ class Arena(
                 var teams = 0
                 var teammates = 0
                 for (on in players) {
-                    if (BedWars.party.isOwner(on)) {
-                        teams++
-                    }
-                    if (BedWars.party.hasParty(on)) {
-                        teammates++
-                    }
+                    if (party.isOwner(on)) teams++
+                    if (party.hasParty(on)) teammates++
                 }
                 if (minPlayers <= players.size && teams > 0 && players.size != teammates / teams) {
                     changeStatus(GameState.STARTING)
@@ -465,7 +462,7 @@ class Arena(
             if (players.size >= maxPlayers / 2 && players.size > minPlayers) {
                 val startingTask = startingTask
                 if (startingTask != null && Bukkit.getScheduler().isCurrentlyRunning(startingTask.task)) {
-                    val countdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_START_COUNTDOWN_HALF)
+                    val countdown = plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_START_COUNTDOWN_HALF)
                     if (startingTask.countdown > countdown) {
                         startingTask.countdown = countdown
                     }
@@ -473,14 +470,14 @@ class Arena(
             }
 
             /* save player inventory etc */
-            if (BedWars.serverType != ServerType.BUNGEE) {
+            if (plugin.serverType != ServerType.BUNGEE) {
                 PlayerGoods += player
                 manager.playerLocation[player] = player.location
             }
             player.teleportSafe(waitingLocation)
 
             if (!isStatusChange) {
-                BedWars.plugin.scoreboardManager.giveSidebar(player, this, false)
+                plugin.scoreboardManager.giveSidebar(player, this, false)
             }
             sendPreGameCommandItems(player)
             for (pf in player.activePotionEffects) {
@@ -493,40 +490,41 @@ class Arena(
         }
 
         player.inventory.setArmorContents(null)
-        BedWars.plugin.run(delay = 17) {
+        val nms = plugin.versionSupport
+        plugin.run(delay = 17) {
             // bungee mode invisibility issues
-            if (BedWars.serverType == ServerType.BUNGEE) {
+            if (plugin.serverType == ServerType.BUNGEE) {
                 // fix invisibility issue
                 //if (BedWars.nms.getVersion() == 7) {
-                BedWars.nms.sendPlayerSpawnPackets(player, this)
+                nms.sendPlayerSpawnPackets(player, this)
                 //}
             }
             for (on in Bukkit.getOnlinePlayers()) {
                 if (on == null || on == player) continue
                 if (isPlayer(on)) {
-                    BedWars.nms.showPlayer(player, on)
-                    BedWars.nms.showPlayer(on, player)
+                    nms.showPlayer(player, on)
+                    nms.showPlayer(on, player)
                 } else {
-                    BedWars.nms.hidePlayer(player, on)
-                    BedWars.nms.hidePlayer(on, player)
+                    nms.hidePlayer(player, on)
+                    nms.hidePlayer(on, player)
                 }
             }
-            if (BedWars.serverType == ServerType.BUNGEE) {
+            if (plugin.serverType == ServerType.BUNGEE) {
                 // fix invisibility issue
                 //if (BedWars.nms.getVersion() == 7) {
-                BedWars.nms.sendPlayerSpawnPackets(player, this)
+                nms.sendPlayerSpawnPackets(player, this)
                 //}
             }
         }
 
-        if (BedWars.serverType == ServerType.BUNGEE) {
+        if (plugin.serverType == ServerType.BUNGEE) {
             player.enderChest.clear()
         }
 
         if (players.size >= maxPlayers) {
             val startingTask = startingTask
             if (startingTask != null && Bukkit.getScheduler().isCurrentlyRunning(startingTask.task)) {
-                val countdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_START_COUNTDOWN_SHORTENED)
+                val countdown = plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_START_COUNTDOWN_SHORTENED)
                 if (startingTask.countdown > countdown)
                     startingTask.countdown = countdown
             }
@@ -566,14 +564,15 @@ class Arena(
 
             if (!playerBefore) {
                 /* save player inv etc if isn't saved yet*/
-                if (BedWars.serverType != ServerType.BUNGEE) {
+                if (plugin.serverType != ServerType.BUNGEE) {
                     PlayerGoods += player
                     manager.playerLocation[player] = player.location
                 }
             }
 
-            BedWars.plugin.scoreboardManager.giveSidebar(player, this, false)
-            BedWars.nms.setCollide(player, this, false)
+            plugin.scoreboardManager.giveSidebar(player, this, false)
+            val nms = plugin.versionSupport
+            nms.setCollide(player, this, false)
 
             if (!playerBefore) {
                 player.teleportSafe(staffTeleport ?: spectatorLocation)
@@ -581,7 +580,7 @@ class Arena(
 
             player.gameMode = GameMode.ADVENTURE
 
-            BedWars.plugin.run(delay = 5) {
+            plugin.run(delay = 5) {
                 if (player in leavingPlayers) return@run
                 player.allowFlight = true
                 player.isFlying = true
@@ -589,37 +588,39 @@ class Arena(
 
             if (player.passenger != null && player.passenger!!.type == EntityType.ARMOR_STAND) player.passenger!!.remove()
 
-            BedWars.plugin.run {
+            plugin.run {
                 if (player in leavingPlayers) return@run
 
                 for (on in Bukkit.getOnlinePlayers()) {
                     if (on === player) continue
                     when (on) {
                         in spectators -> {
-                            BedWars.nms.showPlayer(player, on)
-                            BedWars.nms.showPlayer(on, player)
+                            nms.showPlayer(player, on)
+                            nms.showPlayer(on, player)
                         }
                         in players -> {
-                            BedWars.nms.hidePlayer(player, on)
-                            BedWars.nms.showPlayer(on, player)
+                            nms.hidePlayer(player, on)
+                            nms.showPlayer(on, player)
                         }
                         else -> {
-                            BedWars.nms.hidePlayer(player, on)
-                            BedWars.nms.hidePlayer(on, player)
+                            nms.hidePlayer(player, on)
+                            nms.hidePlayer(on, player)
                         }
                     }
                 }
 
 
-                player.teleportSafe(if (!playerBefore && staffTeleport != null) staffTeleport else spectatorLocation)
-                player.allowFlight = true
-                player.isFlying = true
+                player.apply {
+                    teleportSafe(if (!playerBefore && staffTeleport != null) staffTeleport else spectatorLocation)
+                    allowFlight = true
+                    isFlying = true
 
-                /* Spectator items */
-                sendSpectatorCommandItems(player)
-                // make invisible because it's annoying when there are many spectators around the map
-                player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1, false))
-                player.inventory.setArmorContents(null)
+                    /* Spectator items */
+                    sendSpectatorCommandItems(this)
+                    // make invisible because it's annoying when there are many spectators around the map
+                    addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, Int.MAX_VALUE, 1, false))
+                    inventory.setArmorContents(null)
+                }
             }
 
             leavingPlayers.remove(player)
@@ -628,14 +629,8 @@ class Arena(
 
             /* update generator holograms for spectators */
             val iso = Language.getLanguage(player).iso
-            for (o in oreGenerators) {
-                o.updateHolograms(player, iso)
-            }
-            for (t in teams) {
-                for (o in t.generators) {
-                    o.updateHolograms(player, iso)
-                }
-            }
+            allGenerators.forEach { it.updateHolograms(player, iso) }
+
             for (sh in ShopHolo.shopHolo) {
                 if (sh.a === this) {
                     sh.updateForPlayer(player, iso)
@@ -665,7 +660,7 @@ class Arena(
         BedWars.debug("Player removed: ${player.name} arena: $name")
         respawnSessions.remove(player)
 
-        BedWars.plugin.afkManager.setAFK(player, null)
+        plugin.afkManager.setAFK(player, null)
 
         val team = if (status == GameState.PLAYING) getTeam(player) else null
         if (team != null) {
@@ -688,7 +683,8 @@ class Arena(
 
         if (player.passenger != null && player.passenger!!.type == EntityType.ARMOR_STAND) player.passenger!!.remove()
 
-        var hasParty = players.any { BedWars.party.hasParty(it) }
+        val party = plugin.partyUtil
+        var hasParty = players.any { party.hasParty(it) }
 
         val allPlayers = allPlayers
 
@@ -698,9 +694,9 @@ class Arena(
         } else if (status == GameState.PLAYING) {
             BedWars.debug("removePlayer debug1")
             val teamsAlive = teams.count { it.members.isNotEmpty() }
-            if (teamsAlive == 1 && !BedWars.api.isShuttingDown) {
+            if (teamsAlive == 1 && !plugin.isShuttingDown) {
                 checkWinner()
-                BedWars.plugin.run(delay = 10) { changeStatus(GameState.RESTARTING) }
+                plugin.run(delay = 10) { changeStatus(GameState.RESTARTING) }
 
                 if (team != null && !team.isBedDestroyed) {
                     allPlayers.forEach {
@@ -711,9 +707,9 @@ class Arena(
                         )
                     }
                 }
-            } else if (teamsAlive == 0 && !BedWars.api.isShuttingDown) {
-                BedWars.plugin.run(delay = 10) { changeStatus(GameState.RESTARTING) }
-            } else if (!BedWars.api.isShuttingDown && team != null && !team.isBedDestroyed) {
+            } else if (teamsAlive == 0 && !plugin.isShuttingDown) {
+                plugin.run(delay = 10) { changeStatus(GameState.RESTARTING) }
+            } else if (!plugin.isShuttingDown && team != null && !team.isBedDestroyed) {
                 //ReJoin feature
                 ReJoin(player, this, team, cacheList)
             }
@@ -729,7 +725,7 @@ class Arena(
                     val event = PlayerKillEvent(this, player, team, lastDamager, killerTeam, cause) {
                         Language.getMsg(it, message)
                     }
-                    Bukkit.getPluginManager().callEvent(event)
+                    plugin.server.pluginManager.callEvent(event)
 
                     allPlayers.forEach {
                         val lang = Language.getLanguage(it)
@@ -754,12 +750,12 @@ class Arena(
             "{player}" to player.displayName
         )
 
-        if (BedWars.plugin.sendToMainLobby(player, this)) return
+        if (plugin.sendToMainLobby(player, this)) return
 
         /* restore player inventory */
         if (player !in PlayerGoods) {
             // if there is no previous backup of the inventory send lobby items if multi arena
-            if (BedWars.serverType == ServerType.MULTIARENA) {
+            if (plugin.serverType == ServerType.MULTIARENA) {
                 // Send items
                 manager.sendLobbyCommandItems(player)
             }
@@ -769,31 +765,32 @@ class Arena(
             player.removePotionEffect(pf.type)
         }
 
-        if (!BedWars.api.isShuttingDown) {
-            BedWars.plugin.run(delay = 5) {
+        if (!plugin.isShuttingDown) {
+            plugin.run(delay = 5) {
+                val nms = plugin.versionSupport
                 for (on in Bukkit.getOnlinePlayers()) {
                     if (on == player) continue
                     if (manager.getArena(on) == null) {
-                        BedWars.nms.showPlayer(player, on)
-                        BedWars.nms.showPlayer(on, player)
+                        nms.showPlayer(player, on)
+                        nms.showPlayer(on, player)
                     } else {
-                        BedWars.nms.hidePlayer(player, on)
-                        BedWars.nms.hidePlayer(on, player)
+                        nms.hidePlayer(player, on)
+                        nms.hidePlayer(on, player)
                     }
                 }
-                if (!disconnect) BedWars.plugin.scoreboardManager.giveSidebar(player, null, false)
+                if (!disconnect) plugin.scoreboardManager.giveSidebar(player, null, false)
             }
         }
 
         /* Remove also the party */
-        if (status != GameState.RESTARTING && BedWars.party.hasParty(player) && BedWars.party.isOwner(player)) {
-            if (BedWars.party.isInternal) {
-                BedWars.party.getMembers(player).sendLangMsg(Messages.ARENA_LEAVE_PARTY_DISBANDED)
+        if (status != GameState.RESTARTING && party.hasParty(player) && party.isOwner(player)) {
+            if (party.isInternal) {
+                party.getMembers(player).sendLangMsg(Messages.ARENA_LEAVE_PARTY_DISBANDED)
             }
-            BedWars.party.disband(player)
+            party.disband(player)
 
             // prevent arena from staring with a single player
-            hasParty = players.any { BedWars.party.hasParty(it) }
+            hasParty = players.any { party.hasParty(it) }
             if (status == GameState.STARTING && (maxInTeam > players.size && hasParty || players.size < minPlayers && !hasParty)) {
                 changeStatus(GameState.WAITING)
                 players.sendLangMsg(Messages.ARENA_START_COUNTDOWN_STOPPED_INSUFF_PLAYERS_CHAT)
@@ -824,12 +821,12 @@ class Arena(
 
         // fix #340
         // remove player from party if leaves and the owner is still in the arena while waiting or starting
-        if (!status.isPreGame() || !BedWars.party.hasParty(player) || BedWars.party.isOwner(player)) return
+        if (!status.isPreGame() || !party.hasParty(player) || party.isOwner(player)) return
 
-        val owner = BedWars.party.getOwner(player)
+        val owner = party.getOwner(player)
         if (owner == null || !owner.world.name.equals(name, ignoreCase = true)) return
 
-        BedWars.party.removeFromParty(player)
+        party.removeFromParty(player)
     }
 
     /**
@@ -843,15 +840,17 @@ class Arena(
         if (player in leavingPlayers) return
         leavingPlayers += player
 
-        Bukkit.getPluginManager().callEvent(PlayerLeaveArenaEvent(player, this, null))
-        spectators.remove(player)
+        plugin.server.pluginManager.callEvent(PlayerLeaveArenaEvent(player, this, null))
+        spectators -= player
         player.inventory.clear()
         player.inventory.setArmorContents(null)
-        BedWars.nms.setCollide(player, this, true)
 
-        BedWars.plugin.afkManager.setAFK(player, null)
+        val nms = plugin.versionSupport
+        nms.setCollide(player, this, true)
 
-        if (BedWars.plugin.sendToMainLobby(player, this)) return
+        plugin.afkManager.setAFK(player, null)
+
+        if (plugin.sendToMainLobby(player, this)) return
 
         for (pf in player.activePotionEffects) {
             player.removePotionEffect(pf.type)
@@ -860,7 +859,7 @@ class Arena(
         /* restore player inventory */
         if (player !in PlayerGoods) {
             // if there is no previous backup of the inventory send lobby items if multi arena
-            if (BedWars.serverType == ServerType.MULTIARENA) {
+            if (plugin.serverType == ServerType.MULTIARENA) {
                 // Send items
                 manager.sendLobbyCommandItems(player)
             }
@@ -869,30 +868,29 @@ class Arena(
 
         manager.playerLocation.remove(player)
 
-        if (!BedWars.api.isShuttingDown) {
-            BedWars.plugin.run {
-                for (on in Bukkit.getOnlinePlayers()) {
-                    if (on == player) continue
-                    if (manager.getArena(on) == null) {
-                        BedWars.nms.showPlayer(player, on)
-                        BedWars.nms.showPlayer(on, player)
-                    } else {
-                        BedWars.nms.hidePlayer(player, on)
-                        BedWars.nms.hidePlayer(on, player)
-                    }
+        if (!plugin.isShuttingDown) plugin.run {
+            for (on in Bukkit.getOnlinePlayers()) {
+                if (on == player) continue
+                if (manager.getArena(on) == null) {
+                    nms.showPlayer(player, on)
+                    nms.showPlayer(on, player)
+                } else {
+                    nms.hidePlayer(player, on)
+                    nms.hidePlayer(on, player)
                 }
-                if (!disconnect) BedWars.plugin.scoreboardManager.giveSidebar(player, null, false)
             }
+            if (!disconnect) plugin.scoreboardManager.giveSidebar(player, null, false)
         }
 
         /* Remove also the party */
-        if (status != GameState.RESTARTING && BedWars.party.hasParty(player) && BedWars.party.isOwner(player)) {
-            if (BedWars.party.isInternal) {
-                for (mem in BedWars.party.getMembers(player)) {
+        val party = plugin.partyUtil
+        if (status != GameState.RESTARTING && party.hasParty(player) && party.isOwner(player)) {
+            if (party.isInternal) {
+                for (mem in party.getMembers(player)) {
                     mem.sendLangMsg(Messages.ARENA_LEAVE_PARTY_DISBANDED)
                 }
             }
-            BedWars.party.disband(player)
+            party.disband(player)
         }
 
         player.isFlying = false
@@ -921,20 +919,17 @@ class Arena(
         if (reJoin.arena !== this) return false
         if (!reJoin.canReJoin()) return false
 
-        if (reJoin.task != null) {
-            reJoin.task.destroy()
-        }
+        reJoin.task?.destroy()
 
-        val ev = PlayerReJoinEvent(player, this, BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_COUNTDOWN))
+        val ev = PlayerReJoinEvent(player, this, plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_COUNTDOWN))
         Bukkit.getPluginManager().callEvent(ev)
         if (ev.isCancelled()) return false
 
         for (on in Bukkit.getOnlinePlayers()) {
             if (on == player) continue
-            if (!manager.isInArena(on)) {
-                BedWars.nms.hidePlayer(on, player)
-                BedWars.nms.hidePlayer(player, on)
-            }
+            if (manager.isInArena(on)) continue
+            plugin.versionSupport.hidePlayer(on, player)
+            plugin.versionSupport.hidePlayer(player, on)
         }
 
         player.closeInventory()
@@ -946,7 +941,7 @@ class Arena(
             "{max}" to "$maxPlayers"
         )
         /* save player inventory etc */
-        if (BedWars.serverType != ServerType.BUNGEE) {
+        if (plugin.serverType != ServerType.BUNGEE) {
             // no need to backup inventory because it's empty
             //new PlayerGoods(p, true, true);
             manager.playerLocation[player] = player.location
@@ -955,7 +950,7 @@ class Arena(
         player.inventory.clear()
 
         //restore items before re-spawning in team
-        var sc: ShopCache? = ShopCache.getShopCache(player.uniqueId)
+        var sc = ShopCache.getShopCache(player.uniqueId)
         sc?.destroy()
         sc = ShopCache(player.uniqueId)
         for (ci in reJoin.permanentsAndNonDowngradables) {
@@ -965,7 +960,7 @@ class Arena(
         reJoin.team.reJoin(player, ev.respawnTime)
         reJoin.destroy(false)
 
-        BedWars.plugin.scoreboardManager.giveSidebar(player, this, true)
+        plugin.scoreboardManager.giveSidebar(player, this, true)
         return true
     }
 
@@ -977,20 +972,20 @@ class Arena(
         players.forEach { removePlayer(it, false) }
         spectators.forEach { removeSpectator(it, false) }
 
-        BedWars.plugin.logger.warning("Disabling arena: $name")
+        plugin.logger.warning("Disabling arena: $name")
         Bukkit.getPluginManager().callEvent(ArenaDisableEvent(name, worldName))
         destroyData()
-        BedWars.api.restoreAdapter.onDisable(this)
+        plugin.restoreAdapter.onDisable(this)
     }
 
     /**
      * Restart the arena.
      */
     override fun restart() {
-        BedWars.plugin.logger.fine("Restarting arena: $name")
+        plugin.logger.fine("Restarting arena: $name")
         Bukkit.getPluginManager().callEvent(ArenaRestartEvent(name, worldName))
         destroyData()
-        BedWars.api.restoreAdapter.onRestart(this)
+        plugin.restoreAdapter.onRestart(this)
     }
 
     /**
@@ -1010,7 +1005,7 @@ class Arena(
 
     override fun removePlacedBlock(block: Block) {
         if (!isBlockPlaced(block)) return
-        placed.remove(block.location.toVector())
+        placed -= block.location.toVector()
     }
 
     override fun isBlockPlaced(block: Block) = block.location.toVector() in placed
@@ -1021,14 +1016,15 @@ class Arena(
     override fun changeStatus(status: GameState) {
         // prevent called twice #https://github.com/andrei1058/BedWars1058/issues/774
         if (status == this.status) return
+
+        plugin.server.pluginManager.callEvent(GameStateChangeEvent(this, this.status, status))
         this.status = status
 
-        Bukkit.getPluginManager().callEvent(GameStateChangeEvent(this, status, status))
         refreshSigns()
 
         val allPlayers = allPlayers
         if (status == GameState.PLAYING) {
-            allPlayers.forEach { BedWars.plugin.afkManager.setAFK(it, null) }
+            allPlayers.forEach { plugin.afkManager.setAFK(it, null) }
 
             // Initialize game stats
             players.forEach { statsHolder.init(it) }
@@ -1047,12 +1043,12 @@ class Arena(
         moneyperMinuteTask?.cancel()
         perMinuteTask?.cancel()
 
-        allPlayers.forEach { BedWars.plugin.scoreboardManager.giveSidebar(it, this, false) }
+        allPlayers.forEach { plugin.scoreboardManager.giveSidebar(it, this, false) }
 
         when (status) {
             GameState.STARTING -> startingTask = GameStartingTask(this)
             GameState.PLAYING -> {
-                if (BedWars.levelSupport is InternalLevel) {
+                if (plugin.levelManager is InternalLevelManager) {
                     perMinuteTask = PerMinuteTask(this)
                 }
                 if (BedWars.economy is WithEconomy) {
@@ -1098,7 +1094,7 @@ class Arena(
     override fun refreshSigns() {
         for (b in signs) {
             val s = b.state as? Sign ?: return
-            for ((line, string) in BedWars.signs!!.getStringList("format").withIndex()) {
+            for ((line, string) in plugin.configs.signs.getStringList("format").withIndex()) {
                 s.setLine(line, string
                     .replace("[on]", "${players.size}")
                     .replace("[max]", "$maxPlayers")
@@ -1120,34 +1116,35 @@ class Arena(
      * This will clear the inventory first.
      */
     override fun sendPreGameCommandItems(player: Player) {
-        val preGameItems = BedWars.config.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_PATH) ?: return
+        val config = plugin.mainConfig
+        val preGameItems = config.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_PATH) ?: return
         player.inventory.clear()
 
         for (item in preGameItems.getKeys(false)) {
             val material = ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_MATERIAL.replace("%path%", item)
-            if (material !in BedWars.config) {
-                BedWars.plugin.logger.severe("$material is not set!")
+            if (material !in config) {
+                plugin.logger.severe("$material is not set!")
                 continue
             }
 
             val slot = ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_SLOT.replace("%path%", item)
-            if (slot !in BedWars.config) {
-                BedWars.plugin.logger.severe("$slot is not set!")
+            if (slot !in config) {
+                plugin.logger.severe("$slot is not set!")
                 continue
             }
 
             val command = ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_COMMAND.replace("%path%", item)
-            if (command !in BedWars.config) {
-                BedWars.plugin.logger.severe("$command is not set!")
+            if (command !in config) {
+                plugin.logger.severe("$command is not set!")
                 continue
             }
 
             player.inventory.setItem(
-                BedWars.config.getInt(slot),
+                config.getInt(slot),
                 Misc.createItem(
-                    Material.valueOf(BedWars.config.getString(material)!!),
-                    BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_DATA.replace("%path%", item)).toByte(),
-                    BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_ENCHANTED.replace("%path%", item)),
+                    Material.valueOf(config.getString(material)!!),
+                    config.getInt(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_DATA.replace("%path%", item)).toByte(),
+                    config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_ENCHANTED.replace("%path%", item)),
                     SupportPAPI.support.replace(player,
                         Language.getMsg(player, Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", item))
                     ),
@@ -1156,7 +1153,7 @@ class Arena(
                     ),
                     player,
                     "RUNCOMMAND",
-                    BedWars.config.getString(command)!!
+                    config.getString(command)!!
                 )
             )
 
@@ -1168,34 +1165,35 @@ class Arena(
      * This will clear the inventory first.
      */
     override fun sendSpectatorCommandItems(player: Player) {
-        val spectatorItems = BedWars.config.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_PATH) ?: return
+        val config = plugin.mainConfig
+        val spectatorItems = config.getConfigurationSection(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_PATH) ?: return
         player.inventory.clear()
 
         for (item in spectatorItems.getKeys(false)) {
             val material = ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_MATERIAL.replace("%path%", item)
-            if (material !in BedWars.config) {
-                BedWars.plugin.logger.severe("$material is not set!")
+            if (material !in config) {
+                plugin.logger.severe("$material is not set!")
                 continue
             }
 
             val slot = ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_SLOT.replace("%path%", item)
-            if (slot !in BedWars.config) {
-                BedWars.plugin.logger.severe("$slot is not set!")
+            if (slot !in config) {
+                plugin.logger.severe("$slot is not set!")
                 continue
             }
 
             val command = ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_COMMAND.replace("%path%", item)
-            if (command !in BedWars.config) {
-                BedWars.plugin.logger.severe("$command is not set!")
+            if (command !in config) {
+                plugin.logger.severe("$command is not set!")
                 continue
             }
 
             player.inventory.setItem(
-                BedWars.config.getInt(slot),
+                config.getInt(slot),
                 Misc.createItem(
-                    Material.valueOf(BedWars.config.getString(material)!!),
-                    BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_DATA.replace("%path%", item)).toByte(),
-                    BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_ENCHANTED.replace("%path%", item)),
+                    Material.valueOf(config.getString(material)!!),
+                    config.getInt(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_DATA.replace("%path%", item)).toByte(),
+                    config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_ENCHANTED.replace("%path%", item)),
                     SupportPAPI.support.replace(player,
                         Language.getMsg(player, Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_NAME.replace("%path%", item))
                     ),
@@ -1204,7 +1202,7 @@ class Arena(
                     ),
                     player,
                     "RUNCOMMAND",
-                    BedWars.config.getString(command)!!
+                    config.getString(command)!!
                 )
             )
         }
@@ -1254,6 +1252,7 @@ class Arena(
 
             val statParser = topInChat.newParser()
 
+            val nms = plugin.versionSupport
             allPlayers.forEach {
                 val lang = Language.getLanguage(it)
 
@@ -1264,7 +1263,7 @@ class Arena(
                     .replace("{TeamName}", winner.getDisplayName(lang))
                 )
 
-                BedWars.nms.sendTitle(it, lang.m(
+                nms.sendTitle(it, lang.m(
                     if (winner.members.contains(it) || winner.wasMember(it.uniqueId)) Messages.GAME_END_VICTORY_PLAYER_TITLE
                     else Messages.GAME_END_GAME_OVER_PLAYER_TITLE
                 ), null, 0, 70, 20)
@@ -1292,7 +1291,7 @@ class Arena(
                     it.sendMessage(SupportPAPI.support.replace(it, msg))
                 }
 
-                val sidebar = BedWars.plugin.scoreboardManager.getSidebar(it)
+                val sidebar = plugin.scoreboardManager.getSidebar(it)
                 if (sidebar is BwSidebar) sidebar.topStatistics = topInSidebar
             }
             changeStatus(GameState.RESTARTING)
@@ -1302,7 +1301,7 @@ class Arena(
             val aliveWinners = players.map { it.uniqueId }
             val losers = (teams - winner).flatMap { it.membersCache }.map { it.uniqueId }
 
-            Bukkit.getPluginManager().callEvent(GameEndEvent(this, winners, losers, winner, aliveWinners))
+            plugin.server.pluginManager.callEvent(GameEndEvent(this, winners, losers, winner, aliveWinners))
         }
         if (players.isEmpty() && status != GameState.RESTARTING) {
             changeStatus(GameState.RESTARTING)
@@ -1312,12 +1311,13 @@ class Arena(
     override fun updateNextEvent() {
         BedWars.debug("---")
         BedWars.debug("updateNextEvent called")
+        val generators = plugin.configs.generators
         val (generatorType, nextEvent) = when (nextEvent) {
             NextEvent.EMERALD_GENERATOR_TIER_II if upgradeEmeraldsCount == 0 -> {
                 // next diamond time < next emerald time
-                upgradeEmeraldsCount = BedWars.generatorsCfg.getInt(
+                upgradeEmeraldsCount = generators.getInt(
                     "$group.${ConfigPath.GENERATOR_EMERALD_TIER_III_START}",
-                    BedWars.generatorsCfg.getInt("Default.${ConfigPath.GENERATOR_EMERALD_TIER_III_START}")
+                    generators.getInt("Default.${ConfigPath.GENERATOR_EMERALD_TIER_III_START}")
                 )
                 emeraldTier = 2
                 GeneratorOre.EMERALD to when (diamondTier) {
@@ -1327,9 +1327,9 @@ class Arena(
                 }
             }
             NextEvent.DIAMOND_GENERATOR_TIER_II if upgradeDiamondsCount == 0 -> {
-                upgradeDiamondsCount = BedWars.generatorsCfg.getInt(
+                upgradeDiamondsCount = generators.getInt(
                     "$group.${ConfigPath.GENERATOR_DIAMOND_TIER_III_START}",
-                    BedWars.generatorsCfg.getInt("Default.${ConfigPath.GENERATOR_DIAMOND_TIER_III_START}")
+                    generators.getInt("Default.${ConfigPath.GENERATOR_DIAMOND_TIER_III_START}")
                 )
                 diamondTier = 2
                 GeneratorOre.DIAMOND to when {
@@ -1380,9 +1380,9 @@ class Arena(
      * Register join-signs for arena
      */
     private fun registerSigns() {
-        if (BedWars.serverType == ServerType.BUNGEE) return
+        if (plugin.serverType == ServerType.BUNGEE) return
 
-        for (st in BedWars.signs!!.getStringList("locations")) {
+        for (st in plugin.configs.signs.getStringList("locations")) {
             val data = st.split(",")
             if (data[0] != name) continue
 
@@ -1391,7 +1391,7 @@ class Arena(
             val z = data[3].toDoubleOrNull()
 
             if (x == null || y == null || z == null) {
-                BedWars.plugin.logger.severe("Could not load sign at: $data")
+                plugin.logger.severe("Could not load sign at: $data")
                 continue
             }
 
@@ -1453,8 +1453,8 @@ class Arena(
         world.players.forEach { it.kickPlayer("You're not supposed to be here.") }
         manager.arenas.remove(name)
         destroyReJoins()
-        for (despawnable in ArrayList<Despawnable?>(BedWars.nms.despawnables.values)) {
-            if (despawnable!!.team.arena === this) {
+        for (despawnable in plugin.versionSupport.despawnables.values.toList()) {
+            if (despawnable.team.arena === this) {
                 despawnable.destroy()
             }
         }
@@ -1507,23 +1507,26 @@ class Arena(
         }
 
         // hide to others
+        val nms = plugin.versionSupport
         for (playing in arena.players) {
             if (playing == player) continue
-            BedWars.nms.hidePlayer(player, playing)
+            nms.hidePlayer(player, playing)
         }
-        player.teleportSafe(respawnLocation)
-        player.allowFlight = true
-        player.isFlying = true
+        player.apply {
+            teleportSafe(this@Arena.respawnLocation)
+            allowFlight = true
+            isFlying = true
+        }
 
         respawnSessions[player] = seconds
-        BedWars.plugin.run(delay = 10) {
+        plugin.run(delay = 10) {
             player.allowFlight = true
             player.isFlying = true
 
-            BedWars.nms.setCollide(player, this, false)
+            nms.setCollide(player, this, false)
             // #274
             for (invisible in showTime.keys) {
-                BedWars.nms.hideArmor(invisible, player)
+                nms.hideArmor(invisible, player)
             }
 
             updateSpectatorCollideRule(player, false)
@@ -1546,9 +1549,15 @@ class Arena(
     }
 
     override fun isProtected(location: Location) = regionsList.any { it.isInRegion(location) } ||
-            (teams.flatMap { it.generators } + oreGenerators)
-                .any { it.location.distance(location) <= config.getInt(ConfigPath.ARENA_GENERATOR_PROTECTION) } ||
-            Misc.isOutsideOfBorder(location)
+            allGenerators.any { it.location.distance(location) <= config.getInt(ConfigPath.ARENA_GENERATOR_PROTECTION) } ||
+            isOutsideOfBorder(location)
+
+    fun isOutsideOfBorder(location: Location): Boolean {
+        val border = location.world!!.worldBorder
+        if (plugin.versionSupport.version > 0) return !border.isInside(location)
+        val radius = border.size / 2 + border.warningDistance
+        return border.center.distance(location) >= radius
+    }
 
     override fun abandonGame(player: Player) {
         val team = getExTeam(player.uniqueId) ?: return
@@ -1561,7 +1570,7 @@ class Arena(
             throw RuntimeException("Given location is not on this game world.")
         }
 
-        if (!BedWars.nms.isBed(location.block.type)) return null
+        if (!plugin.versionSupport.isBed(location.block.type)) return null
 
         return teams.find { it.isBed(location) }
     }

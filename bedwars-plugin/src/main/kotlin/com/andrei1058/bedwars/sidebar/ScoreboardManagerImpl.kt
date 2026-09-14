@@ -16,14 +16,15 @@ import org.bukkit.entity.Player
 import java.util.UUID
 import kotlin.math.ceil
 
-class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
+class ScoreboardManagerImpl(private val plugin: BedWars) : ScoreboardManager {
     val sidebarHandler = SidebarManager.init()
     private val sidebars = mutableMapOf<UUID, BwSidebar>()
 
     init {
         val log = plugin.logger
 
-        val playerListRefreshInterval = BedWars.config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_LIST_REFRESH)
+        val config = plugin.mainConfig
+        val playerListRefreshInterval = config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_LIST_REFRESH)
         if (playerListRefreshInterval < 1) {
             log.info("Scoreboard names list refresh is disabled. (It is set to $playerListRefreshInterval).")
         } else {
@@ -32,11 +33,11 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1L, playerListRefreshInterval) { BedWars.api.scoreboardManager.refreshTabList() }
+            plugin.repeat(1L, playerListRefreshInterval) { plugin.scoreboardManager.refreshTabList() }
         }
         plugin.metrics.appendPie("sb_list_refresh_interval") { playerListRefreshInterval.toString() }
 
-        val placeholdersRefreshInterval = BedWars.config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_PLACEHOLDERS_REFRESH_INTERVAL)
+        val placeholdersRefreshInterval = config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_PLACEHOLDERS_REFRESH_INTERVAL)
         if (placeholdersRefreshInterval < 1) {
             log.info("Scoreboard placeholders refresh is disabled. (It is set to $placeholdersRefreshInterval).")
         } else {
@@ -45,11 +46,11 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, placeholdersRefreshInterval) { BedWars.api.scoreboardManager.refreshPlaceholders() }
+            plugin.repeat(1, placeholdersRefreshInterval) { plugin.scoreboardManager.refreshPlaceholders() }
         }
         plugin.metrics.appendPie("sb_placeholder_refresh_interval") { placeholdersRefreshInterval.toString() }
 
-        val titleRefreshInterval = BedWars.config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_TITLE_REFRESH_INTERVAL)
+        val titleRefreshInterval = config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_TITLE_REFRESH_INTERVAL)
         if (titleRefreshInterval < 1) {
             log.info("Scoreboard title refresh is disabled. (It is set to $titleRefreshInterval).")
         } else {
@@ -57,11 +58,11 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
                 log.warning("Scoreboard title refresh interval is set to: $titleRefreshInterval")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, titleRefreshInterval, true) { BedWars.api.scoreboardManager.refreshTitles() }
+            plugin.repeat(1, titleRefreshInterval, true) { plugin.scoreboardManager.refreshTitles() }
         }
         plugin.metrics.appendPie("sb_title_refresh_interval") { titleRefreshInterval.toString() }
 
-        val healthAnimationInterval = BedWars.config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_HEALTH_REFRESH)
+        val healthAnimationInterval = config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_HEALTH_REFRESH)
         if (healthAnimationInterval < 1) {
             log.info("Scoreboard health animation refresh is disabled. (It is set to $healthAnimationInterval).")
         } else {
@@ -70,12 +71,12 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, healthAnimationInterval) { BedWars.api.scoreboardManager.refreshHealth() }
+            plugin.repeat(1, healthAnimationInterval) { plugin.scoreboardManager.refreshHealth() }
         }
         plugin.metrics.appendPie("sb_health_refresh_interval") { healthAnimationInterval.toString() }
 
-        val tabHeaderFooterRefreshInterval = BedWars.config.getLong(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_REFRESH_INTERVAL)
-        if (tabHeaderFooterRefreshInterval < 1 || !BedWars.config.getBoolean(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_ENABLE)) {
+        val tabHeaderFooterRefreshInterval = config.getLong(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_REFRESH_INTERVAL)
+        if (tabHeaderFooterRefreshInterval < 1 || !config.getBoolean(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_ENABLE)) {
             log.info("Scoreboard Tab header-footer refresh is disabled.")
         } else {
             if (tabHeaderFooterRefreshInterval < 20) {
@@ -83,35 +84,36 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, tabHeaderFooterRefreshInterval) { BedWars.api.scoreboardManager.refreshTabHeaderFooter() }
+            plugin.repeat(1, tabHeaderFooterRefreshInterval) { plugin.scoreboardManager.refreshTabHeaderFooter() }
         }
         plugin.metrics.appendPie("sb_header_footer_refresh_interval") { tabHeaderFooterRefreshInterval.toString() }
 
-        val lobbySidebar = BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) &&
-                BedWars.api.serverType == ServerType.MULTIARENA
+        val lobbySidebar = config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) &&
+                plugin.serverType == ServerType.MULTIARENA
         plugin.metrics.appendPie("sb_lobby_enable") { lobbySidebar.toString() }
-        val gameSidebar = BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR)
+        val gameSidebar = config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR)
         plugin.metrics.appendPie("sb_game_enable") { gameSidebar.toString() }
 
-        plugin.registerEvents(ScoreboardListener(this))
+        plugin.registerEvents(ScoreboardListener(plugin, this))
     }
 
     override fun giveSidebar(player: Player, arena: IArena?, delay: Boolean) {
         var sidebar = sidebars.getOrDefault(player.uniqueId, null)
 
+        val config = plugin.mainConfig
         // check if we might need to remove the existing sidebar
         if (null != sidebar) {
             if (null == arena) {
                 // if sidebar is disabled in lobby on shared or multi-arena mode
-                if (!BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) ||
-                    BedWars.api.serverType == ServerType.SHARED
+                if (!config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) ||
+                    plugin.serverType == ServerType.SHARED
                 ) {
                     this.remove(sidebar)
                     return
                 }
             } else {
                 // if sidebar is disabled in game
-                if (!BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR)) {
+                if (!config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR)) {
                     this.remove(sidebar)
                     return
                 }
@@ -119,11 +121,11 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
         }
 
         // if sidebar was null but still disabled for lobbies
-        if (!BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) && null == arena) {
+        if (!config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) && null == arena) {
             return
         }
         // if sidebar was null but still disabled in game
-        if (!BedWars.config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR) && null != arena) {
+        if (!config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR) && null != arena) {
             return
         }
 
@@ -173,7 +175,7 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
 
             }
             Language.getScoreboard(player, "$arenaGroupSidebar.$path", alternative)
-        } else if (BedWars.api.serverType == ServerType.SHARED) emptyList()
+        } else if (plugin.serverType == ServerType.SHARED) emptyList()
         else Language.getList(player, Messages.SCOREBOARD_LOBBY)
 
         // if we do not have lines we eventually remove the sidebar
@@ -189,7 +191,7 @@ class ScoreboardManagerImpl(plugin: BedWars) : ScoreboardManager {
         // at this point we are sure we need a sidebar instance
         var newlyAdded = false
         if (sidebar == null) {
-            sidebar = BwSidebar(player)
+            sidebar = BwSidebar(plugin, player)
             newlyAdded = true
 
             val event = PlayerSidebarInitEvent(player, sidebar)

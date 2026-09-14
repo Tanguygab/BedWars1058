@@ -21,8 +21,8 @@ package com.andrei1058.bedwars.commands.bedwars.subcmds.regular
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
-import com.andrei1058.bedwars.api.command.ParentCommand
-import com.andrei1058.bedwars.api.command.SubCommand
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
+import com.andrei1058.bedwars.commands.bedwars.subcmds.SubCommand
 import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.arena.SetupSession
@@ -30,18 +30,15 @@ import com.andrei1058.bedwars.configuration.Permissions
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class CmdStart(parent: ParentCommand) : SubCommand("start", priority = 15) {
-    init {
-        displayInfo = createTC(
-            "§6 ▪ §7/${parent.commandName} $subCommandName §8 - §eforce start an arena",
-            "/${parent.commandName} $subCommandName",
-            "§fForcestart an arena.\n§fPermission: §c" + Permissions.PERMISSION_FORCESTART
-        )
-    }
+class CmdStart(parent: MainCommand) : SubCommand(parent, "start", priority = 15) {
+    override val description = createDescription(
+        "Forcestart an arena.\nPermission: §c" + Permissions.PERMISSION_FORCESTART,
+        suffix = "force start an arena"
+    )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
         if (sender !is Player) return false
-        val arena = BedWars.api.arenaManager.getArena(sender)
+        val arena = plugin.arenaManager.getArena(sender)
 
         if (arena == null || !arena.isPlayer(sender)) {
             sender.sendLangMsg(Messages.COMMAND_FORCESTART_NOT_IN_GAME)
@@ -64,10 +61,10 @@ class CmdStart(parent: ParentCommand) : SubCommand("start", priority = 15) {
         return true
     }
 
-    override fun canSee(sender: CommandSender, api: com.andrei1058.bedwars.api.BedWars): Boolean {
+    override fun canSee(sender: CommandSender): Boolean {
         if (sender !is Player) return false
 
-        val arena = api.arenaManager.getArena(sender) ?: return false
+        val arena = plugin.arenaManager.getArena(sender) ?: return false
         if (!arena.status.isPreGame() || !arena.isPlayer(sender)) return false
 
         if (SetupSession.isInSetupSession(sender.uniqueId)) return false

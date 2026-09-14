@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.shop.main
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.Utils.editMeta
+import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.shop.ICategoryContent
 import com.andrei1058.bedwars.api.arena.shop.IContentTier
@@ -72,17 +72,17 @@ open class CategoryContent(
         BedWars.debug("Loading CategoryContent $identifier")
 
         if (yml?.get("$identifier.${ConfigPath.SHOP_CATEGORY_CONTENT_CONTENT_SLOT}") == null) {
-            BedWars.plugin.logger.severe("Content slot not set at $identifier")
+            BedWars.INSTANCE.logger.severe("Content slot not set at $identifier")
             isLoaded = false
         }
 
         val path = "$identifier.${ConfigPath.SHOP_CATEGORY_CONTENT_CONTENT_TIERS}"
         val tiers = yml?.getConfigurationSection(path)
         if (tiers == null || tiers.getKeys(false).isEmpty()) {
-            BedWars.plugin.logger.severe("No tiers set for $identifier")
+            BedWars.INSTANCE.logger.severe("No tiers set for $identifier")
             isLoaded = false
         } else if (yml.get("$path.tier1") == null) {
-            BedWars.plugin.logger.severe("tier1 not found for $identifier")
+            BedWars.INSTANCE.logger.severe("tier1 not found for $identifier")
             isLoaded = false
         }
 
@@ -131,7 +131,7 @@ open class CategoryContent(
             return
         }
 
-        val arena = BedWars.plugin.arenaManager.getArena(player)!!
+        val arena = BedWars.INSTANCE.arenaManager.getArena(player)!!
         val event = ShopBuyEvent(player, arena, this)
         //call shop buy event
         Bukkit.getPluginManager().callEvent(event)
@@ -212,7 +212,7 @@ open class CategoryContent(
 
             val buyStatus = Language.getMsg(player,
                 if (isPermanent && shopCache.getCachedItem(this@CategoryContent)?.tier == contentTiers.size)
-                    if (BedWars.nms.isArmor(item)) Messages.SHOP_LORE_STATUS_ARMOR
+                    if (BedWars.INSTANCE.versionSupport.isArmor(item)) Messages.SHOP_LORE_STATUS_ARMOR
                     else Messages.SHOP_LORE_STATUS_MAXED
                 else if (canAfford) Messages.SHOP_LORE_STATUS_CAN_BUY
                 else Messages.SHOP_LORE_STATUS_CANT_AFFORD //ARMOR
@@ -333,15 +333,16 @@ open class CategoryContent(
             }
 
             var cost = amount
+            val nms = BedWars.INSTANCE.versionSupport
             for (i in player.inventory.contents) {
                 if (i == null || i.type != currency) continue
 
                 if (i.amount < cost) {
                     cost -= i.amount
-                    BedWars.nms.minusAmount(player, i, i.amount)
+                    nms.minusAmount(player, i, i.amount)
                     player.updateInventory()
                 } else {
-                    BedWars.nms.minusAmount(player, i, cost)
+                    nms.minusAmount(player, i, cost)
                     player.updateInventory()
                     break
                 }

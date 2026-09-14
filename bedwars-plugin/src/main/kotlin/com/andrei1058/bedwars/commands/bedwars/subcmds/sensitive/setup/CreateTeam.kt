@@ -19,18 +19,18 @@
  */
 package com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.setup
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.team.TeamColor
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.arena.SetupSession
+import com.andrei1058.bedwars.commands.bedwars.MainCommand
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
-class CreateTeam : SetupCommand("createTeam") {
+class CreateTeam(parent: MainCommand) : SetupCommand(parent, "createTeam") {
 
     override fun execute(args: Array<String>, sender: Player, session: SetupSession) {
         if (args.size < 2) {
-            sender.sendMessage("§c▪ §7Usage: /${BedWars.MAIN_COMMAND} createTeam §o<name> §o<color>")
+            sender.sendMessage("§c▪ §7Usage: /${parent.commandName} createTeam §o<name> §o<color>")
             sender.sendMessage("§6 ▪ §7Available colors: §7${getColors()}.")
             return
         }

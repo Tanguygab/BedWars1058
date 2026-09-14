@@ -38,12 +38,14 @@ import org.bukkit.Bukkit
 class GameStartingTask(
     override val arena: Arena
 ) : Runnable, StartingTask {
-    override var countdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_START_COUNTDOWN_REGULAR)
+    private val plugin = BedWars.INSTANCE
+    override var countdown = plugin.mainConfig.getInt(ConfigPath.GENERAL_CONFIGURATION_START_COUNTDOWN_REGULAR)
 
-    override val bukkitTask = Bukkit.getScheduler().runTaskTimer(BedWars.plugin, this, 0, 20L)
+    override val bukkitTask = Bukkit.getScheduler().runTaskTimer(plugin, this, 0, 20L)
 
 
     override fun run() {
+        val nms = plugin.versionSupport
         if (countdown == 0) {
             arena.teamAssigner.assignTeams(arena)
 
@@ -52,7 +54,7 @@ class GameStartingTask(
             //Spawn shops and upgrades
             //Disable generators for empty teams if required
             for (team in arena.teams) {
-                BedWars.nms.colorBed(team)
+                nms.colorBed(team)
                 if (team.members.isEmpty()) {
                     team.isBedDestroyed = true
                     if (arena.config.getBoolean(ConfigPath.ARENA_DISABLE_GENERATOR_FOR_EMPTY_TEAMS)) {
@@ -63,7 +65,7 @@ class GameStartingTask(
                 }
             }
 
-            BedWars.plugin.run(delay = 60) {
+            plugin.run(delay = 60) {
                 //Enable diamond/ emerald generators
                 for (og in arena.oreGenerators) {
                     if (og.type === GeneratorOre.EMERALD || og.type === GeneratorOre.DIAMOND) og.enableRotation()
@@ -74,23 +76,19 @@ class GameStartingTask(
             spawnPlayers()
 
             //Lobby removal
-            BedWars.api.restoreAdapter.onLobbyRemoval(arena)
+            plugin.restoreAdapter.onLobbyRemoval(arena)
 
 
             bukkitTask.cancel()
             arena.changeStatus(GameState.PLAYING)
 
             // Check if emerald should be first based on time
-            if (arena.upgradeDiamondsCount < arena.upgradeEmeraldsCount) {
-                arena.nextEvent = NextEvent.DIAMOND_GENERATOR_TIER_II
-            } else {
-                arena.nextEvent = NextEvent.EMERALD_GENERATOR_TIER_II
-            }
+            arena.nextEvent = if (arena.upgradeDiamondsCount < arena.upgradeEmeraldsCount)
+                NextEvent.DIAMOND_GENERATOR_TIER_II
+            else NextEvent.EMERALD_GENERATOR_TIER_II
 
             //Spawn shopkeepers
-            for (bwt in arena.teams) {
-                bwt.spawnNPCs()
-            }
+            arena.teams.forEach { it.spawnNPCs() }
             return
         }
 
@@ -104,7 +102,7 @@ class GameStartingTask(
             for (player in arena.players) {
                 val playerLang = Language.getLanguage(player)
                 val titleSubtitle = getCountDownTitle(playerLang, countdown)
-                BedWars.nms.sendTitle(player, titleSubtitle[0], titleSubtitle[1], 0, 20, 10)
+                nms.sendTitle(player, titleSubtitle[0], titleSubtitle[1], 0, 20, 10)
                 player.sendLangMsg(Messages.ARENA_STATUS_START_COUNTDOWN_CHAT, "{time}" to countdown)
             }
         }
@@ -113,12 +111,13 @@ class GameStartingTask(
 
     //Spawn players
     private fun spawnPlayers() {
-        for (bwt in arena.teams) {
-            for (p in bwt.members.toList()) {
+        val nms = plugin.versionSupport
+        for (team in arena.teams) {
+            for (p in team.members.toList()) {
                 BedWarsTeam.reSpawnInvulnerability[p.uniqueId] = System.currentTimeMillis() + 2000L
-                bwt.firstSpawn(p)
+                team.firstSpawn(p)
                 Sounds.playSound(ConfigPath.SOUND_GAME_START, p)
-                BedWars.nms.sendTitle(p, Language.getMsg(p, Messages.ARENA_STATUS_START_PLAYER_TITLE), null, 0, 30, 10)
+                nms.sendTitle(p, Language.getMsg(p, Messages.ARENA_STATUS_START_PLAYER_TITLE), null, 0, 30, 10)
                 for (tut in Language.getList(p, Messages.ARENA_STATUS_START_PLAYER_TUTORIAL)) {
                     p.sendMessage(SupportPAPI.support.replace(p, tut))
                 }

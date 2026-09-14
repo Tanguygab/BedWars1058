@@ -30,7 +30,7 @@ class CobWebRemover(private val arena: IArena) {
 
     init {
         taskByArena[arena.worldName]
-        taskId = Bukkit.getScheduler().runTaskTimer(BedWars.plugin, Runnable {
+        taskId = Bukkit.getScheduler().runTaskTimer(BedWars.INSTANCE, Runnable {
             val currentTime = System.currentTimeMillis()
             cobWebs.filter { (block, time) -> time <= currentTime }
                 .forEach { (block, _) ->

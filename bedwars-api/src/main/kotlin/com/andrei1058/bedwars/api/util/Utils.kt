@@ -1,5 +1,6 @@
-package com.andrei1058.bedwars
+package com.andrei1058.bedwars.api.util
 
+import com.andrei1058.bedwars.api.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import io.papermc.lib.PaperLib
 import net.md_5.bungee.api.chat.ClickEvent
@@ -14,13 +15,15 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
 object Utils {
+    private val isPaper = runCatching { Class.forName("com.destroystokyo.paper.PaperConfig") }.isSuccess
+
 
     fun ItemStack.editMeta(run: ItemMeta.() -> Unit) {
         itemMeta = itemMeta?.also(run)
     }
 
     fun Entity.teleportSafe(location: Location, cause: PlayerTeleportEvent.TeleportCause = PlayerTeleportEvent.TeleportCause.PLUGIN) {
-        if (BedWars.isPaper && BedWars.config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_PAPER_FEATURES)) {
+        if (isPaper && BedWars.INSTANCE.configs.main.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_PAPER_FEATURES)) {
             PaperLib.teleportAsync(this, location, cause)
             return
         }
@@ -31,9 +34,9 @@ object Utils {
     /**
      * create TextComponent message
      */
-    fun msgHoverClick(msg: String, hover: String, click: String, clickAction: ClickEvent.Action = ClickEvent.Action.RUN_COMMAND) = TextComponent(msg).apply {
-        hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(hover).create())
-        clickEvent = ClickEvent(clickAction, click)
+    fun component(msg: String, hover: String, click: String, clickAction: ClickEvent.Action = ClickEvent.Action.RUN_COMMAND) = TextComponent(msg).apply {
+        if (hover.isNotEmpty()) hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ComponentBuilder(hover).create())
+        if (click.isNotEmpty()) clickEvent = ClickEvent(clickAction, click)
     }
 
     /**
@@ -44,5 +47,5 @@ object Utils {
         hover: String,
         click: String,
         clickAction: ClickEvent.Action = ClickEvent.Action.RUN_COMMAND
-    ) = spigot().sendMessage(msgHoverClick(msg, hover, click, clickAction))
+    ) = spigot().sendMessage(component(msg, hover, click, clickAction))
 }

@@ -41,7 +41,7 @@ class Interact_1_13Plus : Listener {
         ) return
 
         if (
-            api.configs.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_ANVIL)
+            api.configs.main.getBoolean(ConfigPath.GENERAL_CONFIGURATION_DISABLE_ANVIL)
             || api.arenaManager.isSpectating(e.player)
         ) e.isCancelled = true
     }

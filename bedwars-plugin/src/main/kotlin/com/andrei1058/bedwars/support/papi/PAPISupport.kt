@@ -67,7 +67,7 @@ class PAPISupport(private val plugin: BedWars) : PlaceholderExpansion() {
             val targetedStat = params.removePrefix("stats_")
             if (targetedStat.isBlank()) return null
 
-            val stats = BedWars.statsManager.getUnsafe(player.uniqueId) ?: return null
+            val stats = plugin.statsManager.getUnsafe(player.uniqueId) ?: return null
             val stat = when (targetedStat) {
                 "firstplay" -> SimpleDateFormat(Language.getMsg(player, Messages.FORMATTING_STATS_DATE_FORMAT))
                     .format(stats.firstPlay?.let { Timestamp.from(it) })
@@ -89,7 +89,7 @@ class PAPISupport(private val plugin: BedWars) : PlaceholderExpansion() {
 
         // other placeholders
         val a = arenaManager.getArena(player)
-        val levels = BedWars.levelSupport
+        val levels = plugin.levelManager
         val response = when (params) {
             "current_online" -> arenaManager.arenas.values.sumOf { it.allPlayers.size }
             "current_arenas" -> arenaManager.arenas.size

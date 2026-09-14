@@ -27,12 +27,10 @@ import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.server.ServerType
 import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.plugin.Plugin
 import java.io.File
 import java.io.IOException
 
-class MainConfig(plugin: Plugin) : ConfigManager(plugin, "config", plugin.dataFolder.path) {
+class MainConfig(plugin: BedWars) : ConfigManager(plugin, "config", plugin.dataFolder.path) {
     init {
         options()
             .copyDefaults(true)
@@ -114,7 +112,7 @@ class MainConfig(plugin: Plugin) : ConfigManager(plugin, "config", plugin.dataFo
 
             // tnd block blast resistance
             // on 1.8.8 it has to be around 69, on 1.20 and 1.18 it works fine with 12 (tested)
-            ConfigPath.GENERAL_TNT_PROTECTION_END_STONE_BLAST to if (BedWars.nms.version == 0) 69f else 12f,
+            ConfigPath.GENERAL_TNT_PROTECTION_END_STONE_BLAST to if (plugin.versionSupport.version == 0) 69f else 12f,
             ConfigPath.GENERAL_TNT_PROTECTION_GLASS_BLAST to 300f,
             ConfigPath.GENERAL_TNT_RAY_BLOCKED_BY_GLASS to true,
 
@@ -244,14 +242,14 @@ class MainConfig(plugin: Plugin) : ConfigManager(plugin, "config", plugin.dataFo
             ?.find { language.equals(it, ignoreCase = true) }
             ?: "en"
 
-        val def = Language.getLang(defIso)
+        val def = Language.getLanguageByIso(defIso)
 
-        BedWars.api.defaultLang = def
+        Language.defaultLanguage = def
 
         //remove languages if disabled
         //server language can't be disabled
         for (iso in getStringList(ConfigPath.GENERAL_CONFIGURATION_DISABLED_LANGUAGES)) {
-            val l = Language.getLang(iso)
+            val l = Language.getLanguageByIso(iso)
             if (l !== def) Language.languages.remove(l)
         }
 
@@ -267,17 +265,17 @@ class MainConfig(plugin: Plugin) : ConfigManager(plugin, "config", plugin.dataFo
         }
 
         try {
-            BedWars.serverType = ServerType.valueOf(getString("serverType")!!.uppercase())
+            plugin.serverType = ServerType.valueOf(getString("serverType")!!.uppercase())
         } catch (_: Exception) {
             if (getString("serverType").equals("BUNGEE_LEGACY", ignoreCase = true)) {
-                BedWars.serverType = ServerType.BUNGEE
-                BedWars.autoscale = false
+                plugin.serverType = ServerType.BUNGEE
+                plugin.autoScale = false
             } else {
                 set("serverType", "MULTIARENA")
             }
         }
 
-        BedWars.lobbyWorld = lobbyWorldName
+        plugin.lobbyWorld = lobbyWorldName
     }
 
     val lobbyWorldName: String get() {

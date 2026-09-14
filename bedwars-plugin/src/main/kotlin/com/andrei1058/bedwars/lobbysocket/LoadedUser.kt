@@ -37,7 +37,7 @@ class LoadedUser(
     val uuid: UUID = UUID.fromString(uuid)
 
     private val toleranceTime = System.currentTimeMillis() + waitSeconds
-    val language = Language.getLang(langIso)
+    val language = Language.getLanguageByIso(langIso)
 
     init {
         if (Bukkit.getWorld(arenaIdentifier) != null) loaded[this.uuid] = this
@@ -51,7 +51,7 @@ class LoadedUser(
     }
 
     companion object {
-        private val waitSeconds = BedWars.config.getLong(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_BWP_TIME_OUT)
+        private val waitSeconds = BedWars.INSTANCE.mainConfig.getLong(ConfigPath.GENERAL_CONFIGURATION_BUNGEE_OPTION_BWP_TIME_OUT)
 
         val loaded = ConcurrentHashMap<UUID, LoadedUser>()
 
