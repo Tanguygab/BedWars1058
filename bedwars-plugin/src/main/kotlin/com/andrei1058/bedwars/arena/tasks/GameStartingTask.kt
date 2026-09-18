@@ -32,7 +32,7 @@ import com.andrei1058.bedwars.arena.Arena
 import com.andrei1058.bedwars.arena.generators.GeneratorOre
 import com.andrei1058.bedwars.arena.team.BedWarsTeam
 import com.andrei1058.bedwars.configuration.Sounds
-import com.andrei1058.bedwars.support.papi.SupportPAPI
+import com.andrei1058.bedwars.support.papi.PAPISupport
 import org.bukkit.Bukkit
 
 class GameStartingTask(
@@ -119,7 +119,7 @@ class GameStartingTask(
                 Sounds.playSound(ConfigPath.SOUND_GAME_START, p)
                 nms.sendTitle(p, Language.getMsg(p, Messages.ARENA_STATUS_START_PLAYER_TITLE), null, 0, 30, 10)
                 for (tut in Language.getList(p, Messages.ARENA_STATUS_START_PLAYER_TUTORIAL)) {
-                    p.sendMessage(SupportPAPI.support.replace(p, tut))
+                    p.sendMessage(PAPISupport.support.replace(p, tut))
                 }
             }
         }

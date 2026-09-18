@@ -28,7 +28,7 @@ import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.commands.ShoutCommand
 import com.andrei1058.bedwars.configuration.Permissions
 import com.andrei1058.bedwars.configuration.Permissions.hasPermission
-import com.andrei1058.bedwars.support.papi.SupportPAPI
+import com.andrei1058.bedwars.support.papi.PAPISupport
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -144,7 +144,7 @@ class ChatFormatting(private val plugin: BedWars) : Listener {
                 .replace("{TeamName}", team.getDisplayName(Language.getLanguage(player)).uppercase())
             content = content.replace("{team}", teamFormat)
         }
-        format = SupportPAPI.support
+        format = PAPISupport.support
             .replace(player, content)
             .replace("{message}", $$"%2$s")
     }

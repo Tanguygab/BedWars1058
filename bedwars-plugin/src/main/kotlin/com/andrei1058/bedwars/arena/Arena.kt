@@ -73,7 +73,7 @@ import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.arena.data.LastHit
 import com.andrei1058.bedwars.arena.data.PlayerGoods
 import com.andrei1058.bedwars.arena.data.ReJoin
-import com.andrei1058.bedwars.support.papi.SupportPAPI
+import com.andrei1058.bedwars.support.papi.PAPISupport
 import com.andrei1058.bedwars.support.vault.WithEconomy
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.*
@@ -1148,10 +1148,10 @@ class Arena(
                     Material.valueOf(config.getString(material)!!),
                     config.getInt(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_DATA.replace("%path%", item)).toByte(),
                     config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PRE_GAME_ITEMS_ENCHANTED.replace("%path%", item)),
-                    SupportPAPI.support.replace(player,
+                    PAPISupport.support.replace(player,
                         Language.getMsg(player, Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", item))
                     ),
-                    SupportPAPI.support.replace(player,
+                    PAPISupport.support.replace(player,
                         Language.getList(player, Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_LORE.replace("%path%", item))
                     ),
                     player,
@@ -1197,10 +1197,10 @@ class Arena(
                     Material.valueOf(config.getString(material)!!),
                     config.getInt(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_DATA.replace("%path%", item)).toByte(),
                     config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_ENCHANTED.replace("%path%", item)),
-                    SupportPAPI.support.replace(player,
+                    PAPISupport.support.replace(player,
                         Language.getMsg(player, Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_NAME.replace("%path%", item))
                     ),
-                    SupportPAPI.support.replace(player,
+                    PAPISupport.support.replace(player,
                         Language.getList(player, Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_LORE.replace("%path%", item))
                     ),
                     player,
@@ -1291,7 +1291,7 @@ class Arena(
                         .replace("{TeamColor}", winner.color.chat.toString())
                         .replace("{TeamName}", winner.getDisplayName(lang))
 
-                    it.sendMessage(SupportPAPI.support.replace(it, msg))
+                    it.sendMessage(PAPISupport.support.replace(it, msg))
                 }
 
                 val sidebar = plugin.scoreboardManager.getSidebar(it)

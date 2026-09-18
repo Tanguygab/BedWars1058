@@ -28,7 +28,7 @@ import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.andrei1058.bedwars.commands.MainCommand
 import com.andrei1058.bedwars.commands.subcmds.CooldownCommand
 import com.andrei1058.bedwars.configuration.Sounds
-import com.andrei1058.bedwars.support.papi.SupportPAPI
+import com.andrei1058.bedwars.support.papi.PAPISupport
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -105,6 +105,6 @@ class CmdStats(parent: MainCommand) : CooldownCommand(parent, "stats", 3000, pri
             .replace("{playername}", player.name)
             .replace("{prefix}", BedWars.chatSupport.getPrefix(player))
         }
-        return SupportPAPI.support.replace(player, s)
+        return PAPISupport.support.replace(player, s)
     }
 }

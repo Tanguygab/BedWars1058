@@ -66,8 +66,8 @@ import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.arena.generators.Generator
 import com.andrei1058.bedwars.shop.ShopManagerImpl
 import com.andrei1058.bedwars.stats.StatsManagerImpl
+import com.andrei1058.bedwars.support.papi.BedWarsExpansion
 import com.andrei1058.bedwars.support.papi.PAPISupport
-import com.andrei1058.bedwars.support.papi.SupportPAPI
 import com.andrei1058.bedwars.support.party.*
 import com.andrei1058.bedwars.support.preloadedparty.PrePartyListener
 import com.andrei1058.bedwars.support.vault.NoChat
@@ -412,8 +412,8 @@ class BedWars : JavaPlugin(), API {
         /* PlaceholderAPI Support */
         if (server.pluginManager.getPlugin("PlaceholderAPI") != null) {
             logger.info("Hooked into PlaceholderAPI support!")
-            PAPISupport(this).register()
-            SupportPAPI.support = SupportPAPI.PAPI()
+            BedWarsExpansion(this).register()
+            PAPISupport.support = PAPISupport.PAPI()
         }
         /*
          * Vault support

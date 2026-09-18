@@ -30,7 +30,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.configuration.ArenaConfig
-import com.andrei1058.bedwars.support.papi.SupportPAPI
+import com.andrei1058.bedwars.support.papi.PAPISupport
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.Material
@@ -302,8 +302,8 @@ class ArenaManagerImpl(private val plugin: BedWars) : ArenaManager {
                     Material.valueOf(config.getString(material)!!),
                     config.getInt(data).toByte(),
                     config.getBoolean(enchanted),
-                    SupportPAPI.support.replace(player, Language.getMsg(player, Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", item))),
-                    SupportPAPI.support.replace(player, Language.getList(player, Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", item))),
+                    PAPISupport.support.replace(player, Language.getMsg(player, Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", item))),
+                    PAPISupport.support.replace(player, Language.getList(player, Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", item))),
                     player,
                     "RUNCOMMAND",
                     config.getString(command)!!
