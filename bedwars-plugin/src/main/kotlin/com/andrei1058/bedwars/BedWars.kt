@@ -37,11 +37,7 @@ import com.andrei1058.bedwars.arena.spectator.SpectatorListeners
 import com.andrei1058.bedwars.arena.stats.DefaultStatsHandler
 import com.andrei1058.bedwars.arena.upgrades.BaseListener
 import com.andrei1058.bedwars.arena.upgrades.HealPoolListner
-import com.andrei1058.bedwars.commands.bedwars.MainCommand
-import com.andrei1058.bedwars.commands.leave.LeaveCommand
-import com.andrei1058.bedwars.commands.party.PartyCommand
-import com.andrei1058.bedwars.commands.rejoin.RejoinCommand
-import com.andrei1058.bedwars.commands.shout.ShoutCommand
+import com.andrei1058.bedwars.commands.*
 import com.andrei1058.bedwars.configuration.*
 import com.andrei1058.bedwars.database.Database
 import com.andrei1058.bedwars.database.MySQL
@@ -556,14 +552,14 @@ class BedWars : JavaPlugin(), API {
     private fun registerCommands() {
         versionSupport.commandMap.run {
             register("shout", ShoutCommand(this@BedWars))
-            register("rejoin", RejoinCommand("rejoin"))
+            register("rejoin", RejoinCommand())
 
             if (serverType == ServerType.BUNGEE) return
             register("leave", LeaveCommand())
 
             if (!config.getBoolean(ConfigPath.GENERAL_ENABLE_PARTY_CMD)) return
             logger.info("Registering /party command..")
-            register("party", PartyCommand("party"))
+            register("party", PartyCommand(this@BedWars))
         }
     }
 

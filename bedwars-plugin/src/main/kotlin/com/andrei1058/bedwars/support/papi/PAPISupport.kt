@@ -23,7 +23,7 @@ import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
-import com.andrei1058.bedwars.commands.shout.ShoutCommand
+import com.andrei1058.bedwars.commands.ShoutCommand
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
 import java.sql.Timestamp

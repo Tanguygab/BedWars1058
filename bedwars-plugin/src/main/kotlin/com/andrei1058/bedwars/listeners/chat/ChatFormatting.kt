@@ -25,7 +25,7 @@ import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.api.server.ServerType
-import com.andrei1058.bedwars.commands.shout.ShoutCommand
+import com.andrei1058.bedwars.commands.ShoutCommand
 import com.andrei1058.bedwars.configuration.Permissions
 import com.andrei1058.bedwars.configuration.Permissions.hasPermission
 import com.andrei1058.bedwars.support.papi.SupportPAPI

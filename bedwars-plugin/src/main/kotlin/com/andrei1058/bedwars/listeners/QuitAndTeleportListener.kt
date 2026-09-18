@@ -27,8 +27,8 @@ import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.arena.LastHit
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.arena.team.BedWarsTeam
-import com.andrei1058.bedwars.commands.bedwars.MainCommand
-import com.andrei1058.bedwars.commands.bedwars.subcmds.CooldownCommand
+import com.andrei1058.bedwars.commands.MainCommand
+import com.andrei1058.bedwars.commands.subcmds.CooldownCommand
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
