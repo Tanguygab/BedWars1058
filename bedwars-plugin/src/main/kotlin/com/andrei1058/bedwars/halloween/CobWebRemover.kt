@@ -20,16 +20,14 @@
 package com.andrei1058.bedwars.halloween
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.arena.IArena
 import org.bukkit.Bukkit
 import org.bukkit.block.Block
 
-class CobWebRemover(private val arena: IArena) {
+class CobWebRemover {
     val taskId: Int
     private val cobWebs = mutableMapOf<Block, Long>()
 
     init {
-        taskByArena[arena.worldName]
         taskId = Bukkit.getScheduler().runTaskTimer(BedWars.INSTANCE, Runnable {
             val currentTime = System.currentTimeMillis()
             cobWebs.filter { (block, time) -> time <= currentTime }
@@ -46,12 +44,5 @@ class CobWebRemover(private val arena: IArena) {
 
     fun destroy() {
         Bukkit.getScheduler().cancelTask(this.taskId)
-        taskByArena.remove(arena.worldName)
-    }
-
-    companion object {
-        private val taskByArena = mutableMapOf<String, CobWebRemover>()
-
-        fun getByArenaWorld(world: String) = taskByArena[world]
     }
 }

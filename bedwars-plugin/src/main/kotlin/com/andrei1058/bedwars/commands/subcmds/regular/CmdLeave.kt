@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.commands.subcmds.regular
 
 import com.andrei1058.bedwars.api.server.ServerType
-import com.andrei1058.bedwars.arena.Misc
+import com.andrei1058.bedwars.Misc
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.MainCommand
 import com.andrei1058.bedwars.commands.subcmds.CooldownCommand

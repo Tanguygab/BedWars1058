@@ -25,104 +25,92 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Persian : Language(BedWars.INSTANCE, "fa") {
+class Persian : Language(BedWars.INSTANCE, "fa", "Persian") {
     init {
-        this.options().header("Translation by Alijk#2951")
-        this.options().copyDefaults(true)
-        this.addDefault(Messages.PREFIX, "")
-        this.addDefault("name", "Persian")
+        val bw = BedWars.MAIN_COMMAND
 
-        // this must stay here
-        // move message to new path
-        if (this.get("player-die-knocked-regular") != null && this.get(Messages.PLAYER_DIE_KNOCKED_IN_VOID_REGULAR_KILL) == null) {
-            this.set(Messages.PLAYER_DIE_KNOCKED_IN_VOID_REGULAR_KILL, this.getString("player-die-knocked-regular"))
-            this.set("player-die-knocked-regular", null)
-        }
-        if (this.get("player-die-knocked-final") != null && this.get(Messages.PLAYER_DIE_KNOCKED_IN_VOID_FINAL_KILL) == null) {
-            this.set(Messages.PLAYER_DIE_KNOCKED_IN_VOID_FINAL_KILL, this.getString("player-die-knocked-final"))
-            this.set("player-die-knocked-final", null)
-        }
+        options().setHeader(listOf("Translation by Alijk#2951"))
 
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_MAIN,
-            Arrays.asList<String?>(
+            listOf(
                 "",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " stats",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " join &o<arena/group>",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " leave",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " lang",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " gui",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " start &3(vip)"
+                "&2▪ &7/$bw stats",
+                "&2▪ &7/$bw join &o<arena/group>",
+                "&2▪ &7/$bw leave",
+                "&2▪ &7/$bw lang",
+                "&2▪ &7/$bw gui",
+                "&2▪ &7/$bw start &3(vip)"
             )
         )
-        this.addDefault(Messages.COMMAND_LANG_LIST_HEADER, "{prefix} &2Zaban haye mojood:")
-        this.addDefault(Messages.COMMAND_LANG_LIST_FORMAT, "&a▪  &7{iso} - &f{name}")
-        this.addDefault(Messages.COMMAND_LANG_USAGE, "{prefix}&7Ravesh Estefade: /lang &f&o<iso>")
-        this.addDefault(Messages.COMMAND_LANG_SELECTED_NOT_EXIST, "{prefix}&cIn zaban vojood nadarad!")
-        this.addDefault(Messages.COMMAND_LANG_SELECTED_SUCCESSFULLY, "{prefix}&aZaban taghir kard!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_LANG_LIST_HEADER, "{prefix} &2Zaban haye mojood:")
+        addDefault(Messages.COMMAND_LANG_LIST_FORMAT, "&a▪  &7{iso} - &f{name}")
+        addDefault(Messages.COMMAND_LANG_USAGE, "{prefix}&7Ravesh Estefade: /lang &f&o<iso>")
+        addDefault(Messages.COMMAND_LANG_SELECTED_NOT_EXIST, "{prefix}&cIn zaban vojood nadarad!")
+        addDefault(Messages.COMMAND_LANG_SELECTED_SUCCESSFULLY, "{prefix}&aZaban taghir kard!")
+        addDefault(
             Messages.COMMAND_LANG_USAGE_DENIED,
             "{prefix}&cShoma nemitavanid hengami ke dar game hastid zaban ra agvaz konid."
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_USAGE,
-            "§a▪ §7Ravesh Estefade: /" + BedWars.MAIN_COMMAND + " join §o<arena/group>"
+            "§a▪ §7Ravesh Estefade: /$bw join §o<arena/group>"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_GROUP_OR_ARENA_NOT_FOUND,
             "{prefix}&cHich arena ya arena group i be in nam vojood nadarad: {name}"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_IS_FULL,
             "{prefix}&cIn arena por shode!\n&aBaraye dashtan ghabeliat haye bishtar mitoonid ma ro donate konid. &7&o(click)"
         )
-        this.addDefault(Messages.COMMAND_JOIN_NO_EMPTY_FOUND, "{prefix}&cHich arena i dar hale hazer khali nist ;(")
-        this.addDefault(
+        addDefault(Messages.COMMAND_JOIN_NO_EMPTY_FOUND, "{prefix}&cHich arena i dar hale hazer khali nist ;(")
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_IS_FULL_OF_VIPS,
             "{prefix}&cMotasefane arena mored nazar por shode.\n&cMa midoonim ke shoma donor hastid ama in arena az ghabl ba staff/donor ha por shode."
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_PARTY_TOO_BIG,
             "{prefix}&cTedad afradi ke dar party shoma hastand monaseb in arena nist :("
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_NOT_PARTY_LEADER,
             "{prefix}&cFaghat saheb party emkan entekhab arena dare."
         )
-        this.addDefault(Messages.COMMAND_JOIN_PLAYER_JOIN_MSG, "{prefix}&7{player} &evared shod (&b{on}&e/&b{max}&e)!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_JOIN_PLAYER_JOIN_MSG, "{prefix}&7{player} &evared shod (&b{on}&e/&b{max}&e)!")
+        addDefault(
             Messages.COMMAND_JOIN_SPECTATOR_MSG,
             "{prefix}§6Shoma darhale spectate kardan §9{arena} §6hastid.\n{prefix}§eBaraye kharej shodan az arena az §c/leave §eestefade konid."
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_SPECTATOR_DENIED_MSG,
             "&cEmkan vared shodan spectator be in arena vojood nadarad!"
         )
-        this.addDefault(Messages.COMMAND_TP_PLAYER_NOT_FOUND, "{prefix}&cPlayer peida nashod!")
-        this.addDefault(Messages.COMMAND_TP_NOT_IN_ARENA, "{prefix}&cIn player dar yek arena bedwars nist!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_TP_PLAYER_NOT_FOUND, "{prefix}&cPlayer peida nashod!")
+        addDefault(Messages.COMMAND_TP_NOT_IN_ARENA, "{prefix}&cIn player dar yek arena bedwars nist!")
+        addDefault(
             Messages.COMMAND_TP_NOT_STARTED,
             "{prefix}&cArena i ke player dakhelesh hast hanooz start nashode!"
         )
-        this.addDefault(Messages.COMMAND_TP_USAGE, "{prefix}&cRavesh estefade: /bw tp <username>")
-        this.addDefault(Messages.REJOIN_NO_ARENA, "{prefix}&cArena baraye mojadadan vared shodan mojood nist!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_TP_USAGE, "{prefix}&cRavesh estefade: /bw tp <username>")
+        addDefault(Messages.REJOIN_NO_ARENA, "{prefix}&cArena baraye mojadadan vared shodan mojood nist!")
+        addDefault(
             Messages.REJOIN_DENIED,
             "{prefix}&cShoma dige nemitoonid mojadadan vared arena beshid. Bazi tamoom ya hazf shode."
         )
-        this.addDefault(Messages.REJOIN_ALLOWED, "{prefix}&eDarhale vorood be arena &a{arena}&e!")
-        this.addDefault(Messages.COMMAND_REJOIN_PLAYER_RECONNECTED, "{prefix}&7{player} &emojadadan vared shod!")
-        this.addDefault(Messages.COMMAND_LEAVE_DENIED_NOT_IN_ARENA, "{prefix}&cShoma dar arena nistid!")
-        this.addDefault(Messages.COMMAND_LEAVE_MSG, "{prefix}&7{player} &ekharej shod!")
-        this.addDefault(
+        addDefault(Messages.REJOIN_ALLOWED, "{prefix}&eDarhale vorood be arena &a{arena}&e!")
+        addDefault(Messages.COMMAND_REJOIN_PLAYER_RECONNECTED, "{prefix}&7{player} &emojadadan vared shod!")
+        addDefault(Messages.COMMAND_LEAVE_DENIED_NOT_IN_ARENA, "{prefix}&cShoma dar arena nistid!")
+        addDefault(Messages.COMMAND_LEAVE_MSG, "{prefix}&7{player} &ekharej shod!")
+        addDefault(
             Messages.COMMAND_NOT_ALLOWED_IN_GAME,
             "{prefix}&cShoma nemitavanid inkar ra zamani ke dar game hastid anjam dahid."
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_NOT_FOUND_OR_INSUFF_PERMS,
             "{prefix}&cCommand yaft nashod ya shoma dastresi lazem ro nadarid!"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_PARTY_HELP, listOf(
                 "&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
                 "&aDastoorat Party:",
@@ -136,80 +124,80 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e/party disband &7- &bAz bein bordan party"
             )
         )
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_USAGE, "{prefix}&eRavesh Estefade: &7/party invite <player>")
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &eonline nist!")
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_SENT, "{prefix}&eInvite be &7{player} &eersal shod&6.")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_INVITE_USAGE, "{prefix}&eRavesh Estefade: &7/party invite <player>")
+        addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &eonline nist!")
+        addDefault(Messages.COMMAND_PARTY_INVITE_SENT, "{prefix}&eInvite be &7{player} &eersal shod&6.")
+        addDefault(
             Messages.COMMAND_PARTY_INVITE_SENT_TARGET_RECEIVE_MSG,
             "{prefix}&b{player} &eshoma ro be party davat karde! &o&7(Baraye ghabool kardan click inja konid)"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_PARTY_INVITE_DENIED_CANNOT_INVITE_YOURSELF,
             "{prefix}&cShoma nemitoonid khodetoon ro invite bedi!"
         )
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &eoffline hast!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &eoffline hast!")
+        addDefault(
             Messages.COMMAND_PARTY_ACCEPT_DENIED_NO_INVITE,
             "{prefix}&cHich darkhast party i baraye ghabool kardan vojood nadare"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_PARTY_ACCEPT_DENIED_ALREADY_IN_PARTY,
             "{prefix}&eShoma darhale hazer dar yek party hastid!"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_PARTY_INSUFFICIENT_PERMISSIONS,
             "{prefix}&cFaghat saheb party emkan in kar ro dare!"
         )
-        this.addDefault(Messages.COMMAND_PARTY_ACCEPT_USAGE, "{prefix}&eRavesh Estefade: &7/party accept <player>")
-        this.addDefault(Messages.COMMAND_PARTY_ACCEPT_SUCCESS, "{prefix}&7{player} &evared party shod!")
-        this.addDefault(Messages.COMMAND_PARTY_GENERAL_DENIED_NOT_IN_PARTY, "{prefix}&cShoma dar party nistid!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_ACCEPT_USAGE, "{prefix}&eRavesh Estefade: &7/party accept <player>")
+        addDefault(Messages.COMMAND_PARTY_ACCEPT_SUCCESS, "{prefix}&7{player} &evared party shod!")
+        addDefault(Messages.COMMAND_PARTY_GENERAL_DENIED_NOT_IN_PARTY, "{prefix}&cShoma dar party nistid!")
+        addDefault(
             Messages.COMMAND_PARTY_LEAVE_DENIED_IS_OWNER_NEEDS_DISBAND,
             "{prefix}&cShoma nemitoonid az party khodetoon leave bedi!\n&eDastoor baraye hazf party: &b/party disband"
         )
-        this.addDefault(Messages.COMMAND_PARTY_LEAVE_SUCCESS, "{prefix}&7{player} &eaz party kharej shod!")
-        this.addDefault(Messages.COMMAND_PARTY_DISBAND_SUCCESS, "{prefix}&eParty az bein raft!")
-        this.addDefault(Messages.COMMAND_PARTY_REMOVE_USAGE, "{prefix}&7Ravesh Estefade: &e/party remove <player>")
-        this.addDefault(Messages.COMMAND_PARTY_REMOVE_SUCCESS, "{prefix}&7{player} &eaz party hazf shod,")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_LEAVE_SUCCESS, "{prefix}&7{player} &eaz party kharej shod!")
+        addDefault(Messages.COMMAND_PARTY_DISBAND_SUCCESS, "{prefix}&eParty az bein raft!")
+        addDefault(Messages.COMMAND_PARTY_REMOVE_USAGE, "{prefix}&7Ravesh Estefade: &e/party remove <player>")
+        addDefault(Messages.COMMAND_PARTY_REMOVE_SUCCESS, "{prefix}&7{player} &eaz party hazf shod,")
+        addDefault(
             Messages.COMMAND_PARTY_REMOVE_DENIED_TARGET_NOT_PARTY_MEMBER,
             "{prefix}&7{player} &edakhel party shoma nist!"
         )
-        this.addDefault(Messages.COMMAND_PARTY_PROMOTE_SUCCESS, "{prefix}&eYou successfully promoted {player} to owner")
-        this.addDefault(Messages.COMMAND_PARTY_PROMOTE_OWNER, "{prefix}&eYou have been promoted to party owner")
-        this.addDefault(Messages.COMMAND_PARTY_PROMOTE_NEW_OWNER, "{prefix}&7 &e{player} has been promoted to owner")
-        this.addDefault(Messages.COMMAND_PARTY_INFO_OWNER, "\n{prefix}&eOwner of the party is: &7{owner}")
-        this.addDefault(Messages.COMMAND_PARTY_INFO_PLAYERS, "{prefix}&eParty members:")
-        this.addDefault(Messages.COMMAND_PARTY_INFO_PLAYER, "&7{player}")
-        this.addDefault(Messages.COMMAND_FORCESTART_NOT_IN_GAME, "§c▪ §7Shoma bazi nemikonid!")
-        this.addDefault(Messages.COMMAND_FORCESTART_SUCCESS, "§c▪ §7Shomaresh makoos kootah shod!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_PROMOTE_SUCCESS, "{prefix}&eYou successfully promoted {player} to owner")
+        addDefault(Messages.COMMAND_PARTY_PROMOTE_OWNER, "{prefix}&eYou have been promoted to party owner")
+        addDefault(Messages.COMMAND_PARTY_PROMOTE_NEW_OWNER, "{prefix}&7 &e{player} has been promoted to owner")
+        addDefault(Messages.COMMAND_PARTY_INFO_OWNER, "\n{prefix}&eOwner of the party is: &7{owner}")
+        addDefault(Messages.COMMAND_PARTY_INFO_PLAYERS, "{prefix}&eParty members:")
+        addDefault(Messages.COMMAND_PARTY_INFO_PLAYER, "&7{player}")
+        addDefault(Messages.COMMAND_FORCESTART_NOT_IN_GAME, "§c▪ §7Shoma bazi nemikonid!")
+        addDefault(Messages.COMMAND_FORCESTART_SUCCESS, "§c▪ §7Shomaresh makoos kootah shod!")
+        addDefault(
             Messages.COMMAND_FORCESTART_NO_PERM,
             "{prefix}&7Shoma nemitavanid in arena ro forcestart konid.\n§7Lotfan baraye daryaft ghabeliat haye vizhe server ro donate konid."
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_COOLDOWN,
             "&cShoma hanooz nemitoonid in kar ro anjam bedid! Lotfan {seconds} sanie sabr konid!"
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_JOIN_VIP_KICK,
             "{prefix}&cMotasefane shoma bedalil vorood yek donor be arena kick shodid.\n&aLotfan baraye daryaft ghabeliat haye vizhe server ro donate konid. &7&o(click)"
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_START_COUNTDOWN_STOPPED_INSUFF_PLAYERS_CHAT,
             "{prefix}§cPlayer ha baraye shoroo kafi nistand! Shomaresh makoos motevaghef shod!"
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_RESTART_PLAYER_KICK,
             "{prefix}&eArena i ke shoma dakhelesh budid dar hale rah andazi mojadad hast."
         )
-        this.addDefault(Messages.ARENA_STATUS_PLAYING_NAME, "&cDakhel Bazi")
-        this.addDefault(Messages.ARENA_STATUS_RESTARTING_NAME, "&4Darhal Restart")
-        this.addDefault(Messages.ARENA_STATUS_WAITING_NAME, "&2Dar Entezar §c{full}")
-        this.addDefault(Messages.ARENA_STATUS_STARTING_NAME, "&6Darhale Shoroo §c{full}")
-        this.addDefault(Messages.ARENA_GUI_INV_NAME, "&8Baraye vared shodan click konid")
-        this.addDefault(Messages.ARENA_GUI_ARENA_CONTENT_NAME, "&a&l{name}")
-        this.addDefault(
+        addDefault(Messages.ARENA_STATUS_PLAYING_NAME, "&cDakhel Bazi")
+        addDefault(Messages.ARENA_STATUS_RESTARTING_NAME, "&4Darhal Restart")
+        addDefault(Messages.ARENA_STATUS_WAITING_NAME, "&2Dar Entezar §c{full}")
+        addDefault(Messages.ARENA_STATUS_STARTING_NAME, "&6Darhale Shoroo §c{full}")
+        addDefault(Messages.ARENA_GUI_INV_NAME, "&8Baraye vared shodan click konid")
+        addDefault(Messages.ARENA_GUI_ARENA_CONTENT_NAME, "&a&l{name}")
+        addDefault(
             Messages.ARENA_GUI_ARENA_CONTENT_LORE,
             listOf(
                 "",
@@ -221,26 +209,26 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&eBaraye spectate kardan Right-Click konid."
             )
         )
-        this.addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_NAME, "&r{serverIp}")
-        this.addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_LORE, mutableListOf<Any?>())
-        this.addDefault(
+        addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_NAME, "&r{serverIp}")
+        addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_LORE, emptyList<String>())
+        addDefault(
             Messages.ARENA_STATUS_START_COUNTDOWN_CHAT,
             "{prefix}&eBazi dar &6{time} &esanie digar shoro khahad shod."
         )
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_TITLE, " ")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE, "&a{second}")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-5", "&e❺")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-4", "&e❹")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-3", "&c❸")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-2", "&c❷")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-1", "&c❶")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_TITLE, " ")
-        this.addDefault(
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_TITLE, " ")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE, "&a{second}")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-5", "&e❺")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-4", "&e❹")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-3", "&c❸")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-2", "&c❷")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-1", "&c❶")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_TITLE, " ")
+        addDefault(
             Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_SUB_TITLE,
             "&cDar entezare player haye bishtar.."
         )
-        this.addDefault(Messages.ARENA_STATUS_START_PLAYER_TITLE, "&aBERID")
-        this.addDefault(
+        addDefault(Messages.ARENA_STATUS_START_PLAYER_TITLE, "&aBERID")
+        addDefault(
             Messages.ARENA_STATUS_START_PLAYER_TUTORIAL, listOf(
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
                 "&f                                   &lBedWars", "",
@@ -251,210 +239,210 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_JOIN_DENIED_SELECTOR,
             "{prefix}&cMotasefane darhale hazer nemitoonid vared in arena beshid. Baraye spectate kardan az Right-Click estefade konid!"
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_SPECTATE_DENIED_SELECTOR,
             "{prefix}&cMotasefane darhale hazer nemitoonid in arena ro spectate konid. Baraye vared shodan az Left-Click estefade konid!"
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_JOIN_DENIED_NO_PROXY,
             "&cShoma bayad az tarighe BedWarsProxy vared bazi beshid. \n&eAgar mikhaid arena jadidi ijad konid motmaen shid ke permission bw.setup darid ta betoonid mostaghiman vared server beshid!"
         )
-        this.addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_NAME, "&8Teleporter")
-        this.addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_HEAD_NAME, "{vPrefix}{player}")
-        this.addDefault(
+        addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_NAME, "&8Teleporter")
+        addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_HEAD_NAME, "{vPrefix}{player}")
+        addDefault(
             Messages.ARENA_SPECTATOR_TELEPORTER_GUI_HEAD_LORE,
             listOf("&7Health: &f{health}%", "&7Food: &f{food}", "", "&7Left-click to spectate")
         )
-        this.addDefault(Messages.ARENA_SPECTATOR_LEAVE_ITEM_NAME, "&c&lBazgasht be lobby")
-        this.addDefault(
+        addDefault(Messages.ARENA_SPECTATOR_LEAVE_ITEM_NAME, "&c&lBazgasht be lobby")
+        addDefault(
             Messages.ARENA_SPECTATOR_LEAVE_ITEM_LORE,
             listOf("&7Baraye bargasht be lobby Right-click konid!")
         )
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_TITLE, "&aDarhale spectate kardan &7{player}")
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_SUBTITLE, "&cBaryae khorooj SNEAK konid")
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_TITLE, "&eDarhale khorooj az halat Spectator")
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_SUBTITLE, "")
-        this.addDefault(
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_TITLE, "&aDarhale spectate kardan &7{player}")
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_SUBTITLE, "&cBaryae khorooj SNEAK konid")
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_TITLE, "&eDarhale khorooj az halat Spectator")
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_SUBTITLE, "")
+        addDefault(
             Messages.ARENA_LEAVE_PARTY_DISBANDED,
             "{prefix}§cSaheb party az server kharej shod va party az bein raft!"
         )
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TIER, "&eTier &c{tier}")
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_DIAMOND, "&b&lDiamond")
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_EMERALD, "&a&lEmerald")
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TIMER, "&eSpawn dar &c{seconds} &esanie")
-        this.addDefault(
+        addDefault(Messages.GENERATOR_HOLOGRAM_TIER, "&eTier &c{tier}")
+        addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_DIAMOND, "&b&lDiamond")
+        addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_EMERALD, "&a&lEmerald")
+        addDefault(Messages.GENERATOR_HOLOGRAM_TIMER, "&eSpawn dar &c{seconds} &esanie")
+        addDefault(
             Messages.GENERATOR_UPGRADE_CHAT_ANNOUNCEMENT,
             "{prefix}{generatorType} Generator ha &eertegha peida kardand be Tier &c{tier}"
         )
-        this.addDefault(Messages.FORMATTING_CHAT_LOBBY, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
-        this.addDefault(Messages.FORMATTING_CHAT_WAITING, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
-        this.addDefault(
+        addDefault(Messages.FORMATTING_CHAT_LOBBY, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
+        addDefault(Messages.FORMATTING_CHAT_WAITING, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
+        addDefault(
             Messages.FORMATTING_CHAT_SHOUT,
             "{level}{vPrefix}&6[SHOUT] {team} &7{player}&f{vSuffix}: {message}"
         )
-        this.addDefault(Messages.FORMATTING_CHAT_TEAM, "{level}{vPrefix}&f{team}&7 {player}{vSuffix} {message}")
-        this.addDefault(Messages.FORMATTING_CHAT_SPECTATOR, "{level}{vPrefix}&7[SPECTATOR] {player}{vSuffix}: {message}")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_HEALTH, listOf("&c❤", "&aHealth"))
+        addDefault(Messages.FORMATTING_CHAT_TEAM, "{level}{vPrefix}&f{team}&7 {player}{vSuffix} {message}")
+        addDefault(Messages.FORMATTING_CHAT_SPECTATOR, "{level}{vPrefix}&7[SPECTATOR] {player}{vSuffix}: {message}")
+        addDefault(Messages.FORMATTING_SCOREBOARD_HEALTH, listOf("&c❤", "&aHealth"))
 
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_DATE, "dd/MM/yy")
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SCOREBOARD_DATE, "dd/MM/yy")
+        addDefault(
             Messages.FORMATTING_SCOREBOARD_TEAM_GENERIC,
             "{TeamColor}{TeamLetter}&f {TeamName}: {TeamStatus}"
         )
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ELIMINATED, "&c&l✘")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_BED_DESTROYED, "&a{remainingPlayers}")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ALIVE, "&a&l✓")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_NEXEVENT_TIMER, "mm:ss")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_YOUR_TEAM, "&7 SHOMA")
-        this.addDefault(Messages.FORMATTING_ACTION_BAR_TRACKING, "&fDarhale Track: {team} &f- Fasele: {distance}m")
-        this.addDefault(Messages.FORMATTING_TEAM_WINNER_FORMAT, "      {TeamColor}{TeamName} &7- {members}")
-        this.addDefault(Messages.FORMATTING_SOLO_WINNER_FORMAT, "                 {TeamColor}{TeamName} &7- {members}")
-        this.addDefault(Messages.FORMATTING_GENERATOR_TIER1, "I")
-        this.addDefault(Messages.FORMATTING_GENERATOR_TIER2, "II")
-        this.addDefault(Messages.FORMATTING_GENERATOR_TIER3, "III")
-        this.addDefault(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH, "▮ ")
-        this.addDefault(Messages.FORMATTING_STATS_DATE_FORMAT, "yyyy/MM/dd HH:mm")
-        this.addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_TEAM, "{TeamColor}[{TeamName}]")
-        this.addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SHOUT, "&6[SHOUT]")
-        this.addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SPECTATOR, "&7[SPECTATOR]")
-        this.addDefault(Messages.MEANING_FULL, "Kamel")
-        this.addDefault(Messages.MEANING_SHOUT, "shout")
-        this.addDefault(Messages.MEANING_NOBODY, "Hichkas")
-        this.addDefault(Messages.MEANING_NEVER, "Hichvaght")
-        this.addDefault(Messages.MEANING_IRON_SINGULAR, "Iron")
-        this.addDefault(Messages.MEANING_IRON_PLURAL, "Iron")
-        this.addDefault(Messages.MEANING_GOLD_SINGULAR, "Gold")
-        this.addDefault(Messages.MEANING_GOLD_PLURAL, "Gold")
-        this.addDefault(Messages.MEANING_EMERALD_SINGULAR, "Emerald")
-        this.addDefault(Messages.MEANING_EMERALD_PLURAL, "Emerald")
-        this.addDefault(Messages.MEANING_DIAMOND_SINGULAR, "Diamond")
-        this.addDefault(Messages.MEANING_DIAMOND_PLURAL, "Diamond")
-        this.addDefault(Messages.MEANING_VAULT_SINGULAR, "$")
-        this.addDefault(Messages.MEANING_VAULT_PLURAL, "$")
-        this.addDefault(Messages.INTERACT_CANNOT_PLACE_BLOCK, "{prefix}&cShoma Nemitavanid Inja Block Bezarid.")
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ELIMINATED, "&c&l✘")
+        addDefault(Messages.FORMATTING_SCOREBOARD_BED_DESTROYED, "&a{remainingPlayers}")
+        addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ALIVE, "&a&l✓")
+        addDefault(Messages.FORMATTING_SCOREBOARD_NEXEVENT_TIMER, "mm:ss")
+        addDefault(Messages.FORMATTING_SCOREBOARD_YOUR_TEAM, "&7 SHOMA")
+        addDefault(Messages.FORMATTING_ACTION_BAR_TRACKING, "&fDarhale Track: {team} &f- Fasele: {distance}m")
+        addDefault(Messages.FORMATTING_TEAM_WINNER_FORMAT, "      {TeamColor}{TeamName} &7- {members}")
+        addDefault(Messages.FORMATTING_SOLO_WINNER_FORMAT, "                 {TeamColor}{TeamName} &7- {members}")
+        addDefault(Messages.FORMATTING_GENERATOR_TIER1, "I")
+        addDefault(Messages.FORMATTING_GENERATOR_TIER2, "II")
+        addDefault(Messages.FORMATTING_GENERATOR_TIER3, "III")
+        addDefault(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH, "▮ ")
+        addDefault(Messages.FORMATTING_STATS_DATE_FORMAT, "yyyy/MM/dd HH:mm")
+        addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_TEAM, "{TeamColor}[{TeamName}]")
+        addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SHOUT, "&6[SHOUT]")
+        addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SPECTATOR, "&7[SPECTATOR]")
+        addDefault(Messages.MEANING_FULL, "Kamel")
+        addDefault(Messages.MEANING_SHOUT, "shout")
+        addDefault(Messages.MEANING_NOBODY, "Hichkas")
+        addDefault(Messages.MEANING_NEVER, "Hichvaght")
+        addDefault(Messages.MEANING_IRON_SINGULAR, "Iron")
+        addDefault(Messages.MEANING_IRON_PLURAL, "Iron")
+        addDefault(Messages.MEANING_GOLD_SINGULAR, "Gold")
+        addDefault(Messages.MEANING_GOLD_PLURAL, "Gold")
+        addDefault(Messages.MEANING_EMERALD_SINGULAR, "Emerald")
+        addDefault(Messages.MEANING_EMERALD_PLURAL, "Emerald")
+        addDefault(Messages.MEANING_DIAMOND_SINGULAR, "Diamond")
+        addDefault(Messages.MEANING_DIAMOND_PLURAL, "Diamond")
+        addDefault(Messages.MEANING_VAULT_SINGULAR, "$")
+        addDefault(Messages.MEANING_VAULT_PLURAL, "$")
+        addDefault(Messages.INTERACT_CANNOT_PLACE_BLOCK, "{prefix}&cShoma Nemitavanid Inja Block Bezarid.")
+        addDefault(
             Messages.INTERACT_CANNOT_BREAK_BLOCK,
             "{prefix}&cFaghat Block Hayi Ke Player Ha Gozashtan Ghabele Kandan Ast."
         )
-        this.addDefault(Messages.INTERACT_CANNOT_BREAK_OWN_BED, "&cShoma Nemitavanid Bed Khodetoon Ra Bekanid.")
-        this.addDefault(
+        addDefault(Messages.INTERACT_CANNOT_BREAK_OWN_BED, "&cShoma Nemitavanid Bed Khodetoon Ra Bekanid.")
+        addDefault(
             Messages.INTERACT_BED_DESTROY_CHAT_ANNOUNCEMENT,
             "\n&f&lBED AZ BEYN RAFT > {TeamColor}{TeamName} Bed &7Tavasote {PlayerColor}{PlayerName} &7Az Beyn Raft!\n"
         )
-        this.addDefault(Messages.INTERACT_BED_DESTROY_TITLE_ANNOUNCEMENT, "&cBED AZ BEYN RAFT!")
-        this.addDefault(Messages.INTERACT_BED_DESTROY_SUBTITLE_ANNOUNCEMENT, "&fShoma Digar Respawn Nakhahid Shod.")
-        this.addDefault(
+        addDefault(Messages.INTERACT_BED_DESTROY_TITLE_ANNOUNCEMENT, "&cBED AZ BEYN RAFT!")
+        addDefault(Messages.INTERACT_BED_DESTROY_SUBTITLE_ANNOUNCEMENT, "&fShoma Digar Respawn Nakhahid Shod.")
+        addDefault(
             Messages.INTERACT_BED_DESTROY_CHAT_ANNOUNCEMENT_TO_VICTIM,
             "&f&lBED AZ BEYN RAFT > &7Bed Shoma Tavasote {PlayerColor}{PlayerName} &7Az Beyn Raft"
         )
-        this.addDefault(
+        addDefault(
             Messages.INTERACT_CHEST_CANT_OPEN_TEAM_ELIMINATED,
             "&cShoma Nemitavanid In Chest Ro Be Dalil Inke Player Haye Team Hanoz Namordan Baz Konid!"
         )
-        this.addDefault(
+        addDefault(
             Messages.INTERACT_INVISIBILITY_REMOVED_DAMGE_TAKEN,
             "&cYou are no longer invisible because you have taken damage!"
         )
-        this.addDefault(Messages.PLAYER_DIE_VOID_FALL_REGULAR_KILL, "{PlayerColor}{PlayerName} &7Dakhel Void Oftad.")
-        this.addDefault(
+        addDefault(Messages.PLAYER_DIE_VOID_FALL_REGULAR_KILL, "{PlayerColor}{PlayerName} &7Dakhel Void Oftad.")
+        addDefault(
             Messages.PLAYER_DIE_VOID_FALL_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Dakhel Void Oftad. &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_IN_VOID_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Be Dakhel Void Part Shod."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_IN_VOID_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Be Dakhel Void Part Shod. &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_LOG_OUT_REGULAR,
             "{PlayerColor}{PlayerName} &7Hengame Mobareze Ba {KillerColor}{KillerName} &7Az Server Kharej Shod."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_LOG_OUT_FINAL,
             "{PlayerColor}{PlayerName} &7Hengame Mobareze Ba {KillerColor}{KillerName} &7Az Server Kharej Shod. &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_BY_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Part shod."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_BY_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Part Shod. &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITH_SOURCE_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Bar Asar Enfejar Mord."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITH_SOURCE_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Bar Asar Enfejar Mord. &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITHOUT_SOURCE_REGULAR,
             "{PlayerColor}{PlayerName} &7Bar Asar Enfejar Mord."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITHOUT_SOURCE_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Bar Asar Enfejar Mord. &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Koshte Shod!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Koshte Shod! &b&lFINAL KILL!"
         )
-        this.addDefault(Messages.PLAYER_DIE_UNKNOWN_REASON_REGULAR, "{PlayerColor}{PlayerName} &7Mord.")
-        this.addDefault(
+        addDefault(Messages.PLAYER_DIE_UNKNOWN_REASON_REGULAR, "{PlayerColor}{PlayerName} &7Mord.")
+        addDefault(
             Messages.PLAYER_DIE_UNKNOWN_REASON_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Mord. &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_SHOOT_REGULAR,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Shoot shod!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_SHOOT_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote {KillerColor}{KillerName} &7Shoot shod! &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_DEBUG_REGULAR,
             "{PlayerColor}{PlayerName} &7Tavasote BedBug {KillerColor}{KillerTeamName} &7Koshte Shod!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_DEBUG_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote BedBug {KillerColor}{KillerTeamName} &7Koshte Shod! &b&lFINAL KILL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_IRON_GOLEM_REGULAR,
             "{PlayerColor}{PlayerName} &7Tavasote Iron Golem {KillerColor}{KillerTeamName} Koshte Shod!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_IRON_GOLEM_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7Tavasote Iron Golem {KillerColor}{KillerTeamName} &7Koshte Shod! &b&lFINAL KILL!"
         )
-        this.addDefault(Messages.PLAYER_DIE_REWARD_DIAMOND, "{prefix}&b+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_REWARD_EMERALD, "{prefix}&a+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_REWARD_IRON, "{prefix}&f+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_REWARD_GOLD, "{prefix}&6+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWN_TITLE, "&cSHOMA MORDID!")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWN_SUBTITLE, "&eShoma dar &c{time} &esanie dige respawn mishid!")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWN_CHAT, "{prefix}&eShoma dar &c{time} &esanie dige respawn mishid!")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWNED_TITLE, "&aRESPAWN SHID!")
-        this.addDefault(Messages.PLAYER_DIE_ELIMINATED_CHAT, "{prefix}&cShoma hazf shodid!")
-        this.addDefault(Messages.PLAYER_HIT_BOW, "{prefix}{TeamColor}{PlayerName} &7alan &c{amount} &7HP dare!")
-        this.addDefault(Messages.GAME_END_GAME_OVER_PLAYER_TITLE, "&c&lBAZI TAMOOM SHOD!")
-        this.addDefault(Messages.GAME_END_VICTORY_PLAYER_TITLE, "&6&lBORD!")
-        this.addDefault(Messages.GAME_END_TEAM_WON_CHAT, "{prefix}{TeamColor}{TeamName} &abarande bazi shodan!")
-        this.addDefault(
+        addDefault(Messages.PLAYER_DIE_REWARD_DIAMOND, "{prefix}&b+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_REWARD_EMERALD, "{prefix}&a+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_REWARD_IRON, "{prefix}&f+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_REWARD_GOLD, "{prefix}&6+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_RESPAWN_TITLE, "&cSHOMA MORDID!")
+        addDefault(Messages.PLAYER_DIE_RESPAWN_SUBTITLE, "&eShoma dar &c{time} &esanie dige respawn mishid!")
+        addDefault(Messages.PLAYER_DIE_RESPAWN_CHAT, "{prefix}&eShoma dar &c{time} &esanie dige respawn mishid!")
+        addDefault(Messages.PLAYER_DIE_RESPAWNED_TITLE, "&aRESPAWN SHID!")
+        addDefault(Messages.PLAYER_DIE_ELIMINATED_CHAT, "{prefix}&cShoma hazf shodid!")
+        addDefault(Messages.PLAYER_HIT_BOW, "{prefix}{TeamColor}{PlayerName} &7alan &c{amount} &7HP dare!")
+        addDefault(Messages.GAME_END_GAME_OVER_PLAYER_TITLE, "&c&lBAZI TAMOOM SHOD!")
+        addDefault(Messages.GAME_END_VICTORY_PLAYER_TITLE, "&6&lBORD!")
+        addDefault(Messages.GAME_END_TEAM_WON_CHAT, "{prefix}{TeamColor}{TeamName} &abarande bazi shodan!")
+        addDefault(
             Messages.GAME_END_TOP_PLAYER_CHAT, listOf(
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
                 "&f                                   &lBedWars", "", "{winnerFormat}", "", "",
@@ -464,101 +452,101 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
             )
         )
-        this.addDefault(Messages.BED_HOLOGRAM_DEFEND, "&c&lAz Bed khodetoon hefazat konid!")
-        this.addDefault(Messages.BED_HOLOGRAM_DESTROYED, "&c&lBed shoma az bein raft!")
-        this.addDefault(Messages.NPC_NAME_TEAM_UPGRADES, "&bUPGRADE HAYE TEAM,&e&lRIGHT CLICK")
-        this.addDefault(Messages.NPC_NAME_SOLO_UPGRADES, "&bUPGRADE HAYE SOLO,&e&lRIGHT CLICK")
-        this.addDefault(Messages.NPC_NAME_TEAM_SHOP, "&bFOROOSHGAH TEAM,&e&lRIGHT CLICK")
-        this.addDefault(Messages.NPC_NAME_SOLO_SHOP, "&bFOROOSHGAH ITEM,&e&lRIGHT CLICK")
-        this.addDefault(
+        addDefault(Messages.BED_HOLOGRAM_DEFEND, "&c&lAz Bed khodetoon hefazat konid!")
+        addDefault(Messages.BED_HOLOGRAM_DESTROYED, "&c&lBed shoma az bein raft!")
+        addDefault(Messages.NPC_NAME_TEAM_UPGRADES, "&bUPGRADE HAYE TEAM,&e&lRIGHT CLICK")
+        addDefault(Messages.NPC_NAME_SOLO_UPGRADES, "&bUPGRADE HAYE SOLO,&e&lRIGHT CLICK")
+        addDefault(Messages.NPC_NAME_TEAM_SHOP, "&bFOROOSHGAH TEAM,&e&lRIGHT CLICK")
+        addDefault(Messages.NPC_NAME_SOLO_SHOP, "&bFOROOSHGAH ITEM,&e&lRIGHT CLICK")
+        addDefault(
             Messages.TEAM_ELIMINATED_CHAT,
             "\n&f&lTEAM ELIMINATED > {TeamColor} Team {TeamName} &chazf shod!\n"
         )
-        this.addDefault(Messages.NEXT_EVENT_BEDS_DESTROY, "&cHazf Bed Ha")
-        this.addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_II, "&fDiamond II")
-        this.addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_III, "&fDiamond III")
-        this.addDefault(Messages.NEXT_EVENT_DRAGON_SPAWN, "&fHamle Dragon")
-        this.addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_II, "&fEmerald II")
-        this.addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_III, "&fEmerald III")
-        this.addDefault(Messages.NEXT_EVENT_GAME_END, "&4Payan Bazi")
-        this.addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_BEDS_DESTROYED, "&cBED AZ BEIN RAFT!")
-        this.addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_BEDS_DESTROYED, "&fHameye bed ha az bein raftand!")
-        this.addDefault(Messages.NEXT_EVENT_CHAT_ANNOUNCE_BEDS_DESTROYED, "&c&lTamami bed ha az bein raftand!")
-        this.addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_SUDDEN_DEATH, "&cSudden Death")
-        this.addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_SUDDEN_DEATH, "")
-        this.addDefault(
+        addDefault(Messages.NEXT_EVENT_BEDS_DESTROY, "&cHazf Bed Ha")
+        addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_II, "&fDiamond II")
+        addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_III, "&fDiamond III")
+        addDefault(Messages.NEXT_EVENT_DRAGON_SPAWN, "&fHamle Dragon")
+        addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_II, "&fEmerald II")
+        addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_III, "&fEmerald III")
+        addDefault(Messages.NEXT_EVENT_GAME_END, "&4Payan Bazi")
+        addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_BEDS_DESTROYED, "&cBED AZ BEIN RAFT!")
+        addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_BEDS_DESTROYED, "&fHameye bed ha az bein raftand!")
+        addDefault(Messages.NEXT_EVENT_CHAT_ANNOUNCE_BEDS_DESTROYED, "&c&lTamami bed ha az bein raftand!")
+        addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_SUDDEN_DEATH, "&cSudden Death")
+        addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_SUDDEN_DEATH, "")
+        addDefault(
             Messages.NEXT_EVENT_CHAT_ANNOUNCE_SUDDEN_DEATH,
             "&cSUDDEN DEATH: &6&b{TeamDragons} {TeamColor}{TeamName} Dragon!"
         )
-        this.addDefault(Messages.XP_REWARD_PER_MINUTE, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Zaman Play).")
-        this.addDefault(Messages.XP_REWARD_WIN, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Bord Bazi).")
-        this.addDefault(
+        addDefault(Messages.XP_REWARD_PER_MINUTE, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Zaman Play).")
+        addDefault(Messages.XP_REWARD_WIN, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Bord Bazi).")
+        addDefault(
             Messages.XP_REWARD_PER_TEAMMATE,
             "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Hemayat Az Team)."
         )
-        this.addDefault(
+        addDefault(
             Messages.XP_REWARD_BED_DESTROY,
             "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Az Bein Raftan Bed)."
         )
-        this.addDefault(Messages.XP_REWARD_REGULAR_KILL, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Kill e Addi).")
-        this.addDefault(Messages.XP_REWARD_FINAL_KILL, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Kill e Payani).")
+        addDefault(Messages.XP_REWARD_REGULAR_KILL, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Kill e Addi).")
+        addDefault(Messages.XP_REWARD_FINAL_KILL, "{prefix}&6+{xp} Tajrobe BedWars Daryaft Kardid (Kill e Payani).")
 
-        this.addDefault(Messages.MONEY_REWARD_PER_MINUTE, "{prefix}&6+{money} Coin (Zaman Play).")
-        this.addDefault(Messages.MONEY_REWARD_WIN, "{prefix}&6+{money} Coin (Bord Bazi).")
-        this.addDefault(Messages.MONEY_REWARD_PER_TEAMMATE, "{prefix}&6+{money} Coin (Hemayat Az Team).")
-        this.addDefault(Messages.MONEY_REWARD_BED_DESTROYED, "{prefix}&6+{money} Coin (Az Bein Raftan Bed).")
-        this.addDefault(Messages.MONEY_REWARD_FINAL_KILL, "{prefix}&6+{money} Coin (Kill e Payani).")
-        this.addDefault(Messages.MONEY_REWARD_REGULAR_KILL, "{prefix}&6+{money} Coin (Kill e Addi).")
+        addDefault(Messages.MONEY_REWARD_PER_MINUTE, "{prefix}&6+{money} Coin (Zaman Play).")
+        addDefault(Messages.MONEY_REWARD_WIN, "{prefix}&6+{money} Coin (Bord Bazi).")
+        addDefault(Messages.MONEY_REWARD_PER_TEAMMATE, "{prefix}&6+{money} Coin (Hemayat Az Team).")
+        addDefault(Messages.MONEY_REWARD_BED_DESTROYED, "{prefix}&6+{money} Coin (Az Bein Raftan Bed).")
+        addDefault(Messages.MONEY_REWARD_FINAL_KILL, "{prefix}&6+{money} Coin (Kill e Payani).")
+        addDefault(Messages.MONEY_REWARD_REGULAR_KILL, "{prefix}&6+{money} Coin (Kill e Addi).")
 
         /* Lobby Command Items */
-        this.addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "stats"), "&eAmar")
-        this.addDefault(
+        addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "stats"), "&eAmar")
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", "stats"),
             listOf("&fBaraye didan amaretoon Right-click konid!")
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "arena-selector"),
             "&eEntekhab Arena"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", "arena-selector"),
             listOf("&fBaraye entekhab arena Right-click konid!")
         )
-        this.addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "leave"), "&eBazgasht be Hub")
-        this.addDefault(
+        addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "leave"), "&eBazgasht be Hub")
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", "leave"),
             listOf("&fBaraye raftan az BedWars Right-click konid!")
         )
         /* Pre Game Command Items */
-        this.addDefault(Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", "stats"), "&eAmar")
-        this.addDefault(
+        addDefault(Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", "stats"), "&eAmar")
+        addDefault(
             Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_LORE.replace("%path%", "stats"),
             listOf("&fBaraye didan amaretoon Right-click konid!")
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", "leave"),
             "&eBazgasht be Lobby"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_LORE.replace("%path%", "leave"),
             listOf("&fBaraye raftan az arena Right-click konid!")
         )
         /* Spectator Command Items */
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_NAME.replace("%path%", "teleporter"),
             "&eTeleport Konande"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_NAME.replace("%path%", "leave"),
             "&eBazgasht be Lobby"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_LORE.replace("%path%", "leave"),
             listOf("&fBaraye raftan az arena Right-click konid!")
         )
 
         /* save default items messages for stats gui */
-        this.addDefault(Messages.PLAYER_STATS_GUI_INV_NAME, "&8{player} Amar")
+        addDefault(Messages.PLAYER_STATS_GUI_INV_NAME, "&8{player} Amar")
         addDefaultStatsMsg("wins", "&6Bord", "&f{wins}")
         addDefaultStatsMsg("losses", "&6Bakht", "&f{losses}")
         addDefaultStatsMsg("kills", "&6Kill", "&f{kills}")
@@ -571,7 +559,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
         addDefaultStatsMsg("games-played", "&6Tedad Bazi Anjam Shode", "&f{gamesPlayed}")
 
         // Start of Sidebar
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_LOBBY, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&fLevel Shoma: {level}",
@@ -589,7 +577,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_WAITING, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -606,7 +594,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_WAITING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -623,7 +611,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_STARTING, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -640,7 +628,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_STARTING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -657,7 +645,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -679,7 +667,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -700,7 +688,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -721,7 +709,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -742,7 +730,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_WIN1, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -763,7 +751,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_WIN2, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -784,7 +772,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_LOSER, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -805,7 +793,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING.replaceFirst("Default".toRegex(), "Doubles"), listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -825,7 +813,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC.replaceFirst("Default".toRegex(), "Doubles"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -845,7 +833,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED.replaceFirst("Default".toRegex(), "Doubles"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -866,7 +854,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING.replaceFirst("Default".toRegex(), "3v3v3v3"), listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -890,7 +878,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC.replaceFirst("Default".toRegex(), "3v3v3v3"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -911,7 +899,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED.replaceFirst("Default".toRegex(), "3v3v3v3"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -936,7 +924,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING.replaceFirst("Default".toRegex(), "4v4v4v4"), listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -960,7 +948,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC.replaceFirst("Default".toRegex(), "4v4v4v4"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -981,7 +969,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED.replaceFirst("Default".toRegex(), "4v4v4v4"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -1010,14 +998,14 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
 
         // start of TAB
         // main lobby tab format
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_LOBBY_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_LOBBY_FOOTER, listOf(
                 "",
                 "&fThere are {on} players on this lobby",
@@ -1025,17 +1013,17 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_LOBBY_PREFIX, listOf("{vPrefix}"))
-        this.addDefault(Messages.FORMATTING_SB_TAB_LOBBY_SUFFIX, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_LOBBY_PREFIX, listOf("{vPrefix}"))
+        addDefault(Messages.FORMATTING_SB_TAB_LOBBY_SUFFIX, listOf(" {level}"))
         // player waiting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_FOOTER, listOf(
                 "",
                 "Waiting for more players,Waiting for more players.,Waiting for more players.., Waiting for more players...",
@@ -1046,17 +1034,17 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX, listOf("{vPrefix}"))
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX, listOf("{vPrefix}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX, listOf(" {level}"))
         // spectator waiting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_HEADER_SPEC, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_FOOTER_SPEC, listOf(
                 "",
                 "&7&oYou are spectating",
@@ -1068,10 +1056,10 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX_SPEC, listOf("{vPrefix}"))
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX_SPEC, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX_SPEC, listOf("{vPrefix}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX_SPEC, listOf(" {level}"))
         // player starting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1080,7 +1068,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_FOOTER, listOf(
                 "",
                 "&fStarting in &a{time} &fseconds,&fStarting in &a{time} &fseconds.,&fStarting in &a{time} &fseconds..,&fStarting in &a{time} &fseconds..",
@@ -1091,10 +1079,10 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX, listOf("{vPrefix} "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX, listOf("{vPrefix} "))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX, listOf(" {level}"))
         // spectator starting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_HEADER_SPEC, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1103,7 +1091,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_FOOTER_SPEC, listOf(
                 "",
                 "&fStarting in &a{time} &fseconds,&fStarting in &a{time} &fseconds.,&fStarting in &a{time} &fseconds..,&fStarting in &a{time} &fseconds..",
@@ -1114,10 +1102,10 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX_SPEC, listOf("{vPrefix} "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX_SPEC, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX_SPEC, listOf("{vPrefix} "))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX_SPEC, listOf(" {level}"))
         // player playing
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1128,7 +1116,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_FOOTER, listOf(
                 "",
                 "&fYou are playing on the {teamColor}{teamName} Team",
@@ -1137,10 +1125,10 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_PREFIX, listOf("{teamColor}{teamName} "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SUFFIX, listOf(" {vPrefix}", " {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_PREFIX, listOf("{teamColor}{teamName} "))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SUFFIX, listOf(" {vPrefix}", " {level}"))
         // player eliminated - playing state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_ELM_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1152,7 +1140,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&7&oAYou've been eliminated,&f&oAYou've been eliminated"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_ELM_FOOTER, listOf(
                 "",
                 "&fYou have played in the {teamColor}{teamName} Team",
@@ -1161,8 +1149,8 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_ELM_PREFIX, listOf("&f&oSpectator "))
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_ELM_PREFIX, listOf("&f&oSpectator "))
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_ELM_SUFFIX,
             listOf(
                 " &c&oEliminated {teamColor}&o{teamName}",
@@ -1171,7 +1159,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
             )
         )
         // spectator - playing state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_SPEC_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1182,17 +1170,17 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_SPEC_FOOTER, listOf(
                 "",
                 "&fPowered by {poweredBy}",
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_PREFIX, listOf("&f&oSpectator "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_SUFFIX, listOf(" {vPrefix}", " {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_PREFIX, listOf("&f&oSpectator "))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_SUFFIX, listOf(" {vPrefix}", " {level}"))
         // winner alive - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_HEADER, listOf(
                 "                                                                                                        ",
                 "&6⭐ {winnerTeamColor}&lYour team won the game! &6⭐",
@@ -1200,7 +1188,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_FOOTER, listOf(
                 "",
                 "&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&f&lYou won in the {teamColor}&l{teamName} Team&f&l!",
@@ -1213,16 +1201,16 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_PREFIX,
             listOf("&6&l⭐ {teamColor}{teamName} ")
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_SUFFIX,
             listOf(" {vPrefix}", " {level}")
         )
         // winner dead - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_HEADER, listOf(
                 "                                                                                                        ",
                 "&6⭐ {winnerTeamColor}&l{winnerTeamName} Team won the game! &6⭐",
@@ -1231,7 +1219,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_FOOTER, listOf(
                 "",
                 "&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&f&lYou won in the {teamColor}&l{teamName} Team&f&l!",
@@ -1244,16 +1232,16 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_PREFIX,
             listOf("&6&l⭐ {teamColor}{teamName} ")
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_SUFFIX,
             listOf(" {vPrefix}", " &c&oEliminated", " {level}", " &c&oEliminated")
         )
         // loser - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_HEADER, listOf(
                 "                                                                                                        ",
                 "&6⭐ {winnerTeamColor}&l{winnerTeamName} Team won the game! &6⭐",
@@ -1262,7 +1250,7 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_FOOTER, listOf(
                 "",
                 "&fYou have lost in the {teamColor}{teamName} Team",
@@ -1274,16 +1262,16 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_PREFIX,
             listOf("{teamColor}{teamName} ")
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_SUFFIX,
             listOf(" {vPrefix}", " &c&oEliminated", " {level}", " &c&oEliminated")
         )
         // spectator - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1295,15 +1283,15 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_FOOTER, listOf(
                 "",
                 "&fPowered by {poweredBy}",
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_PREFIX, listOf("&f&oSpectator "))
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_PREFIX, listOf("&f&oSpectator "))
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_SUFFIX,
             listOf(" {vPrefix}", " {level}")
         )
@@ -1311,22 +1299,22 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
         // end of tab
 
         //
-        this.addDefault(Messages.SHOP_INDEX_NAME, "&8Kharid Sari")
-        this.addDefault(Messages.SHOP_QUICK_ADD_NAME, "&8Adding to Quick Buy...")
-        this.addDefault(
+        addDefault(Messages.SHOP_INDEX_NAME, "&8Kharid Sari")
+        addDefault(Messages.SHOP_QUICK_ADD_NAME, "&8Adding to Quick Buy...")
+        addDefault(
             Messages.SHOP_INSUFFICIENT_MONEY,
             "{prefix}&cShoma be andaze kafi {currency} nadarid! Shoma {amount} ta bishtar mikhaid!"
         )
-        this.addDefault(Messages.SHOP_NEW_PURCHASE, "{prefix}&aShoma &6{item} &akharidid")
-        this.addDefault(Messages.SHOP_ALREADY_BOUGHT, "{prefix}&cShoma az ghabl in ro kharidid!")
-        this.addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}Silverfish")
-        this.addDefault(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME, "{TeamColor}{despawn}s &8[ {TeamColor}{health}&8]")
-        this.addDefault(Messages.SHOP_SEPARATOR_NAME, "&8⇧ Daste Bandi Ha")
-        this.addDefault(Messages.SHOP_SEPARATOR_LORE, listOf("&8⇩ Item Ha"))
-        this.addDefault(Messages.SHOP_QUICK_BUY_NAME, "&bKharid Sari")
-        this.addDefault(Messages.SHOP_QUICK_BUY_LORE, ArrayList<Any?>())
-        this.addDefault(Messages.SHOP_QUICK_EMPTY_NAME, "&cSlot Khali!")
-        this.addDefault(
+        addDefault(Messages.SHOP_NEW_PURCHASE, "{prefix}&aShoma &6{item} &akharidid")
+        addDefault(Messages.SHOP_ALREADY_BOUGHT, "{prefix}&cShoma az ghabl in ro kharidid!")
+        addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}Silverfish")
+        addDefault(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME, "{TeamColor}{despawn}s &8[ {TeamColor}{health}&8]")
+        addDefault(Messages.SHOP_SEPARATOR_NAME, "&8⇧ Daste Bandi Ha")
+        addDefault(Messages.SHOP_SEPARATOR_LORE, listOf("&8⇩ Item Ha"))
+        addDefault(Messages.SHOP_QUICK_BUY_NAME, "&bKharid Sari")
+        addDefault(Messages.SHOP_QUICK_BUY_LORE, ArrayList<Any?>())
+        addDefault(Messages.SHOP_QUICK_EMPTY_NAME, "&cSlot Khali!")
+        addDefault(
             Messages.SHOP_QUICK_EMPTY_LORE,
             listOf(
                 "&7Inja jaye slot Kharid Sari hast!",
@@ -1334,13 +1322,13 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&7inja ezafe beshe"
             )
         )
-        this.addDefault(Messages.SHOP_CAN_BUY_COLOR, "&a")
-        this.addDefault(Messages.SHOP_CANT_BUY_COLOR, "&c")
-        this.addDefault(Messages.SHOP_LORE_STATUS_CAN_BUY, "&eBaraye kharid Click konid!")
-        this.addDefault(Messages.SHOP_LORE_STATUS_CANT_AFFORD, "&cShoma be andaze kafi {currency} nadarid!")
-        this.addDefault(Messages.SHOP_LORE_STATUS_MAXED, "&aAKHARIN LEVEL!")
-        this.addDefault(Messages.SHOP_LORE_QUICK_ADD, "&bBaraye ezafe kardan be Kharid Sari SNEAK Click konid")
-        this.addDefault(Messages.SHOP_LORE_QUICK_REMOVE, "&bBaraye hazf az Kharid Sari SNEAK Click konid!")
+        addDefault(Messages.SHOP_CAN_BUY_COLOR, "&a")
+        addDefault(Messages.SHOP_CANT_BUY_COLOR, "&c")
+        addDefault(Messages.SHOP_LORE_STATUS_CAN_BUY, "&eBaraye kharid Click konid!")
+        addDefault(Messages.SHOP_LORE_STATUS_CANT_AFFORD, "&cShoma be andaze kafi {currency} nadarid!")
+        addDefault(Messages.SHOP_LORE_STATUS_MAXED, "&aAKHARIN LEVEL!")
+        addDefault(Messages.SHOP_LORE_QUICK_ADD, "&bBaraye ezafe kardan be Kharid Sari SNEAK Click konid")
+        addDefault(Messages.SHOP_LORE_QUICK_REMOVE, "&bBaraye hazf az Kharid Sari SNEAK Click konid!")
 
 
         addCategoryMessages(
@@ -1733,27 +1721,27 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
         )
 
         //
-        this.addDefault(Messages.MEANING_NO_TRAP, "Hich tale i nadarid!")
-        this.addDefault(Messages.FORMAT_SPECTATOR_TARGET, "{targetTeamColor}{targetDisplayName}")
-        this.addDefault(Messages.FORMAT_UPGRADE_TRAP_COST, "&7Gheimat: {currencyColor}{cost} {currency}")
-        this.addDefault(Messages.FORMAT_UPGRADE_COLOR_CAN_AFFORD, "&e")
-        this.addDefault(Messages.FORMAT_UPGRADE_COLOR_CANT_AFFORD, "&c")
-        this.addDefault(Messages.FORMAT_UPGRADE_COLOR_UNLOCKED, "&a")
-        this.addDefault(Messages.FORMAT_UPGRADE_TIER_LOCKED, "&7")
-        this.addDefault(Messages.FORMAT_UPGRADE_TIER_UNLOCKED, "&a")
-        this.addDefault(Messages.UPGRADES_LORE_REPLACEMENT_CLICK_TO_BUY, "{color}Baraye kharid Click konid!")
-        this.addDefault(
+        addDefault(Messages.MEANING_NO_TRAP, "Hich tale i nadarid!")
+        addDefault(Messages.FORMAT_SPECTATOR_TARGET, "{targetTeamColor}{targetDisplayName}")
+        addDefault(Messages.FORMAT_UPGRADE_TRAP_COST, "&7Gheimat: {currencyColor}{cost} {currency}")
+        addDefault(Messages.FORMAT_UPGRADE_COLOR_CAN_AFFORD, "&e")
+        addDefault(Messages.FORMAT_UPGRADE_COLOR_CANT_AFFORD, "&c")
+        addDefault(Messages.FORMAT_UPGRADE_COLOR_UNLOCKED, "&a")
+        addDefault(Messages.FORMAT_UPGRADE_TIER_LOCKED, "&7")
+        addDefault(Messages.FORMAT_UPGRADE_TIER_UNLOCKED, "&a")
+        addDefault(Messages.UPGRADES_LORE_REPLACEMENT_CLICK_TO_BUY, "{color}Baraye kharid Click konid!")
+        addDefault(
             Messages.UPGRADES_LORE_REPLACEMENT_INSUFFICIENT_MONEY,
             "{color}Shoma be meghdar kafi {currency} nadarid"
         )
-        this.addDefault(Messages.UPGRADES_LORE_REPLACEMENT_LOCKED, "&cGHOFL")
-        this.addDefault(Messages.UPGRADES_LORE_REPLACEMENT_UNLOCKED, "{color}BAZ")
-        this.addDefault(Messages.UPGRADES_UPGRADE_BOUGHT_CHAT, "&a{player} yek &6{upgradeName} &akharid")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_LORE_REPLACEMENT_LOCKED, "&cGHOFL")
+        addDefault(Messages.UPGRADES_LORE_REPLACEMENT_UNLOCKED, "{color}BAZ")
+        addDefault(Messages.UPGRADES_UPGRADE_BOUGHT_CHAT, "&a{player} yek &6{upgradeName} &akharid")
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-1"),
             "{color}Forge Iron"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "forge"),
             listOf(
                 "&7Ertegha resource haei ke dar",
@@ -1766,20 +1754,20 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-2"),
             "{color}Forge Gold"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-3"),
             "{color}Forge Emerald"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-4"),
             "{color}Forge Molten"
         )
-        this.addDefault(Messages.UPGRADES_CATEGORY_ITEM_NAME_PATH + "traps", "&eKharid Tale")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_CATEGORY_ITEM_NAME_PATH + "traps", "&eKharid Tale")
+        addDefault(
             Messages.UPGRADES_CATEGORY_ITEM_LORE_PATH + "traps",
             listOf(
                 "&7Tale haye kharide shode",
@@ -1788,11 +1776,11 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&eClick to browse!"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "swords").replace("{tier}", "tier-1"),
             "{color}Sharpened Swords"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "swords"),
             listOf(
                 "&7Team shoma daeman",
@@ -1803,11 +1791,11 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-1"),
             "{color}Reinforced Armor I"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "armor"),
             listOf(
                 "&7Team shoma daeman",
@@ -1820,23 +1808,23 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-2"),
             "{color}Reinforced Armor II"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-3"),
             "{color}Reinforced Armor III"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-4"),
             "{color}Reinforced Armor IV"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "miner").replace("{tier}", "tier-1"),
             "{color}Maniac Miner I"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "miner"),
             listOf(
                 "&7Tamam player haye team shoma",
@@ -1847,15 +1835,15 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "miner").replace("{tier}", "tier-2"),
             "{color}Maniac Miner II"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "heal-pool").replace("{tier}", "tier-1"),
             "{color}Heal Pool"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "heal-pool"),
             listOf(
                 "&7Yek mantaghe regeneration",
@@ -1865,11 +1853,11 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "dragon").replace("{tier}", "tier-1"),
             "{color}Dragon Buff"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "dragon"),
             listOf(
                 "&7Team shoma bejaye 1 dragon",
@@ -1879,14 +1867,14 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "glass", "&8⬆&7Ghabel Kharid")
-        this.addDefault(Messages.UPGRADES_SEPARATOR_ITEM_LORE_PATH + "glass", listOf("&8⬇&7Safe Tale"))
-        this.addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "first", "{color}Tale #1: {name}")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "glass", "&8⬆&7Ghabel Kharid")
+        addDefault(Messages.UPGRADES_SEPARATOR_ITEM_LORE_PATH + "glass", listOf("&8⬇&7Safe Tale"))
+        addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "first", "{color}Tale #1: {name}")
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + "first",
             listOf("&7Avalin enemy ke vared", "&7base shoma beshe in", "&7tale faal mishe!")
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + "first",
             listOf(
                 "",
@@ -1898,12 +1886,12 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&7Tale Badi: &b{cost} {currency}"
             )
         )
-        this.addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "second", "{color}Tale #2: {name}")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "second", "{color}Tale #2: {name}")
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + "second",
             listOf("&7Dovomin enemy ke vared", "&7base shoma beshe in", "&7tale faal mishe!")
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + "second",
             listOf(
                 "",
@@ -1915,12 +1903,12 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&7Tale Badi: &b{cost} {currency}"
             )
         )
-        this.addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "third", "{color}Tale #3: {name}")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "third", "{color}Tale #3: {name}")
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + "third",
             listOf("&7Sevomin enemy ke vared", "&7base shoma beshe in", "&7tale faal mishe!")
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + "third",
             listOf(
                 "",
@@ -1932,23 +1920,23 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 "&7Tale Badi: &b{cost} {currency}"
             )
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "1", "{color}Tale Sade!")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "1", "{color}Tale Sade!")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "1",
             listOf("&7Hengam vorood enemy ha be island", "&7baraye 5 sanie koor va kond mishan.", "")
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "2", "{color}Counter-Offensive Trap")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "2", "{color}Counter-Offensive Trap")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "2",
             listOf("&7Grants Speed I for 15 seconds to", "&7allied players near your base.", "")
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "3", "{color}Tale Alarm")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "3", "{color}Tale Alarm")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "3",
             listOf("&7Hengam Vorood Afrade Invisible", "&7Be Teametoon Hoshdar Dade Mishe.", "")
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "4", "{color}Trap Miner Fatigue")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "4", "{color}Trap Miner Fatigue")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "4",
             listOf(
                 "&7Baraye 10 sanie Miner Fatigue Enemy",
@@ -1956,22 +1944,22 @@ class Persian : Language(BedWars.INSTANCE, "fa") {
                 ""
             )
         )
-        this.addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "back", "&aBazgasht")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "back", "&aBazgasht")
+        addDefault(
             Messages.UPGRADES_SEPARATOR_ITEM_LORE_PATH + "back",
             listOf("&7To Upgrades & Traps")
         )
-        this.addDefault(Messages.UPGRADES_CATEGORY_GUI_NAME_PATH + "traps", "&8Dar saf gharar dadan Tale")
-        this.addDefault(Messages.UPGRADES_TRAP_QUEUE_LIMIT, "&cEmkan Kharid Tale Bishtar Ra Nadarid.")
-        this.addDefault(Messages.UPGRADES_TRAP_DEFAULT_MSG, "&c&l{trap} khamoosh shod!")
-        this.addDefault(Messages.UPGRADES_TRAP_DEFAULT_TITLE, "&cTALE FAAL SHOD!")
-        this.addDefault(Messages.UPGRADES_TRAP_DEFAULT_SUBTITLE, "&f{trap} Shoma Faal Shod.")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_CATEGORY_GUI_NAME_PATH + "traps", "&8Dar saf gharar dadan Tale")
+        addDefault(Messages.UPGRADES_TRAP_QUEUE_LIMIT, "&cEmkan Kharid Tale Bishtar Ra Nadarid.")
+        addDefault(Messages.UPGRADES_TRAP_DEFAULT_MSG, "&c&l{trap} khamoosh shod!")
+        addDefault(Messages.UPGRADES_TRAP_DEFAULT_TITLE, "&cTALE FAAL SHOD!")
+        addDefault(Messages.UPGRADES_TRAP_DEFAULT_SUBTITLE, "&f{trap} Shoma Faal Shod.")
+        addDefault(
             Messages.UPGRADES_TRAP_CUSTOM_MSG + "3",
             "&c&lHoshdar Tale Tavasote &7&l{player} &c&laz team {color}&l{team} &c&lGheyre Faal Shod!"
         )
-        this.addDefault(Messages.UPGRADES_TRAP_CUSTOM_TITLE + "3", "&c&lHOSHDAR!!!")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_TRAP_CUSTOM_TITLE + "3", "&c&lHOSHDAR!!!")
+        addDefault(
             Messages.UPGRADES_TRAP_CUSTOM_SUBTITLE + "3",
             "&fAlarm Tale Tavasote Team {color}{team} &fGheyre Faal Shod!"
         )

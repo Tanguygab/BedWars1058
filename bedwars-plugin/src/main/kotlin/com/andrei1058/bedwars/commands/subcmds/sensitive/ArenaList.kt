@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.commands.subcmds.sensitive
 
 import com.andrei1058.bedwars.api.language.Language
-import com.andrei1058.bedwars.arena.Misc
+import com.andrei1058.bedwars.Misc
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.MainCommand
 import com.andrei1058.bedwars.commands.subcmds.SubCommand

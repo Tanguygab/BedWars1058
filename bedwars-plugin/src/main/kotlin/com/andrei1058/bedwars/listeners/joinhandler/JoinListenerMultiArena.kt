@@ -20,7 +20,7 @@
 package com.andrei1058.bedwars.listeners.joinhandler
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.arena.ReJoin
+import com.andrei1058.bedwars.arena.data.ReJoin
 import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler

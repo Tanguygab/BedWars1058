@@ -33,9 +33,10 @@ class ScoreboardManagerImpl(private val plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1L, playerListRefreshInterval) { plugin.scoreboardManager.refreshTabList() }
+            plugin.repeat(1L, playerListRefreshInterval) { refreshTabList() }
         }
-        plugin.metrics.appendPie("sb_list_refresh_interval") { playerListRefreshInterval.toString() }
+        val metrics = plugin.metrics
+        metrics.appendPie("sb_list_refresh_interval") { "$playerListRefreshInterval" }
 
         val placeholdersRefreshInterval = config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_PLACEHOLDERS_REFRESH_INTERVAL)
         if (placeholdersRefreshInterval < 1) {
@@ -46,9 +47,9 @@ class ScoreboardManagerImpl(private val plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, placeholdersRefreshInterval) { plugin.scoreboardManager.refreshPlaceholders() }
+            plugin.repeat(1, placeholdersRefreshInterval) { refreshPlaceholders() }
         }
-        plugin.metrics.appendPie("sb_placeholder_refresh_interval") { placeholdersRefreshInterval.toString() }
+        metrics.appendPie("sb_placeholder_refresh_interval") { "$placeholdersRefreshInterval" }
 
         val titleRefreshInterval = config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_TITLE_REFRESH_INTERVAL)
         if (titleRefreshInterval < 1) {
@@ -58,9 +59,9 @@ class ScoreboardManagerImpl(private val plugin: BedWars) : ScoreboardManager {
                 log.warning("Scoreboard title refresh interval is set to: $titleRefreshInterval")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, titleRefreshInterval, true) { plugin.scoreboardManager.refreshTitles() }
+            plugin.repeat(1, titleRefreshInterval, true) { refreshTitles() }
         }
-        plugin.metrics.appendPie("sb_title_refresh_interval") { titleRefreshInterval.toString() }
+        metrics.appendPie("sb_title_refresh_interval") { "$titleRefreshInterval" }
 
         val healthAnimationInterval = config.getLong(ConfigPath.SB_CONFIG_SIDEBAR_HEALTH_REFRESH)
         if (healthAnimationInterval < 1) {
@@ -71,9 +72,9 @@ class ScoreboardManagerImpl(private val plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, healthAnimationInterval) { plugin.scoreboardManager.refreshHealth() }
+            plugin.repeat(1, healthAnimationInterval) { refreshHealth() }
         }
-        plugin.metrics.appendPie("sb_health_refresh_interval") { healthAnimationInterval.toString() }
+        metrics.appendPie("sb_health_refresh_interval") { "$healthAnimationInterval" }
 
         val tabHeaderFooterRefreshInterval = config.getLong(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_REFRESH_INTERVAL)
         if (tabHeaderFooterRefreshInterval < 1 || !config.getBoolean(ConfigPath.SB_CONFIG_TAB_HEADER_FOOTER_ENABLE)) {
@@ -84,15 +85,14 @@ class ScoreboardManagerImpl(private val plugin: BedWars) : ScoreboardManager {
                 log.warning("It is not recommended to use a value under 20 ticks.")
                 log.warning("If you expect performance issues please increase its timer.")
             }
-            plugin.repeat(1, tabHeaderFooterRefreshInterval) { plugin.scoreboardManager.refreshTabHeaderFooter() }
+            plugin.repeat(1, tabHeaderFooterRefreshInterval) { refreshTabHeaderFooter() }
         }
-        plugin.metrics.appendPie("sb_header_footer_refresh_interval") { tabHeaderFooterRefreshInterval.toString() }
+        metrics.appendPie("sb_header_footer_refresh_interval") { "$tabHeaderFooterRefreshInterval" }
 
-        val lobbySidebar = config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) &&
-                plugin.serverType == ServerType.MULTIARENA
-        plugin.metrics.appendPie("sb_lobby_enable") { lobbySidebar.toString() }
+        val lobbySidebar = config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) && plugin.serverType == ServerType.MULTIARENA
+        metrics.appendPie("sb_lobby_enable") { "$lobbySidebar" }
         val gameSidebar = config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR)
-        plugin.metrics.appendPie("sb_game_enable") { gameSidebar.toString() }
+        metrics.appendPie("sb_game_enable") { "$gameSidebar" }
 
         plugin.registerEvents(ScoreboardListener(plugin, this))
     }
@@ -103,20 +103,16 @@ class ScoreboardManagerImpl(private val plugin: BedWars) : ScoreboardManager {
         val config = plugin.mainConfig
         // check if we might need to remove the existing sidebar
         if (null != sidebar) {
-            if (null == arena) {
-                // if sidebar is disabled in lobby on shared or multi-arena mode
-                if (!config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) ||
-                    plugin.serverType == ServerType.SHARED
-                ) {
-                    this.remove(sidebar)
-                    return
-                }
-            } else {
+            // if sidebar is disabled in lobby on shared or multi-arena mode
+            if (null == arena && (
+                !config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_LOBBY_SIDEBAR) ||
+                plugin.serverType == ServerType.SHARED
+            ) ||
                 // if sidebar is disabled in game
-                if (!config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR)) {
-                    this.remove(sidebar)
-                    return
-                }
+                !config.getBoolean(ConfigPath.SB_CONFIG_SIDEBAR_USE_GAME_SIDEBAR)
+            ) {
+                remove(sidebar)
+                return
             }
         }
 

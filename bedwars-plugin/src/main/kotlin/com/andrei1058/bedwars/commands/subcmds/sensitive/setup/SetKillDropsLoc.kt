@@ -24,8 +24,8 @@ import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.MainCommand
-import com.andrei1058.bedwars.commands.Misc.createArmorStand
-import com.andrei1058.bedwars.commands.Misc.removeArmorStand
+import com.andrei1058.bedwars.Misc.createArmorStand
+import com.andrei1058.bedwars.Misc.removeArmorStand
 import com.andrei1058.bedwars.configuration.Sounds.playSound
 import net.md_5.bungee.api.chat.ClickEvent
 import org.bukkit.Bukkit

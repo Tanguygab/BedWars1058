@@ -21,7 +21,7 @@ package com.andrei1058.bedwars.support.citizens
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.NPCCommand
+import com.andrei1058.bedwars.commands.subcmds.sensitive.NPCCommand
 import net.citizensnpcs.api.CitizensAPI
 import net.citizensnpcs.api.npc.NPC
 import net.citizensnpcs.npc.skin.SkinnableEntity
@@ -32,12 +32,7 @@ import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.EntityType
 import org.bukkit.event.player.PlayerTeleportEvent
 
-object JoinNPC {
-    /**
-     * Check if Citizens is loaded correctly
-     */
-    var isCitizensSupport = false
-        internal set
+class CitizensSupport(private val plugin: BedWars) {
 
     /* Here are stored NPC holograms without colors and placeholders translated used for refresh*/
     var holograms = mutableMapOf<ArmorStand, List<String>>()
@@ -49,8 +44,8 @@ object JoinNPC {
     /**
      * Spawn all the CmdJoin-NPCs
      */
-    fun init() {
-        val locations = BedWars.INSTANCE.mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE)
+    init {
+        val locations = plugin.mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE)
         for (s in locations) {
             val data = s.split(",")
             if (data.size < 10) continue
@@ -68,7 +63,7 @@ object JoinNPC {
             val id = data[9].toIntOrNull() ?: continue
             val npc = CitizensAPI.getNPCRegistry().getById(id)
             if (npc == null) {
-                BedWars.INSTANCE.logger.severe("Invalid npc id: $id")
+                plugin.logger.severe("Invalid npc id: $id")
                 continue
             }
             spawnNPC(location, name, group, skin, npc)
@@ -108,7 +103,7 @@ object JoinNPC {
                     isMarker = false
                     isCustomNameVisible = true
                     customName = ChatColor.translateAlternateColorCodes('&', name[index])
-                        .replace("{players}", BedWars.INSTANCE.arenaManager.getPlayers(group).toString())
+                        .replace("{players}", plugin.arenaManager.getPlayers(group).toString())
                     holograms[this] = listOf(group, name[index])
                 }
             }
@@ -121,7 +116,7 @@ object JoinNPC {
      * @param group arena group
      */
     fun updateNPCs(group: String) {
-        val players = BedWars.INSTANCE.arenaManager.getPlayers(group).toString()
+        val players = plugin.arenaManager.getPlayers(group).toString()
         for ((key, value) in holograms) {
             if (!value[0].equals(group, ignoreCase = true) || key.isDead) continue
             key.customName = ChatColor.translateAlternateColorCodes('&', value[1].replace("{players}", players))

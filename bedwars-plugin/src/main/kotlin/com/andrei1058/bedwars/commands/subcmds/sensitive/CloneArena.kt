@@ -19,7 +19,7 @@
  */
 package com.andrei1058.bedwars.commands.subcmds.sensitive
 
-import com.andrei1058.bedwars.arena.Misc
+import com.andrei1058.bedwars.Misc
 import com.andrei1058.bedwars.commands.MainCommand
 import com.andrei1058.bedwars.commands.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Permissions

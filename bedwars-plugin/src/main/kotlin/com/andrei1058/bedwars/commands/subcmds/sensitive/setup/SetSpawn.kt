@@ -24,7 +24,7 @@ import com.andrei1058.bedwars.api.util.Utils.message
 import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.MainCommand
-import com.andrei1058.bedwars.commands.Misc
+import com.andrei1058.bedwars.Misc
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player

@@ -36,7 +36,8 @@ open class Language(
     /**
      * Get language iso code.
      */
-    val iso: String
+    val iso: String,
+    defaultName: String
 ) : ConfigManager(plugin, "messages_$iso", "${plugin.dataFolder.path}/Languages") {
     private var prefix = ""
     private var serverIp: String? = null
@@ -56,6 +57,15 @@ open class Language(
             }
 
             set(Messages.GAME_END_TOP_PLAYER_CHAT, newMsg)
+
+            options().copyDefaults(true)
+            addDefault(Messages.PREFIX, "")
+            addDefault("name", defaultName)
+
+            // this must stay here
+            // move message to new path
+            relocate("player-die-knocked-regular", Messages.PLAYER_DIE_KNOCKED_IN_VOID_REGULAR_KILL)
+            relocate("player-die-knocked-final", Messages.PLAYER_DIE_KNOCKED_IN_VOID_FINAL_KILL)
         }
 
         if (contains("scoreboard")) {

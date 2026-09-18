@@ -29,7 +29,7 @@ import com.andrei1058.bedwars.api.events.server.SetupSessionStartEvent
 import com.andrei1058.bedwars.api.server.ISetupSession
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.api.server.SetupType
-import com.andrei1058.bedwars.commands.Misc.createArmorStand
+import com.andrei1058.bedwars.Misc.createArmorStand
 import com.andrei1058.bedwars.configuration.ArenaConfig
 import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import net.md_5.bungee.api.ChatColor

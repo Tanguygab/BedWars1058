@@ -29,7 +29,6 @@ import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.subcmds.regular.*
 import com.andrei1058.bedwars.commands.subcmds.sensitive.*
 import com.andrei1058.bedwars.commands.subcmds.sensitive.setup.*
-import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.command.defaults.BukkitCommand
@@ -110,13 +109,13 @@ class MainCommand(private val plugin: BedWars, override val commandName: String)
                 return true
             }
             /* Send player commands */
-            Bukkit.dispatchCommand(sender, "$name cmds")
+            plugin.server.dispatchCommand(sender, "$name cmds")
             return true
         }
 
         if (sender is Player) {
             if (SetupSession.isInSetupSession(sender.uniqueId)) {
-                Bukkit.dispatchCommand(sender, "$name cmds")
+                plugin.server.dispatchCommand(sender, "$name cmds")
             } else {
                 sender.sendMessage("\n§8§l$dot §6${plugin.description.name} v${plugin.description.version} §7- §c Admin Commands\n")
                 sendSubCommands(sender)

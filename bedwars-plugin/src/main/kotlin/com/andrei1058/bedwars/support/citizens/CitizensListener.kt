@@ -33,15 +33,16 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 
 class CitizensListener(private val plugin: BedWars) : Listener {
     @EventHandler
-    fun removeNPC(e: NPCRemoveEvent) {
+    fun onNPCRemove(e: NPCRemoveEvent) {
         val npc = e.npc
         if (npc?.entity == null) return
 
         val locations = plugin.mainConfig.getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE).toMutableList()
 
         var removed = false
-        if (npc.id in JoinNPC.npcs) {
-            JoinNPC.npcs -= npc.id
+        val npcs = plugin.npcSupport?.npcs
+        if (npcs != null && npc.id in npcs) {
+            npcs -= npc.id
             removed = true
         }
 
@@ -64,14 +65,14 @@ class CitizensListener(private val plugin: BedWars) : Listener {
 
     @EventHandler // Citizens support
     fun onNPCInteract(e: PlayerInteractEntityEvent) {
-        if (!JoinNPC.isCitizensSupport) return
+        val npcSupport = plugin.npcSupport ?: return
 
         val player = e.player
         if (player.isSneaking || !e.rightClicked.hasMetadata("NPC")) return
         val npc = CitizensAPI.getNPCRegistry().getNPC(e.rightClicked) ?: return
 
-        if (npc.id !in JoinNPC.npcs) return
-        val sound = if (!plugin.arenaManager.joinRandomFromGroup(player, JoinNPC.npcs[npc.id]!!)) {
+        if (npc.id !in npcSupport.npcs) return
+        val sound = if (!plugin.arenaManager.joinRandomFromGroup(player, npcSupport.npcs[npc.id]!!)) {
             player.sendLangMsg(Messages.COMMAND_JOIN_NO_EMPTY_FOUND)
             "join-denied"
         } else "join-allowed"

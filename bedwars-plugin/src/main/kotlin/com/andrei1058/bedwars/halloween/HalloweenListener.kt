@@ -43,13 +43,11 @@ import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.metadata.FixedMetadataValue
 
-class HalloweenListener : Listener {
+class HalloweenListener(private val plugin: BedWars) : Listener {
     private val ambienceSound = Sound.valueOf(getForCurrentVersion("AMBIENT_CAVE", "AMBIENCE_CAVE", "AMBIENT_CAVE"))
-    private val ghastSound = Sound.valueOf(getForCurrentVersion(
-        "ENTITY_GHAST_SCREAM",
-        "GHAST_SCREAM2",
-        "ENTITY_GHAST_SCREAM"
-    ))
+    private val ghastSound = Sound.valueOf(getForCurrentVersion("ENTITY_GHAST_SCREAM", "GHAST_SCREAM2", "ENTITY_GHAST_SCREAM"))
+
+    private val cobwebs = mutableMapOf<String, CobWebRemover>()
 
     @EventHandler(ignoreCancelled = true)
     fun onCreatureSpawn(e: CreatureSpawnEvent) {
@@ -68,52 +66,53 @@ class HalloweenListener : Listener {
     @EventHandler
     fun onPlayerDie(e: PlayerKillEvent) {
         if (e.killer == null) return
+
         val location = e.victim.location.add(0.0, 1.0, 0.0)
         val block = location.block
         if (block.type != Material.AIR) return
 
         location.world!!.playSound(location, ghastSound, 2f, 1f)
-        if (e.arena.isProtected(location)) return
+        val arena = e.arena
+        if (arena.isProtected(location)) return
 
         block.type = Material.valueOf(getForCurrentVersion("COBWEB", "WEB"))
-        e.arena.addPlacedBlock(block)
-        block.setMetadata("give-bw-exp", FixedMetadataValue(BedWars.INSTANCE, "ok"))
-        CobWebRemover.getByArenaWorld(e.arena.worldName)?.addCobWeb(block)
+        arena.addPlacedBlock(block)
+        block.setMetadata("give-bw-exp", FixedMetadataValue(plugin, "ok"))
+        cobwebs[arena.worldName]?.addCobWeb(block)
     }
 
     @EventHandler(ignoreCancelled = true)
     fun onBlockBreak(e: BlockBreakEvent) {
         if (!e.block.hasMetadata("give-bw-exp")) return
-        val level = PlayerLevel.getLevelByPlayer(e.player.uniqueId)
+        val player = e.player
+        val level = PlayerLevel.getLevelByPlayer(player.uniqueId)
         e.block.drops.clear()
         level.addXp(5, PlayerXpGainEvent.XpSource.OTHER)
-        e.player.sendMessage("${ChatColor.GOLD}+5 xp!")
+        player.sendMessage("${ChatColor.GOLD}+5 xp!")
     }
 
     @EventHandler
     fun onJoin(e: PlayerJoinArenaEvent) {
         if (e.isSpectator) return
-        BedWars.INSTANCE.run(delay = 20) { e.player.world.playSound(e.player.location, ambienceSound, 3f, 1f) }
+        val player = e.player
+        plugin.run(delay = 20) { player.world.playSound(player.location, ambienceSound, 3f, 1f) }
     }
 
     @EventHandler
     fun onGameStateChange(e: GameStateChangeEvent) {
         if (e.newState != GameState.RESTARTING) return
-        CobWebRemover.getByArenaWorld(e.arena.worldName)?.destroy()
+        destroy(e.arena.worldName)
     }
 
-    @EventHandler
-    fun onRestart(e: ArenaRestartEvent) {
-        CobWebRemover.getByArenaWorld(e.worldName)?.destroy()
-    }
-
-    @EventHandler
-    fun onDisable(e: ArenaDisableEvent) {
-        CobWebRemover.getByArenaWorld(e.worldName)?.destroy()
-    }
+    @EventHandler fun onRestart(e: ArenaRestartEvent) = destroy(e.worldName)
+    @EventHandler fun onDisable(e: ArenaDisableEvent) = destroy(e.worldName)
 
     @EventHandler
     fun onEnable(e: ArenaEnableEvent) {
-        CobWebRemover(e.arena)
+        cobwebs[e.arena.worldName] = CobWebRemover()
+    }
+
+    private fun destroy(world: String) {
+        cobwebs.remove(world)?.destroy()
     }
 }

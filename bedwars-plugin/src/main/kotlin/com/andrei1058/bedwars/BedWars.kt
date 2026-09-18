@@ -29,7 +29,6 @@ import com.andrei1058.bedwars.api.server.RestoreAdapter
 import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.api.server.VersionSupport
 import com.andrei1058.bedwars.arena.ArenaManagerImpl
-import com.andrei1058.bedwars.arena.Misc
 import com.andrei1058.bedwars.arena.VoidChunkGenerator
 import com.andrei1058.bedwars.arena.despawnables.TargetListener
 import com.andrei1058.bedwars.arena.feature.SpoilPlayerTNTFeature
@@ -60,7 +59,7 @@ import com.andrei1058.bedwars.metrics.MetricsManager
 import com.andrei1058.bedwars.money.internal.MoneyListeners
 import com.andrei1058.bedwars.sidebar.ScoreboardManagerImpl
 import com.andrei1058.bedwars.support.citizens.CitizensListener
-import com.andrei1058.bedwars.support.citizens.JoinNPC
+import com.andrei1058.bedwars.support.citizens.CitizensSupport
 import com.andrei1058.bedwars.api.util.Utils.teleportSafe
 import com.andrei1058.bedwars.api.Configs
 import com.andrei1058.bedwars.arena.SetupSession
@@ -175,13 +174,14 @@ class BedWars : JavaPlugin(), API {
         internal set
 
     override val addonsPath = File(dataFolder, "Addons")
-    override lateinit var mainCommand: MainCommand
+    override val mainCommand = MainCommand(this, MAIN_COMMAND)
 
     lateinit var database: Database
 
     private var levelListeners: LevelListeners? = null
     lateinit var levelsConfig: LevelsConfig
     lateinit var moneyConfig: MoneyConfig
+    var npcSupport: CitizensSupport? = null
 
     override fun onLoad() {
         //Spigot support
@@ -262,7 +262,6 @@ class BedWars : JavaPlugin(), API {
         }
 
         /* Register commands */
-        mainCommand = MainCommand(this, MAIN_COMMAND)
         versionSupport.commandMap.register(mainCommand.name, mainCommand)
 
         // newer versions do not seem to like delayed registration of commands
@@ -401,8 +400,7 @@ class BedWars : JavaPlugin(), API {
             registerEvents(CitizensListener(this))
             //spawn NPCs
             try {
-                JoinNPC.init()
-                JoinNPC.isCitizensSupport = true
+                npcSupport = CitizensSupport(this)
             } catch (_: Exception) {
                 logger.severe("Could not spawn CmdJoin NPCs. Make sure you have right version of Citizens for your server!")
             }
@@ -506,7 +504,9 @@ class BedWars : JavaPlugin(), API {
         HalloweenSpecial.init(this)
 
         // TNT Spoil Feature
-        SpoilPlayerTNTFeature.init(this)
+        val tntSpoil = mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_SPOIL_TNT_PLAYERS)
+        metrics.appendPie("tnt_spoil_enable") { "$tntSpoil" }
+        if (tntSpoil) registerEvents(SpoilPlayerTNTFeature(this))
 
         // Warn user if current server version support is deprecated
         performDeprecationCheck()
@@ -565,6 +565,8 @@ class BedWars : JavaPlugin(), API {
 
     override fun onDisable() {
         isShuttingDown = true
+        HandlerList.unregisterAll(this)
+        npcSupport = null
         if (!enabled) return
         if (serverType == ServerType.BUNGEE) {
             ArenaSocket.disable()

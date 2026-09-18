@@ -23,7 +23,6 @@ import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.commands.MainCommand
 import com.andrei1058.bedwars.commands.subcmds.SubCommand
 import com.andrei1058.bedwars.configuration.Permissions
-import com.andrei1058.bedwars.support.citizens.JoinNPC
 import net.citizensnpcs.api.CitizensAPI
 import net.citizensnpcs.api.npc.NPC
 import net.md_5.bungee.api.ChatColor
@@ -65,7 +64,8 @@ class NPCCommand(parent: MainCommand) : SubCommand(parent, "npc", Permissions.PE
     )
 
     override fun execute(args: Array<String>, sender: CommandSender): Boolean {
-        if (sender !is Player || !JoinNPC.isCitizensSupport) return false
+        val npcSupport = plugin.npcSupport ?: return false
+        if (sender !is Player) return false
         val config = plugin.mainConfig
         when (args.getOrNull(0)) {
             "add" -> {
@@ -75,7 +75,7 @@ class NPCCommand(parent: MainCommand) : SubCommand(parent, "npc", Permissions.PE
                 }
 
                 val name = args.joinToString(" ").replace("${args[0]} ${args[1]} ${args[2]} ", "")
-                val npc = JoinNPC.spawnNPC(sender.location, name, args[2], args[1], null)
+                val npc = npcSupport.spawnNPC(sender.location, name, args[2], args[1], null)
                 val location = "${config.stringLocationConfigFormat(sender.location)},${args[1]},$name,${args[2]},${npc.id}"
 
                 sender.sendMessage("§a§c▪ §bNPC: ${name.replace("&", "§").replace("\\n", " ")} §bwas set!")
@@ -104,7 +104,7 @@ class NPCCommand(parent: MainCommand) : SubCommand(parent, "npc", Permissions.PE
                 val locations = config
                     .getStringList(ConfigPath.GENERAL_CONFIGURATION_NPC_LOC_STORAGE)
                     .filter { !it.split(",")[4].equals(npc.id.toString(), ignoreCase = true) }
-                JoinNPC.npcs.remove(npc.id)
+                npcSupport.npcs.remove(npc.id)
                 npc.entity.getNearbyEntities(.0, 3.0, .0).forEach {
                     if (it.type == EntityType.ARMOR_STAND) it.remove()
                 }
@@ -120,7 +120,7 @@ class NPCCommand(parent: MainCommand) : SubCommand(parent, "npc", Permissions.PE
     override val tabComplete = listOf("remove", "add")
 
 
-    override fun canSee(sender: CommandSender) = JoinNPC.isCitizensSupport && super.canSee(sender)
+    override fun canSee(sender: CommandSender) = plugin.npcSupport != null && super.canSee(sender)
 
     companion object {
         /**

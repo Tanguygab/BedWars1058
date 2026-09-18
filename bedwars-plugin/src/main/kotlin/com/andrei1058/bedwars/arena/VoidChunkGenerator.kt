@@ -26,6 +26,6 @@ import java.util.Random
 
 class VoidChunkGenerator : ChunkGenerator() {
     @Deprecated("")
-    override fun generateChunkData(world: World, random: Random, x: Int, z: Int, b: BiomeGrid) = this.createChunkData(world)
+    override fun generateChunkData(world: World, random: Random, x: Int, z: Int, b: BiomeGrid) = createChunkData(world)
     override fun getFixedSpawnLocation(world: World, random: Random) = Location(world, 0.0, 64.0, 0.0)
 }

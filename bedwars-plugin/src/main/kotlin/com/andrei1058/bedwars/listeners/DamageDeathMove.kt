@@ -33,7 +33,7 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Language.Companion.sendLangMsg
 import com.andrei1058.bedwars.api.language.Messages
 import com.andrei1058.bedwars.api.server.ServerType
-import com.andrei1058.bedwars.arena.LastHit
+import com.andrei1058.bedwars.arena.data.LastHit
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.arena.team.BedWarsTeam
 import com.andrei1058.bedwars.configuration.Sounds.playSound

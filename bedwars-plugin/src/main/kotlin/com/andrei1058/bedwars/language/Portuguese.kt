@@ -25,88 +25,75 @@ import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.language.Messages
 import java.util.*
 
-class Portuguese : Language(BedWars.INSTANCE, "pt") {
+class Portuguese : Language(BedWars.INSTANCE, "pt", "Português") {
     init {
-        this.options().copyDefaults(true)
-        this.addDefault(Messages.PREFIX, "")
-        this.addDefault("name", "Português")
+        val bw = BedWars.MAIN_COMMAND
 
-        // this must stay here
-        // move message to new path
-        if (this.get("player-die-knocked-regular") != null && this.get(Messages.PLAYER_DIE_KNOCKED_IN_VOID_REGULAR_KILL) == null) {
-            this.set(Messages.PLAYER_DIE_KNOCKED_IN_VOID_REGULAR_KILL, this.getString("player-die-knocked-regular"))
-            this.set("player-die-knocked-regular", null)
-        }
-        if (this.get("player-die-knocked-final") != null && this.get(Messages.PLAYER_DIE_KNOCKED_IN_VOID_FINAL_KILL) == null) {
-            this.set(Messages.PLAYER_DIE_KNOCKED_IN_VOID_FINAL_KILL, this.getString("player-die-knocked-final"))
-            this.set("player-die-knocked-final", null)
-        }
-
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_MAIN,
-            Arrays.asList<String?>(
+            listOf(
                 "",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " stats",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " join &o<arena/group>",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " leave",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " lang",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " gui",
-                "&2▪ &7/" + BedWars.MAIN_COMMAND + " start &3(vip)"
+                "&2▪ &7/$bw stats",
+                "&2▪ &7/$bw join &o<arena/group>",
+                "&2▪ &7/$bw leave",
+                "&2▪ &7/$bw lang",
+                "&2▪ &7/$bw gui",
+                "&2▪ &7/$bw start &3(vip)"
             )
         )
-        this.addDefault(Messages.COMMAND_LANG_LIST_HEADER, "{prefix} &2Idiomas disponíveis:")
-        this.addDefault(Messages.COMMAND_LANG_LIST_FORMAT, "&a▪  &7{iso} - &f{name}")
-        this.addDefault(Messages.COMMAND_LANG_USAGE, "{prefix}&7Use: /lang &f&o<linguagem>")
-        this.addDefault(Messages.COMMAND_LANG_SELECTED_NOT_EXIST, "{prefix}&cEsta linguagem não existe!")
-        this.addDefault(Messages.COMMAND_LANG_SELECTED_SUCCESSFULLY, "{prefix}&aIdioma alterado!")
-        this.addDefault(Messages.COMMAND_LANG_USAGE_DENIED, "{prefix}&cVocê não pode mudar o idioma durante a partida.")
-        this.addDefault(Messages.COMMAND_JOIN_USAGE, "§a▪ §7Use: /" + BedWars.MAIN_COMMAND + " join §o<arena/grupo>")
-        this.addDefault(
+        addDefault(Messages.COMMAND_LANG_LIST_HEADER, "{prefix} &2Idiomas disponíveis:")
+        addDefault(Messages.COMMAND_LANG_LIST_FORMAT, "&a▪  &7{iso} - &f{name}")
+        addDefault(Messages.COMMAND_LANG_USAGE, "{prefix}&7Use: /lang &f&o<linguagem>")
+        addDefault(Messages.COMMAND_LANG_SELECTED_NOT_EXIST, "{prefix}&cEsta linguagem não existe!")
+        addDefault(Messages.COMMAND_LANG_SELECTED_SUCCESSFULLY, "{prefix}&aIdioma alterado!")
+        addDefault(Messages.COMMAND_LANG_USAGE_DENIED, "{prefix}&cVocê não pode mudar o idioma durante a partida.")
+        addDefault(Messages.COMMAND_JOIN_USAGE, "§a▪ §7Use: /$bw join §o<arena/grupo>")
+        addDefault(
             Messages.COMMAND_JOIN_GROUP_OR_ARENA_NOT_FOUND,
             "{prefix}&cNão existe nenhuma arena ou grupo de arena chamado: {name}"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_IS_FULL,
             "{prefix}&cEsta arena está cheia!\n&aVocê pode adquirir vantagens doando. &7&o(clique)"
         )
-        this.addDefault(Messages.COMMAND_JOIN_NO_EMPTY_FOUND, "{prefix}&cNão há nenhuma arena disponível no momento ;(")
-        this.addDefault(
+        addDefault(Messages.COMMAND_JOIN_NO_EMPTY_FOUND, "{prefix}&cNão há nenhuma arena disponível no momento ;(")
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_IS_FULL_OF_VIPS,
             "{prefix}&cPedimos desculpas, mas esta arena está cheia.\n&cSabemos que é um doador, mas esta arena já está cheia de staffs e/ou doadores."
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_PARTY_TOO_BIG,
             "{prefix}&cA sua party é muito grande para poder entrar na arena. :("
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_JOIN_DENIED_NOT_PARTY_LEADER,
             "{prefix}&cApenas o líder da party pode escolher a arena."
         )
-        this.addDefault(Messages.COMMAND_JOIN_PLAYER_JOIN_MSG, "{prefix}&7{player} &eentrou (&b{on}&e/&b{max}&e)!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_JOIN_PLAYER_JOIN_MSG, "{prefix}&7{player} &eentrou (&b{on}&e/&b{max}&e)!")
+        addDefault(
             Messages.COMMAND_JOIN_SPECTATOR_MSG,
             "{prefix}§6Você agora está assistindo §9{arena}§6.\n{prefix}§eVocê pode sair da arena a qualquer momento com §c/leave§e."
         )
-        this.addDefault(Messages.COMMAND_JOIN_SPECTATOR_DENIED_MSG, "&cEspectadores não são permitidos nesta arena!")
-        this.addDefault(Messages.COMMAND_TP_PLAYER_NOT_FOUND, "{prefix}&cJogador não encontrado!")
-        this.addDefault(Messages.COMMAND_TP_NOT_IN_ARENA, "{prefix}&cEste jogador não está em uma arena de bedwars!")
-        this.addDefault(Messages.COMMAND_TP_NOT_STARTED, "{prefix}&cA arena onde o jogador está ainda não começou!")
-        this.addDefault(Messages.COMMAND_TP_USAGE, "{prefix}&cUse: /bw tp <player>")
-        this.addDefault(Messages.REJOIN_NO_ARENA, "{prefix}&cNão tem partidas para você se reconectar.")
-        this.addDefault(
+        addDefault(Messages.COMMAND_JOIN_SPECTATOR_DENIED_MSG, "&cEspectadores não são permitidos nesta arena!")
+        addDefault(Messages.COMMAND_TP_PLAYER_NOT_FOUND, "{prefix}&cJogador não encontrado!")
+        addDefault(Messages.COMMAND_TP_NOT_IN_ARENA, "{prefix}&cEste jogador não está em uma arena de bedwars!")
+        addDefault(Messages.COMMAND_TP_NOT_STARTED, "{prefix}&cA arena onde o jogador está ainda não começou!")
+        addDefault(Messages.COMMAND_TP_USAGE, "{prefix}&cUse: /bw tp <player>")
+        addDefault(Messages.REJOIN_NO_ARENA, "{prefix}&cNão tem partidas para você se reconectar.")
+        addDefault(
             Messages.REJOIN_DENIED,
             "{prefix}&cVocê não pode mais se juntar à arena. Jogo terminou ou cama destruída."
         )
-        this.addDefault(Messages.REJOIN_ALLOWED, "{prefix}&eEntrando na arena &a{arena}&e!")
-        this.addDefault(Messages.COMMAND_REJOIN_PLAYER_RECONNECTED, "{prefix}&7{player} &ese reconectou!")
-        this.addDefault(Messages.COMMAND_LEAVE_DENIED_NOT_IN_ARENA, "{prefix}&cVocê não está em uma arena!")
-        this.addDefault(Messages.COMMAND_LEAVE_MSG, "{prefix}&7{player} &esaiu!")
-        this.addDefault(Messages.COMMAND_NOT_ALLOWED_IN_GAME, "{prefix}&cVocê não pode fazer isso durante o jogo.")
-        this.addDefault(
+        addDefault(Messages.REJOIN_ALLOWED, "{prefix}&eEntrando na arena &a{arena}&e!")
+        addDefault(Messages.COMMAND_REJOIN_PLAYER_RECONNECTED, "{prefix}&7{player} &ese reconectou!")
+        addDefault(Messages.COMMAND_LEAVE_DENIED_NOT_IN_ARENA, "{prefix}&cVocê não está em uma arena!")
+        addDefault(Messages.COMMAND_LEAVE_MSG, "{prefix}&7{player} &esaiu!")
+        addDefault(Messages.COMMAND_NOT_ALLOWED_IN_GAME, "{prefix}&cVocê não pode fazer isso durante o jogo.")
+        addDefault(
             Messages.COMMAND_NOT_FOUND_OR_INSUFF_PERMS,
             "{prefix}&cComando não encontrado ou você não tem permissão!"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_PARTY_HELP, listOf(
                 "&6▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
                 "&aComandos da Party:",
@@ -120,68 +107,68 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e/party disband &7- &bRecuse um pedido de party"
             )
         )
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_USAGE, "{prefix}&eUse: &7/party invite <player>")
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &enão está online.")
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_SENT, "{prefix}&ePedido enviado para &7{player}&6.")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_INVITE_USAGE, "{prefix}&eUse: &7/party invite <player>")
+        addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &enão está online.")
+        addDefault(Messages.COMMAND_PARTY_INVITE_SENT, "{prefix}&ePedido enviado para &7{player}&6.")
+        addDefault(
             Messages.COMMAND_PARTY_INVITE_SENT_TARGET_RECEIVE_MSG,
             "{prefix}&b{player} &econvidou você para uma party! &o&7(Clique para aceitar)"
         )
-        this.addDefault(
+        addDefault(
             Messages.COMMAND_PARTY_INVITE_DENIED_CANNOT_INVITE_YOURSELF,
             "{prefix}&cVocê não pode se convidar!"
         )
-        this.addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &enão está online.")
-        this.addDefault(Messages.COMMAND_PARTY_ACCEPT_DENIED_NO_INVITE, "{prefix}&cVocê não tem solicitações de party.")
-        this.addDefault(Messages.COMMAND_PARTY_ACCEPT_DENIED_ALREADY_IN_PARTY, "{prefix}&eVocê já está em uma party!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_INVITE_DENIED_PLAYER_OFFLINE, "{prefix}&7{player} &enão está online.")
+        addDefault(Messages.COMMAND_PARTY_ACCEPT_DENIED_NO_INVITE, "{prefix}&cVocê não tem solicitações de party.")
+        addDefault(Messages.COMMAND_PARTY_ACCEPT_DENIED_ALREADY_IN_PARTY, "{prefix}&eVocê já está em uma party!")
+        addDefault(
             Messages.COMMAND_PARTY_INSUFFICIENT_PERMISSIONS,
             "{prefix}&cSomente o dono da party pode fazer isso!"
         )
-        this.addDefault(Messages.COMMAND_PARTY_ACCEPT_USAGE, "{prefix}&eUse: &7/party accept <player>")
-        this.addDefault(Messages.COMMAND_PARTY_ACCEPT_SUCCESS, "{prefix}&7{player} &eentrou na party.")
-        this.addDefault(Messages.COMMAND_PARTY_GENERAL_DENIED_NOT_IN_PARTY, "{prefix}&cVocê não está em uma party.")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_ACCEPT_USAGE, "{prefix}&eUse: &7/party accept <player>")
+        addDefault(Messages.COMMAND_PARTY_ACCEPT_SUCCESS, "{prefix}&7{player} &eentrou na party.")
+        addDefault(Messages.COMMAND_PARTY_GENERAL_DENIED_NOT_IN_PARTY, "{prefix}&cVocê não está em uma party.")
+        addDefault(
             Messages.COMMAND_PARTY_LEAVE_DENIED_IS_OWNER_NEEDS_DISBAND,
             "{prefix}&cVocê não pode sair da sua party.\n&eTente usar: &b/party disband"
         )
-        this.addDefault(Messages.COMMAND_PARTY_LEAVE_SUCCESS, "{prefix}&7{player} &esaiu da party!")
-        this.addDefault(Messages.COMMAND_PARTY_DISBAND_SUCCESS, "{prefix}&eA party foi desfeita")
-        this.addDefault(Messages.COMMAND_PARTY_REMOVE_USAGE, "{prefix}&7Use: &e/party remove <player>")
-        this.addDefault(Messages.COMMAND_PARTY_REMOVE_SUCCESS, "{prefix}&7{player} &efoi removido da party.")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_LEAVE_SUCCESS, "{prefix}&7{player} &esaiu da party!")
+        addDefault(Messages.COMMAND_PARTY_DISBAND_SUCCESS, "{prefix}&eA party foi desfeita")
+        addDefault(Messages.COMMAND_PARTY_REMOVE_USAGE, "{prefix}&7Use: &e/party remove <player>")
+        addDefault(Messages.COMMAND_PARTY_REMOVE_SUCCESS, "{prefix}&7{player} &efoi removido da party.")
+        addDefault(
             Messages.COMMAND_PARTY_REMOVE_DENIED_TARGET_NOT_PARTY_MEMBER,
             "{prefix}&7{player} &enão está na sua party!"
         )
-        this.addDefault(Messages.COMMAND_PARTY_PROMOTE_SUCCESS, "{prefix}&eVocê promoveu com sucesso {player} a dono")
-        this.addDefault(Messages.COMMAND_PARTY_PROMOTE_OWNER, "{prefix}&eVocê foi promovido a dono do grupo")
-        this.addDefault(Messages.COMMAND_PARTY_PROMOTE_NEW_OWNER, "{prefix}&7 &e{player} foi promovido a dono")
-        this.addDefault(Messages.COMMAND_PARTY_INFO_OWNER, "\n{prefix}&eO dono do grupo é: &7{owner}")
-        this.addDefault(Messages.COMMAND_PARTY_INFO_PLAYERS, "{prefix}&eMembros do grupo são:")
-        this.addDefault(Messages.COMMAND_PARTY_INFO_PLAYER, "&7{player}")
-        this.addDefault(Messages.COMMAND_FORCESTART_NOT_IN_GAME, "§c▪ §7Você não está jogando!")
-        this.addDefault(Messages.COMMAND_FORCESTART_SUCCESS, "§c▪ §7Contagem regressiva encurtada!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_PARTY_PROMOTE_SUCCESS, "{prefix}&eVocê promoveu com sucesso {player} a dono")
+        addDefault(Messages.COMMAND_PARTY_PROMOTE_OWNER, "{prefix}&eVocê foi promovido a dono do grupo")
+        addDefault(Messages.COMMAND_PARTY_PROMOTE_NEW_OWNER, "{prefix}&7 &e{player} foi promovido a dono")
+        addDefault(Messages.COMMAND_PARTY_INFO_OWNER, "\n{prefix}&eO dono do grupo é: &7{owner}")
+        addDefault(Messages.COMMAND_PARTY_INFO_PLAYERS, "{prefix}&eMembros do grupo são:")
+        addDefault(Messages.COMMAND_PARTY_INFO_PLAYER, "&7{player}")
+        addDefault(Messages.COMMAND_FORCESTART_NOT_IN_GAME, "§c▪ §7Você não está jogando!")
+        addDefault(Messages.COMMAND_FORCESTART_SUCCESS, "§c▪ §7Contagem regressiva encurtada!")
+        addDefault(
             Messages.COMMAND_FORCESTART_NO_PERM,
             "{prefix}&7Você não pode inicializar uma partida.\n§7Por favor, considere doar para obter vantagens VIP."
         )
-        this.addDefault(Messages.COMMAND_COOLDOWN, "&cVocê não pode fazer isso ainda! Aguarde mais {seconds} segundos!")
-        this.addDefault(
+        addDefault(Messages.COMMAND_COOLDOWN, "&cVocê não pode fazer isso ainda! Aguarde mais {seconds} segundos!")
+        addDefault(
             Messages.ARENA_JOIN_VIP_KICK,
             "{prefix}&cDesculpe, mas você foi expulso porque um doador entrou na arena.\n&aPor favor, considere doar para mais vantagens. &7&o(clique)"
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_START_COUNTDOWN_STOPPED_INSUFF_PLAYERS_CHAT,
             "{prefix}§cNão há jogadores suficientes! Contagem regressiva parada!"
         )
-        this.addDefault(Messages.ARENA_RESTART_PLAYER_KICK, "{prefix}&eA arena em que você estava está reiniciando.")
-        this.addDefault(Messages.ARENA_STATUS_PLAYING_NAME, "&cJogando")
-        this.addDefault(Messages.ARENA_STATUS_RESTARTING_NAME, "&4Reiniciando")
-        this.addDefault(Messages.ARENA_STATUS_WAITING_NAME, "&2Esperando §c{full}")
-        this.addDefault(Messages.ARENA_STATUS_STARTING_NAME, "&6Iniciando §c{full}")
-        this.addDefault(Messages.ARENA_GUI_INV_NAME, "&8Clique para entrar!")
-        this.addDefault(Messages.ARENA_GUI_ARENA_CONTENT_NAME, "&a&l{name}")
-        this.addDefault(
+        addDefault(Messages.ARENA_RESTART_PLAYER_KICK, "{prefix}&eA arena em que você estava está reiniciando.")
+        addDefault(Messages.ARENA_STATUS_PLAYING_NAME, "&cJogando")
+        addDefault(Messages.ARENA_STATUS_RESTARTING_NAME, "&4Reiniciando")
+        addDefault(Messages.ARENA_STATUS_WAITING_NAME, "&2Esperando §c{full}")
+        addDefault(Messages.ARENA_STATUS_STARTING_NAME, "&6Iniciando §c{full}")
+        addDefault(Messages.ARENA_GUI_INV_NAME, "&8Clique para entrar!")
+        addDefault(Messages.ARENA_GUI_ARENA_CONTENT_NAME, "&a&l{name}")
+        addDefault(
             Messages.ARENA_GUI_ARENA_CONTENT_LORE,
             listOf(
                 "",
@@ -193,20 +180,20 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&eBotão direito para assistir."
             )
         )
-        this.addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_NAME, "&r{serverIp}")
-        this.addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_LORE, mutableListOf<Any?>())
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CHAT, "{prefix}&eO jogo começa em &6{time} &esegundos!")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_TITLE, " ")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE, "&a{second}")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-5", "&e❺")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-4", "&e❹")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-3", "&c❸")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-2", "&c❷")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-1", "&c❶")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_TITLE, " ")
-        this.addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_SUB_TITLE, "&cAguardando mais jogadores...")
-        this.addDefault(Messages.ARENA_STATUS_START_PLAYER_TITLE, "&aCOMEÇOU")
-        this.addDefault(
+        addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_NAME, "&r{serverIp}")
+        addDefault(Messages.ARENA_GUI_SKIPPED_ITEM_LORE, emptyList<String>())
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CHAT, "{prefix}&eO jogo começa em &6{time} &esegundos!")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_TITLE, " ")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE, "&a{second}")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-5", "&e❺")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-4", "&e❹")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-3", "&c❸")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-2", "&c❷")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_SUB_TITLE + "-1", "&c❶")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_TITLE, " ")
+        addDefault(Messages.ARENA_STATUS_START_COUNTDOWN_CANCELLED_SUB_TITLE, "&cAguardando mais jogadores...")
+        addDefault(Messages.ARENA_STATUS_START_PLAYER_TITLE, "&aCOMEÇOU")
+        addDefault(
             Messages.ARENA_STATUS_START_PLAYER_TUTORIAL, listOf(
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
                 "&f                                   &lBedWars", "",
@@ -217,207 +204,207 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_JOIN_DENIED_SELECTOR,
             "{prefix}&cDesculpe, mas você não pode participar desta partida neste momento. Use o botão direito do mouse para espectar."
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_SPECTATE_DENIED_SELECTOR,
             "{prefix}&cDesculpe, mas você não pode espectar esta partida neste momento. Utilize o botão esquerdo para entrar na partida."
         )
-        this.addDefault(
+        addDefault(
             Messages.ARENA_JOIN_DENIED_NO_PROXY,
             "&cDesculpe, mas precisa entrar em uma arena usando BedWarsProxy. \n&eSe você quiser configurar uma arena, certifique-se de dar a si mesmo a permissão bw.setup para que você possa entrar no servidor diretamente!"
         )
-        this.addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_NAME, "&8Teletransportador")
-        this.addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_HEAD_NAME, "{vPrefix}{player}")
-        this.addDefault(
+        addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_NAME, "&8Teletransportador")
+        addDefault(Messages.ARENA_SPECTATOR_TELEPORTER_GUI_HEAD_NAME, "{vPrefix}{player}")
+        addDefault(
             Messages.ARENA_SPECTATOR_TELEPORTER_GUI_HEAD_LORE,
             listOf("&7Vida: &f{health}%", "&7Fome: &f{food}", "", "&7Clique para teletransportar.")
         )
-        this.addDefault(Messages.ARENA_SPECTATOR_LEAVE_ITEM_NAME, "&c&lRetornar ao lobby")
-        this.addDefault(
+        addDefault(Messages.ARENA_SPECTATOR_LEAVE_ITEM_NAME, "&c&lRetornar ao lobby")
+        addDefault(
             Messages.ARENA_SPECTATOR_LEAVE_ITEM_LORE,
             listOf("&7Clique com o botão direito para sair.")
         )
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_TITLE, "&aEspectando: &7{player}")
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_SUBTITLE, "&cUtilize o SHIFT para sair.")
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_TITLE, "&eSaindo do modo espectador!")
-        this.addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_SUBTITLE, "")
-        this.addDefault(Messages.ARENA_LEAVE_PARTY_DISBANDED, "{prefix}§cO dono da party saiu e a party foi desfeita.")
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TIER, "&eNível &c{tier}")
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_DIAMOND, "&b&lDiamante")
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_EMERALD, "&a&lEsmeralda")
-        this.addDefault(Messages.GENERATOR_HOLOGRAM_TIMER, "&eGera em &c{seconds} &esegundos.")
-        this.addDefault(
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_TITLE, "&aEspectando: &7{player}")
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_ENTER_SUBTITLE, "&cUtilize o SHIFT para sair.")
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_TITLE, "&eSaindo do modo espectador!")
+        addDefault(Messages.ARENA_SPECTATOR_FIRST_PERSON_LEAVE_SUBTITLE, "")
+        addDefault(Messages.ARENA_LEAVE_PARTY_DISBANDED, "{prefix}§cO dono da party saiu e a party foi desfeita.")
+        addDefault(Messages.GENERATOR_HOLOGRAM_TIER, "&eNível &c{tier}")
+        addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_DIAMOND, "&b&lDiamante")
+        addDefault(Messages.GENERATOR_HOLOGRAM_TYPE_EMERALD, "&a&lEsmeralda")
+        addDefault(Messages.GENERATOR_HOLOGRAM_TIMER, "&eGera em &c{seconds} &esegundos.")
+        addDefault(
             Messages.GENERATOR_UPGRADE_CHAT_ANNOUNCEMENT,
             "{prefix}Geradores de {generatorType} &emelhorados para nível &c{tier}"
         )
-        this.addDefault(Messages.FORMATTING_CHAT_LOBBY, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
-        this.addDefault(Messages.FORMATTING_CHAT_WAITING, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
-        this.addDefault(
+        addDefault(Messages.FORMATTING_CHAT_LOBBY, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
+        addDefault(Messages.FORMATTING_CHAT_WAITING, "{level}{vPrefix}&7{player}{vSuffix}: {message}")
+        addDefault(
             Messages.FORMATTING_CHAT_SHOUT,
             "{level}{vPrefix}&6[SHOUT] {team} &7{player}&f{vSuffix}: {message}"
         )
-        this.addDefault(Messages.FORMATTING_CHAT_TEAM, "{level}{vPrefix}&f{team}&7 {player}{vSuffix} {message}")
-        this.addDefault(Messages.FORMATTING_CHAT_SPECTATOR, "{level}{vPrefix}&7[SPECTATOR] {player}{vSuffix}: {message}")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_HEALTH, listOf("&c❤", "&aVida"))
+        addDefault(Messages.FORMATTING_CHAT_TEAM, "{level}{vPrefix}&f{team}&7 {player}{vSuffix} {message}")
+        addDefault(Messages.FORMATTING_CHAT_SPECTATOR, "{level}{vPrefix}&7[SPECTATOR] {player}{vSuffix}: {message}")
+        addDefault(Messages.FORMATTING_SCOREBOARD_HEALTH, listOf("&c❤", "&aVida"))
 
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_DATE, "dd/MM/yy")
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SCOREBOARD_DATE, "dd/MM/yy")
+        addDefault(
             Messages.FORMATTING_SCOREBOARD_TEAM_GENERIC,
             "{TeamColor}{TeamLetter}&f {TeamName}: {TeamStatus}"
         )
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ELIMINATED, "&c&l✘")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_BED_DESTROYED, "&a{remainingPlayers}")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ALIVE, "&a&l✓")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_NEXEVENT_TIMER, "mm:ss")
-        this.addDefault(Messages.FORMATTING_SCOREBOARD_YOUR_TEAM, "&7 VOCÊ")
-        this.addDefault(Messages.FORMATTING_ACTION_BAR_TRACKING, "&fRastreando: {team} &f- Distância: {distance}m")
-        this.addDefault(Messages.FORMATTING_TEAM_WINNER_FORMAT, "      {TeamColor}{TeamName} &7- {members}")
-        this.addDefault(Messages.FORMATTING_SOLO_WINNER_FORMAT, "                 {TeamColor}{TeamName} &7- {members}")
-        this.addDefault(Messages.FORMATTING_GENERATOR_TIER1, "I")
-        this.addDefault(Messages.FORMATTING_GENERATOR_TIER2, "II")
-        this.addDefault(Messages.FORMATTING_GENERATOR_TIER3, "III")
-        this.addDefault(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH, "▮ ")
-        this.addDefault(Messages.FORMATTING_STATS_DATE_FORMAT, "yyyy/MM/dd HH:mm")
-        this.addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_TEAM, "{TeamColor}[{TeamName}]")
-        this.addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SHOUT, "&6[SHOUT]")
-        this.addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SPECTATOR, "&7[ESPECTADOR]")
-        this.addDefault(Messages.MEANING_FULL, "Lotado")
-        this.addDefault(Messages.MEANING_SHOUT, "shout")
-        this.addDefault(Messages.MEANING_NOBODY, "Ninguém")
-        this.addDefault(Messages.MEANING_NEVER, "Nunca")
-        this.addDefault(Messages.MEANING_IRON_SINGULAR, "Ferro")
-        this.addDefault(Messages.MEANING_IRON_PLURAL, "Ferros")
-        this.addDefault(Messages.MEANING_GOLD_SINGULAR, "Ouro")
-        this.addDefault(Messages.MEANING_GOLD_PLURAL, "Ouros")
-        this.addDefault(Messages.MEANING_EMERALD_SINGULAR, "Esmeralda")
-        this.addDefault(Messages.MEANING_EMERALD_PLURAL, "Esmeraldas")
-        this.addDefault(Messages.MEANING_DIAMOND_SINGULAR, "Diamante")
-        this.addDefault(Messages.MEANING_DIAMOND_PLURAL, "Diamantes")
-        this.addDefault(Messages.MEANING_VAULT_SINGULAR, "$")
-        this.addDefault(Messages.MEANING_VAULT_PLURAL, "$")
-        this.addDefault(Messages.INTERACT_CANNOT_PLACE_BLOCK, "{prefix}&cVocê não pode colocar blocos aqui!")
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ELIMINATED, "&c&l✘")
+        addDefault(Messages.FORMATTING_SCOREBOARD_BED_DESTROYED, "&a{remainingPlayers}")
+        addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ALIVE, "&a&l✓")
+        addDefault(Messages.FORMATTING_SCOREBOARD_NEXEVENT_TIMER, "mm:ss")
+        addDefault(Messages.FORMATTING_SCOREBOARD_YOUR_TEAM, "&7 VOCÊ")
+        addDefault(Messages.FORMATTING_ACTION_BAR_TRACKING, "&fRastreando: {team} &f- Distância: {distance}m")
+        addDefault(Messages.FORMATTING_TEAM_WINNER_FORMAT, "      {TeamColor}{TeamName} &7- {members}")
+        addDefault(Messages.FORMATTING_SOLO_WINNER_FORMAT, "                 {TeamColor}{TeamName} &7- {members}")
+        addDefault(Messages.FORMATTING_GENERATOR_TIER1, "I")
+        addDefault(Messages.FORMATTING_GENERATOR_TIER2, "II")
+        addDefault(Messages.FORMATTING_GENERATOR_TIER3, "III")
+        addDefault(Messages.FORMATTING_DESPAWNABLE_UTILITY_NPC_HEALTH, "▮ ")
+        addDefault(Messages.FORMATTING_STATS_DATE_FORMAT, "yyyy/MM/dd HH:mm")
+        addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_TEAM, "{TeamColor}[{TeamName}]")
+        addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SHOUT, "&6[SHOUT]")
+        addDefault(Messages.FORMAT_PAPI_PLAYER_TEAM_SPECTATOR, "&7[ESPECTADOR]")
+        addDefault(Messages.MEANING_FULL, "Lotado")
+        addDefault(Messages.MEANING_SHOUT, "shout")
+        addDefault(Messages.MEANING_NOBODY, "Ninguém")
+        addDefault(Messages.MEANING_NEVER, "Nunca")
+        addDefault(Messages.MEANING_IRON_SINGULAR, "Ferro")
+        addDefault(Messages.MEANING_IRON_PLURAL, "Ferros")
+        addDefault(Messages.MEANING_GOLD_SINGULAR, "Ouro")
+        addDefault(Messages.MEANING_GOLD_PLURAL, "Ouros")
+        addDefault(Messages.MEANING_EMERALD_SINGULAR, "Esmeralda")
+        addDefault(Messages.MEANING_EMERALD_PLURAL, "Esmeraldas")
+        addDefault(Messages.MEANING_DIAMOND_SINGULAR, "Diamante")
+        addDefault(Messages.MEANING_DIAMOND_PLURAL, "Diamantes")
+        addDefault(Messages.MEANING_VAULT_SINGULAR, "$")
+        addDefault(Messages.MEANING_VAULT_PLURAL, "$")
+        addDefault(Messages.INTERACT_CANNOT_PLACE_BLOCK, "{prefix}&cVocê não pode colocar blocos aqui!")
+        addDefault(
             Messages.INTERACT_CANNOT_BREAK_BLOCK,
             "{prefix}&cVocê só pode quebrar blocos colocados por um jogador!"
         )
-        this.addDefault(Messages.INTERACT_CANNOT_BREAK_OWN_BED, "&cVocê não pode destruir sua própria cama!")
-        this.addDefault(
+        addDefault(Messages.INTERACT_CANNOT_BREAK_OWN_BED, "&cVocê não pode destruir sua própria cama!")
+        addDefault(
             Messages.INTERACT_BED_DESTROY_CHAT_ANNOUNCEMENT,
             "\n&f&lCAMA DESTRUIDA > {TeamColor}Cama do time {TeamName} &7foi destruida por {PlayerColor}{PlayerName}&7!\n"
         )
-        this.addDefault(Messages.INTERACT_BED_DESTROY_TITLE_ANNOUNCEMENT, "&cCAMA DESTRUIDA !")
-        this.addDefault(Messages.INTERACT_BED_DESTROY_SUBTITLE_ANNOUNCEMENT, "&fVocê não vai mais renascer!")
-        this.addDefault(
+        addDefault(Messages.INTERACT_BED_DESTROY_TITLE_ANNOUNCEMENT, "&cCAMA DESTRUIDA !")
+        addDefault(Messages.INTERACT_BED_DESTROY_SUBTITLE_ANNOUNCEMENT, "&fVocê não vai mais renascer!")
+        addDefault(
             Messages.INTERACT_BED_DESTROY_CHAT_ANNOUNCEMENT_TO_VICTIM,
             "&f&lCAMA DESTRUIDA > &7Sua cama foi destruida por {PlayerColor}{PlayerName}&7!"
         )
-        this.addDefault(
+        addDefault(
             Messages.INTERACT_CHEST_CANT_OPEN_TEAM_ELIMINATED,
             "&cVocê não pode abrir este baú porque esse time não foi eliminado!"
         )
-        this.addDefault(
+        addDefault(
             Messages.INTERACT_INVISIBILITY_REMOVED_DAMGE_TAKEN,
             "&cSua invisibilidade foi removida pois você tomou dano!"
         )
-        this.addDefault(Messages.PLAYER_DIE_VOID_FALL_REGULAR_KILL, "{PlayerColor}{PlayerName} &7caiu no void.")
-        this.addDefault(
+        addDefault(Messages.PLAYER_DIE_VOID_FALL_REGULAR_KILL, "{PlayerColor}{PlayerName} &7caiu no void.")
+        addDefault(
             Messages.PLAYER_DIE_VOID_FALL_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7caiu no void. &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_IN_VOID_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7foi jogado no void por {KillerColor}{KillerName}&7."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_IN_VOID_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi jogado no void por {KillerColor}{KillerName}&7. &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_LOG_OUT_REGULAR,
             "{PlayerColor}{PlayerName} &7desconectou em combate com {KillerColor}{KillerName}&7."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_LOG_OUT_FINAL,
             "{PlayerColor}{PlayerName} &7desconectou em combate com {KillerColor}{KillerName}&7. &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_BY_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7foi empurrado por {KillerColor}{KillerName}&7."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_KNOCKED_BY_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi empurrado por {KillerColor}{KillerName}&7. &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITH_SOURCE_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7foi atingido por uma TNT de {KillerColor}{KillerName}&7."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITH_SOURCE_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi atingido por uma TNT de {KillerColor}{KillerName}&7. &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITHOUT_SOURCE_REGULAR,
             "{PlayerColor}{PlayerName} &7foi atingido por uma TNT."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_EXPLOSION_WITHOUT_SOURCE_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi atingido por uma TNT. &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_REGULAR_KILL,
             "{PlayerColor}{PlayerName} &7foi morto por {KillerColor}{KillerName}&7."
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_PVP_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi morto por {KillerColor}{KillerName}&7. &b&lKILL FINAL!"
         )
-        this.addDefault(Messages.PLAYER_DIE_UNKNOWN_REASON_REGULAR, "{PlayerColor}{PlayerName} &7morreu.")
-        this.addDefault(
+        addDefault(Messages.PLAYER_DIE_UNKNOWN_REASON_REGULAR, "{PlayerColor}{PlayerName} &7morreu.")
+        addDefault(
             Messages.PLAYER_DIE_UNKNOWN_REASON_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7morreu. &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_SHOOT_REGULAR,
             "{PlayerColor}{PlayerName} &7foi flechado por {KillerColor}{KillerName}&7!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_SHOOT_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi flechado por {KillerColor}{KillerName}&7! &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_DEBUG_REGULAR,
             "{PlayerColor}{PlayerName} &7foi morto por pela Traça de {KillerColor}{KillerTeamName}&7!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_DEBUG_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi morto por pela Traça de {KillerColor}{KillerTeamName}&7! &b&lKILL FINAL!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_IRON_GOLEM_REGULAR,
             "{PlayerColor}{PlayerName} &7foi morto pelo Golem do {KillerColor}{KillerTeamName}&7!"
         )
-        this.addDefault(
+        addDefault(
             Messages.PLAYER_DIE_IRON_GOLEM_FINAL_KILL,
             "{PlayerColor}{PlayerName} &7foi morto pelo Golem do {KillerColor}{KillerTeamName}&7! &b&lKILL FINAL!"
         )
-        this.addDefault(Messages.PLAYER_DIE_REWARD_DIAMOND, "{prefix}&b+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_REWARD_EMERALD, "{prefix}&a+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_REWARD_IRON, "{prefix}&f+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_REWARD_GOLD, "{prefix}&6+{amount} {meaning}")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWN_TITLE, "&cVOCÊ MORREU!")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWN_SUBTITLE, "&eRenascendo em &c{time} &esegundos.")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWN_CHAT, "{prefix}&eVocê irá renascer em &c{time} &esegundos.")
-        this.addDefault(Messages.PLAYER_DIE_RESPAWNED_TITLE, "&aRENASCIDO!")
-        this.addDefault(Messages.PLAYER_DIE_ELIMINATED_CHAT, "{prefix}&cVocê foi eliminado!")
-        this.addDefault(Messages.PLAYER_HIT_BOW, "{prefix}{TeamColor}{PlayerName} &7está com &c{amount} &7de vida!")
-        this.addDefault(Messages.GAME_END_GAME_OVER_PLAYER_TITLE, "&c&lFIM DE JOGO!")
-        this.addDefault(Messages.GAME_END_VICTORY_PLAYER_TITLE, "&6&lVITÓRIA!")
-        this.addDefault(Messages.GAME_END_TEAM_WON_CHAT, "{prefix}{TeamColor}{TeamName} &aganhou o jogo!")
-        this.addDefault(
+        addDefault(Messages.PLAYER_DIE_REWARD_DIAMOND, "{prefix}&b+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_REWARD_EMERALD, "{prefix}&a+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_REWARD_IRON, "{prefix}&f+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_REWARD_GOLD, "{prefix}&6+{amount} {meaning}")
+        addDefault(Messages.PLAYER_DIE_RESPAWN_TITLE, "&cVOCÊ MORREU!")
+        addDefault(Messages.PLAYER_DIE_RESPAWN_SUBTITLE, "&eRenascendo em &c{time} &esegundos.")
+        addDefault(Messages.PLAYER_DIE_RESPAWN_CHAT, "{prefix}&eVocê irá renascer em &c{time} &esegundos.")
+        addDefault(Messages.PLAYER_DIE_RESPAWNED_TITLE, "&aRENASCIDO!")
+        addDefault(Messages.PLAYER_DIE_ELIMINATED_CHAT, "{prefix}&cVocê foi eliminado!")
+        addDefault(Messages.PLAYER_HIT_BOW, "{prefix}{TeamColor}{PlayerName} &7está com &c{amount} &7de vida!")
+        addDefault(Messages.GAME_END_GAME_OVER_PLAYER_TITLE, "&c&lFIM DE JOGO!")
+        addDefault(Messages.GAME_END_VICTORY_PLAYER_TITLE, "&6&lVITÓRIA!")
+        addDefault(Messages.GAME_END_TEAM_WON_CHAT, "{prefix}{TeamColor}{TeamName} &aganhou o jogo!")
+        addDefault(
             Messages.GAME_END_TOP_PLAYER_CHAT, listOf(
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬",
                 "&f                                   &lBedWars",
@@ -432,98 +419,98 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
             )
         )
-        this.addDefault(Messages.BED_HOLOGRAM_DEFEND, "&c&lDefenda sua cama!")
-        this.addDefault(Messages.BED_HOLOGRAM_DESTROYED, "&c&lSua cama foi destruída!")
-        this.addDefault(Messages.NPC_NAME_TEAM_UPGRADES, "&bMELHORIAS DA EQUIPE,&e&lCLIQUE DIREITO")
-        this.addDefault(Messages.NPC_NAME_SOLO_UPGRADES, "&bMELHORIAS,&e&lCLIQUE DIREITO")
-        this.addDefault(Messages.NPC_NAME_TEAM_SHOP, "&bLOJA DA EQUIPE,&e&lCLIQUE DIREITO")
-        this.addDefault(Messages.NPC_NAME_SOLO_SHOP, "&bLOJA,&e&lCLIQUE DIREITO")
-        this.addDefault(
+        addDefault(Messages.BED_HOLOGRAM_DEFEND, "&c&lDefenda sua cama!")
+        addDefault(Messages.BED_HOLOGRAM_DESTROYED, "&c&lSua cama foi destruída!")
+        addDefault(Messages.NPC_NAME_TEAM_UPGRADES, "&bMELHORIAS DA EQUIPE,&e&lCLIQUE DIREITO")
+        addDefault(Messages.NPC_NAME_SOLO_UPGRADES, "&bMELHORIAS,&e&lCLIQUE DIREITO")
+        addDefault(Messages.NPC_NAME_TEAM_SHOP, "&bLOJA DA EQUIPE,&e&lCLIQUE DIREITO")
+        addDefault(Messages.NPC_NAME_SOLO_SHOP, "&bLOJA,&e&lCLIQUE DIREITO")
+        addDefault(
             Messages.TEAM_ELIMINATED_CHAT,
             "\n&f&lEQUIPE ELIMINADA > &cO time {TeamColor}{TeamName} &cfoi eliminado!\n"
         )
-        this.addDefault(Messages.NEXT_EVENT_BEDS_DESTROY, "&cDestruição da Cama")
-        this.addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_II, "&fDiamante II")
-        this.addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_III, "&fDiamante III")
-        this.addDefault(Messages.NEXT_EVENT_DRAGON_SPAWN, "&fMorte Súbita")
-        this.addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_II, "&fEsmeraldas II")
-        this.addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_III, "&fEsmeraldas III")
-        this.addDefault(Messages.NEXT_EVENT_GAME_END, "&4Fim do jogo")
-        this.addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_BEDS_DESTROYED, "&cCAMA DESTRUÍDA!")
-        this.addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_BEDS_DESTROYED, "&fTodas as camas foram destruídas!")
-        this.addDefault(Messages.NEXT_EVENT_CHAT_ANNOUNCE_BEDS_DESTROYED, "&c&lTodas as camas foram destruídas!")
-        this.addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_SUDDEN_DEATH, "&cMorte Súbita")
-        this.addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_SUDDEN_DEATH, "")
-        this.addDefault(
+        addDefault(Messages.NEXT_EVENT_BEDS_DESTROY, "&cDestruição da Cama")
+        addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_II, "&fDiamante II")
+        addDefault(Messages.NEXT_EVENT_DIAMOND_UPGRADE_III, "&fDiamante III")
+        addDefault(Messages.NEXT_EVENT_DRAGON_SPAWN, "&fMorte Súbita")
+        addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_II, "&fEsmeraldas II")
+        addDefault(Messages.NEXT_EVENT_EMERALD_UPGRADE_III, "&fEsmeraldas III")
+        addDefault(Messages.NEXT_EVENT_GAME_END, "&4Fim do jogo")
+        addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_BEDS_DESTROYED, "&cCAMA DESTRUÍDA!")
+        addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_BEDS_DESTROYED, "&fTodas as camas foram destruídas!")
+        addDefault(Messages.NEXT_EVENT_CHAT_ANNOUNCE_BEDS_DESTROYED, "&c&lTodas as camas foram destruídas!")
+        addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_SUDDEN_DEATH, "&cMorte Súbita")
+        addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_SUDDEN_DEATH, "")
+        addDefault(
             Messages.NEXT_EVENT_CHAT_ANNOUNCE_SUDDEN_DEATH,
             "&cMORTE SÚBITA: &6&b{TeamDragons} dragões do {TeamColor}{TeamName}"
         )
-        this.addDefault(Messages.XP_REWARD_PER_MINUTE, "{prefix}&6+{xp} BedWars Experience Received (Tempo de jogo).")
-        this.addDefault(Messages.XP_REWARD_WIN, "{prefix}&6+{xp} BedWars Experience Received (Vencer o jogo).")
-        this.addDefault(
+        addDefault(Messages.XP_REWARD_PER_MINUTE, "{prefix}&6+{xp} BedWars Experience Received (Tempo de jogo).")
+        addDefault(Messages.XP_REWARD_WIN, "{prefix}&6+{xp} BedWars Experience Received (Vencer o jogo).")
+        addDefault(
             Messages.XP_REWARD_PER_TEAMMATE,
             "{prefix}&6+{xp} BedWars Experience Received (Suporte da equipe)."
         )
-        this.addDefault(Messages.XP_REWARD_BED_DESTROY, "{prefix}&6+{xp} BedWars Experience Received (Bed Destroyed).")
-        this.addDefault(Messages.XP_REWARD_REGULAR_KILL, "{prefix}&6+{xp} BedWars Experience Received (Regular Kill).")
-        this.addDefault(Messages.XP_REWARD_FINAL_KILL, "{prefix}&6+{xp} BedWars Experience Received (Final Kill).")
+        addDefault(Messages.XP_REWARD_BED_DESTROY, "{prefix}&6+{xp} BedWars Experience Received (Bed Destroyed).")
+        addDefault(Messages.XP_REWARD_REGULAR_KILL, "{prefix}&6+{xp} BedWars Experience Received (Regular Kill).")
+        addDefault(Messages.XP_REWARD_FINAL_KILL, "{prefix}&6+{xp} BedWars Experience Received (Final Kill).")
 
-        this.addDefault(Messages.MONEY_REWARD_PER_MINUTE, "{prefix}&6+{money} Moedas (Tempo de jogo).")
-        this.addDefault(Messages.MONEY_REWARD_WIN, "{prefix}&6+{money} Moedas (Vencer o jogo).")
-        this.addDefault(Messages.MONEY_REWARD_PER_TEAMMATE, "{prefix}&6+{money} Moedas (Suporte da equipe).")
-        this.addDefault(Messages.MONEY_REWARD_BED_DESTROYED, "{prefix}&6+{money} Moedas (Bed Destroyed).")
-        this.addDefault(Messages.MONEY_REWARD_FINAL_KILL, "{prefix}&6+{money} Moedas (Final Kill).")
-        this.addDefault(Messages.MONEY_REWARD_REGULAR_KILL, "{prefix}&6+{money} Moedas (Regular Kill).")
+        addDefault(Messages.MONEY_REWARD_PER_MINUTE, "{prefix}&6+{money} Moedas (Tempo de jogo).")
+        addDefault(Messages.MONEY_REWARD_WIN, "{prefix}&6+{money} Moedas (Vencer o jogo).")
+        addDefault(Messages.MONEY_REWARD_PER_TEAMMATE, "{prefix}&6+{money} Moedas (Suporte da equipe).")
+        addDefault(Messages.MONEY_REWARD_BED_DESTROYED, "{prefix}&6+{money} Moedas (Bed Destroyed).")
+        addDefault(Messages.MONEY_REWARD_FINAL_KILL, "{prefix}&6+{money} Moedas (Final Kill).")
+        addDefault(Messages.MONEY_REWARD_REGULAR_KILL, "{prefix}&6+{money} Moedas (Regular Kill).")
 
         /* Lobby Command Items */
-        this.addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "stats"), "&eEstatísticas")
-        this.addDefault(
+        addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "stats"), "&eEstatísticas")
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", "stats"),
             listOf("&fBotão direito para ver estatísticas! ")
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "arena-selector"),
             "&eSeletor de Arena"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", "arena-selector"),
             listOf("&fBotão direito para escolher arena.")
         )
-        this.addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "leave"), "&eSair do BedWars")
-        this.addDefault(
+        addDefault(Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_NAME.replace("%path%", "leave"), "&eSair do BedWars")
+        addDefault(
             Messages.GENERAL_CONFIGURATION_LOBBY_ITEMS_LORE.replace("%path%", "leave"),
             listOf("&fBotão direito para sair do BedWars!")
         )
         /* Pre Game Command Items */
-        this.addDefault(Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", "stats"), "&eEstatísticas")
-        this.addDefault(
+        addDefault(Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", "stats"), "&eEstatísticas")
+        addDefault(
             Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_LORE.replace("%path%", "stats"),
             listOf("&fBotão direito para ver estatísticas!")
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_NAME.replace("%path%", "leave"),
             "&eSair da Partida"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_WAITING_ITEMS_LORE.replace("%path%", "leave"),
             listOf("&fBotão direito para sair da arena!")
         )
         /* Spectator Command Items */
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_NAME.replace("%path%", "teleporter"),
             "&eTeletransportador"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_NAME.replace("%path%", "leave"),
             "&eSair da Partida"
         )
-        this.addDefault(
+        addDefault(
             Messages.GENERAL_CONFIGURATION_SPECTATOR_ITEMS_LORE.replace("%path%", "leave"),
             listOf("&fBotão direito para sair da arena!")
         )
 
         /* save default items messages for stats gui */
-        this.addDefault(Messages.PLAYER_STATS_GUI_INV_NAME, "&8Estatísticas de {player}")
+        addDefault(Messages.PLAYER_STATS_GUI_INV_NAME, "&8Estatísticas de {player}")
         addDefaultStatsMsg("wins", "&6Vitórias", "&f{wins}")
         addDefaultStatsMsg("losses", "&6Perdas", "&f{losses}")
         addDefaultStatsMsg("kills", "&6Abates", "&f{kills}")
@@ -536,7 +523,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
         addDefaultStatsMsg("games-played", "&6Partidas", "&f{gamesPlayed}")
 
         // Start of Sidebar
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_LOBBY, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&fSeu nivel: {level}",
@@ -553,7 +540,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "", "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_WAITING, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -570,7 +557,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_WAITING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -587,7 +574,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_STARTING, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -604,7 +591,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_STARTING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date} &8{server}",
@@ -621,7 +608,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -643,7 +630,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -664,7 +651,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -685,7 +672,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_SPEC, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -706,7 +693,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_WIN1, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -727,7 +714,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_WIN2, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -748,7 +735,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_RESTARTING_LOSER, listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -769,7 +756,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING.replaceFirst("Default".toRegex(), "Doubles"), listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -789,7 +776,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC.replaceFirst("Default".toRegex(), "Doubles"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -809,7 +796,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED.replaceFirst("Default".toRegex(), "Doubles"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -830,7 +817,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING.replaceFirst("Default".toRegex(), "3v3v3v3"), listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -854,7 +841,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC.replaceFirst("Default".toRegex(), "3v3v3v3"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -875,7 +862,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED.replaceFirst("Default".toRegex(), "3v3v3v3"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -900,7 +887,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING.replaceFirst("Default".toRegex(), "4v4v4v4"), listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
                 "&7{date}",
@@ -920,7 +907,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
 
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC.replaceFirst("Default".toRegex(), "4v4v4v4"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -937,7 +924,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&e{serverIp}"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.SCOREBOARD_DEFAULT_PLAYING_SPEC_ELIMINATED.replaceFirst("Default".toRegex(), "4v4v4v4"),
             listOf(
                 "&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&lBED WARS,&f&l{poweredBy},&f&l{poweredBy},&f&l{poweredBy},&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&lBED WARS,&e&l{poweredBy},&e&l{poweredBy},&e&l{poweredBy}",
@@ -962,14 +949,14 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
 
         // start of TAB
         // main lobby tab format
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_LOBBY_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_LOBBY_FOOTER, listOf(
                 "",
                 "&fThere are {on} players on this lobby",
@@ -977,17 +964,17 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_LOBBY_PREFIX, listOf("{vPrefix}"))
-        this.addDefault(Messages.FORMATTING_SB_TAB_LOBBY_SUFFIX, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_LOBBY_PREFIX, listOf("{vPrefix}"))
+        addDefault(Messages.FORMATTING_SB_TAB_LOBBY_SUFFIX, listOf(" {level}"))
         // player waiting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_FOOTER, listOf(
                 "",
                 "Waiting for more players,Waiting for more players.,Waiting for more players.., Waiting for more players...",
@@ -998,17 +985,17 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX, listOf("{vPrefix}"))
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX, listOf("{vPrefix}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX, listOf(" {level}"))
         // spectator waiting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_HEADER_SPEC, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_WAITING_FOOTER_SPEC, listOf(
                 "",
                 "&7&oYou are spectating",
@@ -1020,10 +1007,10 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX_SPEC, listOf("{vPrefix}"))
-        this.addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX_SPEC, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_PREFIX_SPEC, listOf("{vPrefix}"))
+        addDefault(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX_SPEC, listOf(" {level}"))
         // player starting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1032,7 +1019,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_FOOTER, listOf(
                 "",
                 "&fStarting in &a{time} &fseconds,&fStarting in &a{time} &fseconds.,&fStarting in &a{time} &fseconds..,&fStarting in &a{time} &fseconds..",
@@ -1043,10 +1030,10 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX, listOf("{vPrefix} "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX, listOf("{vPrefix} "))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX, listOf(" {level}"))
         // spectator starting lobby
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_HEADER_SPEC, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1055,7 +1042,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_STARTING_FOOTER_SPEC, listOf(
                 "",
                 "&fStarting in &a{time} &fseconds,&fStarting in &a{time} &fseconds.,&fStarting in &a{time} &fseconds..,&fStarting in &a{time} &fseconds..",
@@ -1066,10 +1053,10 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX_SPEC, listOf("{vPrefix} "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX_SPEC, listOf(" {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_PREFIX_SPEC, listOf("{vPrefix} "))
+        addDefault(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX_SPEC, listOf(" {level}"))
         // player playing
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1080,7 +1067,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_FOOTER, listOf(
                 "",
                 "&fYou are playing on the {teamColor}{teamName} Team",
@@ -1089,10 +1076,10 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_PREFIX, listOf("{teamColor}{teamName} "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SUFFIX, listOf(" {vPrefix}", " {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_PREFIX, listOf("{teamColor}{teamName} "))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SUFFIX, listOf(" {vPrefix}", " {level}"))
         // player eliminated - playing state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_ELM_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1104,7 +1091,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&7&oAYou've been eliminated,&f&oAYou've been eliminated"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_ELM_FOOTER, listOf(
                 "",
                 "&fYou have played in the {teamColor}{teamName} Team",
@@ -1113,8 +1100,8 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_ELM_PREFIX, listOf("&f&oSpectator "))
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_ELM_PREFIX, listOf("&f&oSpectator "))
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_ELM_SUFFIX,
             listOf(
                 " &c&oEliminated {teamColor}&o{teamName}",
@@ -1123,7 +1110,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
             )
         )
         // spectator - playing state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_SPEC_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1134,17 +1121,17 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_PLAYING_SPEC_FOOTER, listOf(
                 "",
                 "&fPowered by {poweredBy}",
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_PREFIX, listOf("&f&oSpectator "))
-        this.addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_SUFFIX, listOf(" {vPrefix}", " {level}"))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_PREFIX, listOf("&f&oSpectator "))
+        addDefault(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_SUFFIX, listOf(" {vPrefix}", " {level}"))
         // winner alive - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_HEADER, listOf(
                 "                                                                                                        ",
                 "&6⭐ {winnerTeamColor}&lYour team won the game! &6⭐",
@@ -1152,7 +1139,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_FOOTER, listOf(
                 "",
                 "&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&f&lYou won in the {teamColor}&l{teamName} Team&f&l!",
@@ -1165,16 +1152,16 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_PREFIX,
             listOf("&6&l⭐ {teamColor}{teamName} ")
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN1_SUFFIX,
             listOf(" {vPrefix}", " {level}")
         )
         // winner dead - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_HEADER, listOf(
                 "                                                                                                        ",
                 "&6⭐ {winnerTeamColor}&l{winnerTeamName} Team won the game! &6⭐",
@@ -1183,7 +1170,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_FOOTER, listOf(
                 "",
                 "&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&6&lYou won in the {teamColor}&l{teamName} Team&6&l!,&f&lYou won in the {teamColor}&l{teamName} Team&f&l!",
@@ -1196,16 +1183,16 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_PREFIX,
             listOf("&6&l⭐ {teamColor}{teamName} ")
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_SUFFIX,
             listOf(" {vPrefix}", " &c&oEliminated", " {level}", " &c&oEliminated")
         )
         // loser - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_HEADER, listOf(
                 "                                                                                                        ",
                 "&6⭐ {winnerTeamColor}&l{winnerTeamName} Team won the game! &6⭐",
@@ -1214,7 +1201,7 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_FOOTER, listOf(
                 "",
                 "&fYou have lost in the {teamColor}{teamName} Team",
@@ -1226,16 +1213,16 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_PREFIX,
             listOf("{teamColor}{teamName} ")
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_ELM_SUFFIX,
             listOf(" {vPrefix}", " &c&oEliminated", " {level}", " &c&oEliminated")
         )
         // spectator - restarting state
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_HEADER, listOf(
                 "                                                                                                        ",
                 "&a{serverIp}",
@@ -1247,15 +1234,15 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_FOOTER, listOf(
                 "",
                 "&fPowered by {poweredBy}",
                 ""
             )
         )
-        this.addDefault(Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_PREFIX, listOf("&f&oSpectator "))
-        this.addDefault(
+        addDefault(Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_PREFIX, listOf("&f&oSpectator "))
+        addDefault(
             Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_SUFFIX,
             listOf(" {vPrefix}", " {level}")
         )
@@ -1263,22 +1250,22 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
         // end of tab
 
         //
-        this.addDefault(Messages.SHOP_INDEX_NAME, "&8Compra rápida")
-        this.addDefault(Messages.SHOP_QUICK_ADD_NAME, "&8Adicionando à compra rápida...")
-        this.addDefault(
+        addDefault(Messages.SHOP_INDEX_NAME, "&8Compra rápida")
+        addDefault(Messages.SHOP_QUICK_ADD_NAME, "&8Adicionando à compra rápida...")
+        addDefault(
             Messages.SHOP_INSUFFICIENT_MONEY,
             "{prefix}&cVocê não tem {currency} suficiente! Precisa de mais {amount}!"
         )
-        this.addDefault(Messages.SHOP_NEW_PURCHASE, "{prefix}&aVocê comprou &6{item}")
-        this.addDefault(Messages.SHOP_ALREADY_BOUGHT, "{prefix}&cVocê já comprou isso!")
-        this.addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}Traça")
-        this.addDefault(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME, "{TeamColor}{despawn}s &8[ {TeamColor}{health}&8]")
-        this.addDefault(Messages.SHOP_SEPARATOR_NAME, "&8⇧ Categorias")
-        this.addDefault(Messages.SHOP_SEPARATOR_LORE, listOf("&8⇩ Itens"))
-        this.addDefault(Messages.SHOP_QUICK_BUY_NAME, "&bCompra rápida")
-        this.addDefault(Messages.SHOP_QUICK_BUY_LORE, ArrayList<Any?>())
-        this.addDefault(Messages.SHOP_QUICK_EMPTY_NAME, "&cEspaço vazio!")
-        this.addDefault(
+        addDefault(Messages.SHOP_NEW_PURCHASE, "{prefix}&aVocê comprou &6{item}")
+        addDefault(Messages.SHOP_ALREADY_BOUGHT, "{prefix}&cVocê já comprou isso!")
+        addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}Traça")
+        addDefault(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME, "{TeamColor}{despawn}s &8[ {TeamColor}{health}&8]")
+        addDefault(Messages.SHOP_SEPARATOR_NAME, "&8⇧ Categorias")
+        addDefault(Messages.SHOP_SEPARATOR_LORE, listOf("&8⇩ Itens"))
+        addDefault(Messages.SHOP_QUICK_BUY_NAME, "&bCompra rápida")
+        addDefault(Messages.SHOP_QUICK_BUY_LORE, ArrayList<Any?>())
+        addDefault(Messages.SHOP_QUICK_EMPTY_NAME, "&cEspaço vazio!")
+        addDefault(
             Messages.SHOP_QUICK_EMPTY_LORE,
             listOf(
                 "&7Este é um slot de compra rápida!",
@@ -1286,13 +1273,13 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&7shift para adicionar neste slot."
             )
         )
-        this.addDefault(Messages.SHOP_CAN_BUY_COLOR, "&a")
-        this.addDefault(Messages.SHOP_CANT_BUY_COLOR, "&c")
-        this.addDefault(Messages.SHOP_LORE_STATUS_CAN_BUY, "&eClique para comprar!")
-        this.addDefault(Messages.SHOP_LORE_STATUS_CANT_AFFORD, "&cVocê não tem o suficiente de {currency}!")
-        this.addDefault(Messages.SHOP_LORE_STATUS_MAXED, "&aMÁXIMO!")
-        this.addDefault(Messages.SHOP_LORE_QUICK_ADD, "&bClique + shift para por na Compra Rápida")
-        this.addDefault(Messages.SHOP_LORE_QUICK_REMOVE, "&bClique + shift para tirar da Compra Rápida")
+        addDefault(Messages.SHOP_CAN_BUY_COLOR, "&a")
+        addDefault(Messages.SHOP_CANT_BUY_COLOR, "&c")
+        addDefault(Messages.SHOP_LORE_STATUS_CAN_BUY, "&eClique para comprar!")
+        addDefault(Messages.SHOP_LORE_STATUS_CANT_AFFORD, "&cVocê não tem o suficiente de {currency}!")
+        addDefault(Messages.SHOP_LORE_STATUS_MAXED, "&aMÁXIMO!")
+        addDefault(Messages.SHOP_LORE_QUICK_ADD, "&bClique + shift para por na Compra Rápida")
+        addDefault(Messages.SHOP_LORE_QUICK_REMOVE, "&bClique + shift para tirar da Compra Rápida")
 
 
         addCategoryMessages(
@@ -1698,27 +1685,27 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
         )
 
         //
-        this.addDefault(Messages.MEANING_NO_TRAP, "Sem armadilha!")
-        this.addDefault(Messages.FORMAT_SPECTATOR_TARGET, "{targetTeamColor}{targetDisplayName}")
-        this.addDefault(Messages.FORMAT_UPGRADE_TRAP_COST, "&7Preço: {currencyColor}{cost} {currency}")
-        this.addDefault(Messages.FORMAT_UPGRADE_COLOR_CAN_AFFORD, "&e")
-        this.addDefault(Messages.FORMAT_UPGRADE_COLOR_CANT_AFFORD, "&c")
-        this.addDefault(Messages.FORMAT_UPGRADE_COLOR_UNLOCKED, "&a")
-        this.addDefault(Messages.FORMAT_UPGRADE_TIER_LOCKED, "&7")
-        this.addDefault(Messages.FORMAT_UPGRADE_TIER_UNLOCKED, "&a")
-        this.addDefault(Messages.UPGRADES_LORE_REPLACEMENT_CLICK_TO_BUY, "{color}Clique para comprar!")
-        this.addDefault(
+        addDefault(Messages.MEANING_NO_TRAP, "Sem armadilha!")
+        addDefault(Messages.FORMAT_SPECTATOR_TARGET, "{targetTeamColor}{targetDisplayName}")
+        addDefault(Messages.FORMAT_UPGRADE_TRAP_COST, "&7Preço: {currencyColor}{cost} {currency}")
+        addDefault(Messages.FORMAT_UPGRADE_COLOR_CAN_AFFORD, "&e")
+        addDefault(Messages.FORMAT_UPGRADE_COLOR_CANT_AFFORD, "&c")
+        addDefault(Messages.FORMAT_UPGRADE_COLOR_UNLOCKED, "&a")
+        addDefault(Messages.FORMAT_UPGRADE_TIER_LOCKED, "&7")
+        addDefault(Messages.FORMAT_UPGRADE_TIER_UNLOCKED, "&a")
+        addDefault(Messages.UPGRADES_LORE_REPLACEMENT_CLICK_TO_BUY, "{color}Clique para comprar!")
+        addDefault(
             Messages.UPGRADES_LORE_REPLACEMENT_INSUFFICIENT_MONEY,
             "{color}Você não tem o suficiente de {currency}."
         )
-        this.addDefault(Messages.UPGRADES_LORE_REPLACEMENT_LOCKED, "&cBLOQUEADO")
-        this.addDefault(Messages.UPGRADES_LORE_REPLACEMENT_UNLOCKED, "{color}DESBLOQUEADO")
-        this.addDefault(Messages.UPGRADES_UPGRADE_BOUGHT_CHAT, "&a{player} compro &6{upgradeName}")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_LORE_REPLACEMENT_LOCKED, "&cBLOQUEADO")
+        addDefault(Messages.UPGRADES_LORE_REPLACEMENT_UNLOCKED, "{color}DESBLOQUEADO")
+        addDefault(Messages.UPGRADES_UPGRADE_BOUGHT_CHAT, "&a{player} compro &6{upgradeName}")
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-1"),
             "{color}Forja de Ferro"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "forge"),
             listOf(
                 "&Melhore a geração de recursos",
@@ -1731,20 +1718,20 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-2"),
             "{color}Forja de Ouro"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-3"),
             "{color}Forja de Esmeralda"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "forge").replace("{tier}", "tier-4"),
             "{color}Forja Melhorada"
         )
-        this.addDefault(Messages.UPGRADES_CATEGORY_ITEM_NAME_PATH + "traps", "&eCompre uma armadilha")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_CATEGORY_ITEM_NAME_PATH + "traps", "&eCompre uma armadilha")
+        addDefault(
             Messages.UPGRADES_CATEGORY_ITEM_LORE_PATH + "traps",
             listOf(
                 "&7As armadilhas compradas serão",
@@ -1753,11 +1740,11 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&eClique para navegar!"
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "swords").replace("{tier}", "tier-1"),
             "{color}Espadas Afiadas"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "swords"),
             listOf(
                 "&7Todas as espadas do seu time irão ter o",
@@ -1767,11 +1754,11 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-1"),
             "{color}Armadura Reforçada I"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "armor"),
             listOf(
                 "&7Sua equipe ganha permanentemente",
@@ -1784,23 +1771,23 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-2"),
             "{color}Armadura Reforçada II"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-3"),
             "{color}Armadura Reforçada III"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "armor").replace("{tier}", "tier-4"),
             "{color}Armadura Reforçada IV"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "miner").replace("{tier}", "tier-1"),
             "{color}Minerador Maníaco I"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "miner"),
             listOf(
                 "&7Todos os jogadores do seu time irão",
@@ -1811,15 +1798,15 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "miner").replace("{tier}", "tier-2"),
             "{color}Minerador Maníaco II"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "heal-pool").replace("{tier}", "tier-1"),
             "{color}Regeneração na Ilha"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "heal-pool"),
             listOf(
                 "&7Cria um campo de regeneração",
@@ -1829,11 +1816,11 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "dragon").replace("{tier}", "tier-1"),
             "{color}Buffar Dragões"
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "dragon"),
             listOf(
                 "&7Sua equipe terá 2 dragões",
@@ -1843,17 +1830,17 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "glass", "&8⬆&7Adquirível")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "glass", "&8⬆&7Adquirível")
+        addDefault(
             Messages.UPGRADES_SEPARATOR_ITEM_LORE_PATH + "glass",
             listOf("&8⬇&7Fila de armadilhas")
         )
-        this.addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "first", "{color}Armadilha #1: {name}")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "first", "{color}Armadilha #1: {name}")
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + "first",
             listOf("&7O primeiro inimigo a andar", "&7em sua base irá acionar", "&7esta armadilha!")
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + "first",
             listOf(
                 "",
@@ -1865,12 +1852,12 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&7Próxima armadilha: &b{cost} {currency}"
             )
         )
-        this.addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "second", "{color}Armadilha #2: {name}")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "second", "{color}Armadilha #2: {name}")
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + "second",
             listOf("&7O segundo inimigo a andar", "&7em sua base irá acionar", "&7esta armadilha!")
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + "second",
             listOf(
                 "",
@@ -1882,12 +1869,12 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&7Próxima armadilha: &b{cost} {currency}"
             )
         )
-        this.addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "third", "{color}Armadilha #3: {name}")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_NAME_PATH + "third", "{color}Armadilha #3: {name}")
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + "third",
             listOf("&7O terceiro inimigo a andar", "&7em sua base irá acionar", "&7esta armadilha!")
         )
-        this.addDefault(
+        addDefault(
             Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + "third",
             listOf(
                 "",
@@ -1899,13 +1886,13 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 "&7Próxima armadilha: &b{cost} {currency}"
             )
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "1", "{color}É uma armadilha!")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "1", "{color}É uma armadilha!")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "1",
             listOf("&7Isso irá causar cegueira e lentidão", "&7durante 5 segundos nos invasores.", "")
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "2", "{color}Armadilha Contra-ofensiva")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "2", "{color}Armadilha Contra-ofensiva")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "2",
             listOf(
                 "&7Concede Velocidade I por 15 segundos a",
@@ -1913,13 +1900,13 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "3", "{color}Alarme")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "3", "{color}Alarme")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "3",
             listOf("&7Irá revelar jogadores invisíveis,", "&7bem como seu nome e time.", "")
         )
-        this.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "4", "{color}Cansaço")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "4", "{color}Cansaço")
+        addDefault(
             Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "4",
             listOf(
                 "&7Os inimigos irão receber fadiga I ao entrar",
@@ -1927,22 +1914,22 @@ class Portuguese : Language(BedWars.INSTANCE, "pt") {
                 ""
             )
         )
-        this.addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "back", "&aVoltar")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_SEPARATOR_ITEM_NAME_PATH + "back", "&aVoltar")
+        addDefault(
             Messages.UPGRADES_SEPARATOR_ITEM_LORE_PATH + "back",
             listOf("&7To Upgrades & Traps")
         )
-        this.addDefault(Messages.UPGRADES_CATEGORY_GUI_NAME_PATH + "traps", "&8Enfileirar uma armadilha")
-        this.addDefault(Messages.UPGRADES_TRAP_QUEUE_LIMIT, "&cFila de armadilhas cheia!")
-        this.addDefault(Messages.UPGRADES_TRAP_DEFAULT_MSG, "&c&lA armadilha {trap} foi acionada!")
-        this.addDefault(Messages.UPGRADES_TRAP_DEFAULT_TITLE, "&cARMADILHA ACIONADA!")
-        this.addDefault(Messages.UPGRADES_TRAP_DEFAULT_SUBTITLE, "&fSua {trap} foi acionada!")
-        this.addDefault(
+        addDefault(Messages.UPGRADES_CATEGORY_GUI_NAME_PATH + "traps", "&8Enfileirar uma armadilha")
+        addDefault(Messages.UPGRADES_TRAP_QUEUE_LIMIT, "&cFila de armadilhas cheia!")
+        addDefault(Messages.UPGRADES_TRAP_DEFAULT_MSG, "&c&lA armadilha {trap} foi acionada!")
+        addDefault(Messages.UPGRADES_TRAP_DEFAULT_TITLE, "&cARMADILHA ACIONADA!")
+        addDefault(Messages.UPGRADES_TRAP_DEFAULT_SUBTITLE, "&fSua {trap} foi acionada!")
+        addDefault(
             Messages.UPGRADES_TRAP_CUSTOM_MSG + "3",
             "&c&lArmadilha de alarme acionada por &7&l{player} &c&ldo time {color}&l{team}&c&l!"
         )
-        this.addDefault(Messages.UPGRADES_TRAP_CUSTOM_TITLE + "3", "&c&lALARME!!!")
-        this.addDefault(Messages.UPGRADES_TRAP_CUSTOM_SUBTITLE + "3", "&fAlarme acionado pelo time {color}{team}&f!")
+        addDefault(Messages.UPGRADES_TRAP_CUSTOM_TITLE + "3", "&c&lALARME!!!")
+        addDefault(Messages.UPGRADES_TRAP_CUSTOM_SUBTITLE + "3", "&fAlarme acionado pelo time {color}{team}&f!")
         save()
         setPrefix(m(Messages.PREFIX))
     }

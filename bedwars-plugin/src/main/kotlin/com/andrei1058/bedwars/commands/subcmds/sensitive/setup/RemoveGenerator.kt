@@ -23,7 +23,7 @@ import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.server.SetupType
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.commands.MainCommand
-import com.andrei1058.bedwars.commands.Misc.removeArmorStand
+import com.andrei1058.bedwars.Misc.removeArmorStand
 import com.andrei1058.bedwars.configuration.Sounds.playSound
 import org.bukkit.ChatColor
 import org.bukkit.Location

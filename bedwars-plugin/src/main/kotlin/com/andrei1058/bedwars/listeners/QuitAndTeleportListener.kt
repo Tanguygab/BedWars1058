@@ -24,7 +24,7 @@ import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.language.Language
 import com.andrei1058.bedwars.api.server.ServerType
-import com.andrei1058.bedwars.arena.LastHit
+import com.andrei1058.bedwars.arena.data.LastHit
 import com.andrei1058.bedwars.arena.SetupSession
 import com.andrei1058.bedwars.arena.team.BedWarsTeam
 import com.andrei1058.bedwars.commands.MainCommand

@@ -188,7 +188,7 @@ class MenuBaseTrap(
                 Messages.FORMAT_UPGRADE_COLOR_CAN_AFFORD
                 else Messages.FORMAT_UPGRADE_COLOR_CANT_AFFORD
             )
-            this.setDisplayName(Language.getMsg(player, Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + name.removePrefix("base-trap-"))
+            setDisplayName(Language.getMsg(player, Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + name.removePrefix("base-trap-"))
                 .replace("{color}", color)
             )
 

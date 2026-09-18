@@ -20,7 +20,6 @@
 package com.andrei1058.bedwars.arena.feature
 
 import com.andrei1058.bedwars.BedWars
-import com.andrei1058.bedwars.api.configuration.ConfigPath
 import com.andrei1058.bedwars.api.events.player.PlayerKillEvent
 import com.andrei1058.bedwars.api.events.player.PlayerLeaveArenaEvent
 import org.bukkit.Material
@@ -32,88 +31,78 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerPickupItemEvent
 import org.bukkit.potion.PotionEffectType
-import java.util.LinkedList
 
-object SpoilPlayerTNTFeature {
-    private val playersWithTnt = LinkedList<Player>()
-    private var enabled = false
+class SpoilPlayerTNTFeature(private val plugin: BedWars) : Listener {
+    private val playersWithTnt = mutableListOf<Player>()
 
-    fun init(plugin: BedWars) {
-        val enable = plugin.mainConfig.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_SPOIL_TNT_PLAYERS)
-        if (enable && !enabled) {
-            enabled = true
-            plugin.registerEvents(TNTListener(plugin))
-            plugin.repeat(20, 1) {
-                for (player in playersWithTnt) {
-                    if (player.hasPotionEffect(PotionEffectType.INVISIBILITY)) continue
-                    plugin.versionSupport.playRedStoneDot(player)
-                }
+    init {
+        val nms = plugin.versionSupport
+        plugin.repeat(20, 1) {
+            playersWithTnt.forEach {
+                if (it.hasPotionEffect(PotionEffectType.INVISIBILITY)) return@forEach
+                nms.playRedStoneDot(it)
             }
         }
-        plugin.metrics.appendPie("tnt_spoil_enable") { "$enable" }
     }
 
-    private class TNTListener(private val plugin: BedWars) : Listener {
-        @EventHandler
-        fun onDie(e: PlayerKillEvent) {
-            playersWithTnt.remove(e.victim)
-        }
-
-        @EventHandler
-        fun onLeave(e: PlayerLeaveArenaEvent) {
-            playersWithTnt.remove(e.player)
-        }
-
-        @EventHandler(ignoreCancelled = true)
-        fun onPickUp(e: PlayerPickupItemEvent) {
-            if (e.item.itemStack.type != Material.TNT) return
-            val player = e.player
-            if (player in playersWithTnt || !player.isPlaying()) return
-
-            playersWithTnt += player
-        }
-
-        @EventHandler(ignoreCancelled = true)
-        fun onDrop(e: PlayerDropItemEvent) {
-            if (e.itemDrop.itemStack.type != Material.TNT) return
-
-            val player = e.player
-            if (player !in playersWithTnt || Material.TNT in player.inventory) return
-            if (!player.isPlaying()) return
-
-            playersWithTnt.remove(player)
-        }
-
-        @EventHandler(ignoreCancelled = true)
-        fun onPlace(e: BlockPlaceEvent) {
-            val player = e.player
-            if (!player.isPlaying()) return
-
-            if (e.itemInHand.type != Material.TNT) return
-
-            if (player !in playersWithTnt) return
-            plugin.run(delay = 1) {
-                if (Material.TNT !in player.inventory) {
-                    playersWithTnt.remove(player)
-                }
-            }
-        }
-
-        @EventHandler(ignoreCancelled = true)
-        fun inventorySwitch(event: InventoryCloseEvent) {
-            val player = event.player as? Player ?: return
-            if (!player.isPlaying()) return
-
-            val hasTnt = Material.TNT in player.inventory
-
-            if (player in playersWithTnt) {
-                if (!hasTnt) playersWithTnt.remove(player)
-                return
-            }
-            if (hasTnt) playersWithTnt += player
-        }
-
-        private fun Player.isPlaying() = plugin.arenaManager.isPlaying(this)
+    @EventHandler
+    fun onDie(e: PlayerKillEvent) {
+        playersWithTnt -= e.victim
     }
+
+    @EventHandler
+    fun onLeave(e: PlayerLeaveArenaEvent) {
+        playersWithTnt -= e.player
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onPickUp(e: PlayerPickupItemEvent) {
+        if (e.item.itemStack.type != Material.TNT) return
+        val player = e.player
+        if (player in playersWithTnt || !player.isPlaying()) return
+
+        playersWithTnt += player
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onDrop(e: PlayerDropItemEvent) {
+        if (e.itemDrop.itemStack.type != Material.TNT) return
+
+        val player = e.player
+        if (player !in playersWithTnt || Material.TNT in player.inventory) return
+        if (!player.isPlaying()) return
+
+        playersWithTnt -= player
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onPlace(e: BlockPlaceEvent) {
+        val player = e.player
+        if (!player.isPlaying()) return
+
+        if (e.itemInHand.type != Material.TNT) return
+
+        if (player !in playersWithTnt) return
+        plugin.run(delay = 1) {
+            if (Material.TNT in player.inventory) return@run
+            playersWithTnt -= player
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun inventorySwitch(event: InventoryCloseEvent) {
+        val player = event.player as? Player ?: return
+        if (!player.isPlaying()) return
+
+        val hasTnt = Material.TNT in player.inventory
+
+        if (player in playersWithTnt) {
+            if (!hasTnt) playersWithTnt -= player
+            return
+        }
+        if (hasTnt) playersWithTnt += player
+    }
+
+    private fun Player.isPlaying() = plugin.arenaManager.isPlaying(this)
 
 }

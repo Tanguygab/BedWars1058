@@ -17,7 +17,7 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
-package com.andrei1058.bedwars.arena
+package com.andrei1058.bedwars.arena.data
 
 import com.andrei1058.bedwars.BedWars
 import org.bukkit.Bukkit

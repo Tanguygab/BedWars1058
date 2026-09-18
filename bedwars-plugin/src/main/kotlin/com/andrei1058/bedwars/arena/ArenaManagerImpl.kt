@@ -20,6 +20,7 @@
 package com.andrei1058.bedwars.arena
 
 import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.Misc
 import com.andrei1058.bedwars.api.arena.ArenaManager
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena

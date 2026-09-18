@@ -42,7 +42,7 @@ object HalloweenSpecial {
 
         plugin.logger.info("${ChatColor.AQUA}Loaded Halloween Special <3")
         // pumpkin hats
-        plugin.registerEvents(HalloweenListener())
+        plugin.registerEvents(HalloweenListener(plugin))
 
         // pumpkin in shop
         val blockCategory = ShopConfig.shop.categoryList.find { it.name == "blocks-category" }
@@ -61,6 +61,6 @@ object HalloweenSpecial {
         val day = date.dayOfMonth
 
         // allowed between October 21 and November 1
-        return (month == 10 && day > 21 || month == 11 && day < 2)
+        return month == 10 && day > 21 || month == 11 && day < 2
     }
 }

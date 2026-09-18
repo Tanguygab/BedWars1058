@@ -17,9 +17,8 @@
  *
  * Contact e-mail: andrew.dascalu@gmail.com
  */
-package com.andrei1058.bedwars.arena
+package com.andrei1058.bedwars
 
-import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.configuration.ConfigPath
@@ -29,11 +28,16 @@ import com.andrei1058.bedwars.api.server.ServerType
 import com.andrei1058.bedwars.api.util.Utils.editMeta
 import com.google.common.io.ByteStreams
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.ArmorStand
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.metadata.FixedMetadataValue
 import java.io.File
 
 object Misc {
@@ -143,4 +147,48 @@ object Misc {
         .listFiles { it.isFile && it.name.endsWith(".yml") }
         ?.map { it.nameWithoutExtension }
         ?: emptyList()
+
+    /**
+     * This is used to spawn armorStands during the setup
+     * so the player knows what he set
+     *
+     * @since api v6
+     */
+    fun createArmorStand(name: String, location: Location, configLoc: String?) {
+        (location.world!!.spawnEntity(location.block.location.add(0.5, 2.0, 0.5), EntityType.ARMOR_STAND) as ArmorStand).apply {
+            isVisible = false
+            isMarker = true
+            setGravity(false)
+            isCustomNameVisible = true
+            customName = name
+            setMetadata("bw1058-setup", FixedMetadataValue(BedWars.INSTANCE, "hologram"))
+            if (configLoc != null) {
+                setMetadata("bw1058-loc", FixedMetadataValue(BedWars.INSTANCE, configLoc))
+            }
+        }
+    }
+
+    /**
+     * Remove an armor stand
+     */
+    fun removeArmorStand(contains: String?, location: Location, configLoc: String?) {
+        for (e in location.getWorld()!!.getNearbyEntities(location, 1.0, 3.0, 1.0)) {
+            if (e.hasMetadata("bw1058-setup")) {
+                if (!e.hasMetadata("bw1058-loc")) {
+                    e.remove()
+                    continue
+                }
+                if (e.getMetadata("bw1058-loc")[0].asString().equals(configLoc, ignoreCase = true)) {
+                    if (!contains.isNullOrEmpty() && contains in ChatColor.stripColor(e.customName)!!) {
+                        e.remove()
+                        return
+                    }
+                    e.remove()
+                }
+                continue
+            }
+            if (e is ArmorStand && !e.isVisible && !contains.isNullOrEmpty() && contains in e.customName!!)
+                e.remove()
+        }
+    }
 }

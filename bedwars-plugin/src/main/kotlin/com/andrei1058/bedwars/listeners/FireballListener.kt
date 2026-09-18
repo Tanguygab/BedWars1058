@@ -2,7 +2,7 @@ package com.andrei1058.bedwars.listeners
 
 import com.andrei1058.bedwars.BedWars
 import com.andrei1058.bedwars.api.configuration.ConfigPath
-import com.andrei1058.bedwars.arena.LastHit
+import com.andrei1058.bedwars.arena.data.LastHit
 import org.bukkit.entity.Fireball
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler

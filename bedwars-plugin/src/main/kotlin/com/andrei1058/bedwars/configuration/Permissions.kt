@@ -19,28 +19,29 @@
  */
 package com.andrei1058.bedwars.configuration
 
-import com.andrei1058.bedwars.BedWars.Companion.MAIN_COMMAND
+import com.andrei1058.bedwars.BedWars
 import org.bukkit.entity.Player
 
 object Permissions {
-    const val PERMISSION_FORCESTART = "$MAIN_COMMAND.forcestart"
-    const val PERMISSION_ALL = "$MAIN_COMMAND.*"
-    const val PERMISSION_COMMAND_BYPASS = "$MAIN_COMMAND.cmd.bypass"
-    const val PERMISSION_SHOUT_COMMAND = "$MAIN_COMMAND.shout"
+    private const val BW = BedWars.MAIN_COMMAND
+    const val PERMISSION_FORCESTART = "$BW.forcestart"
+    const val PERMISSION_ALL = "$BW.*"
+    const val PERMISSION_COMMAND_BYPASS = "$BW.cmd.bypass"
+    const val PERMISSION_SHOUT_COMMAND = "$BW.shout"
 
-    const val PERMISSION_SETUP_ARENA = "$MAIN_COMMAND.setup"
-    const val PERMISSION_ARENA_GROUP = "$MAIN_COMMAND.groups"
-    const val PERMISSION_BUILD = "$MAIN_COMMAND.build"
-    const val PERMISSION_CLONE = "$MAIN_COMMAND.clone"
-    const val PERMISSION_DEL_ARENA = "$MAIN_COMMAND.delete"
-    const val PERMISSION_ARENA_ENABLE = "$MAIN_COMMAND.enableRotation"
-    const val PERMISSION_ARENA_DISABLE = "$MAIN_COMMAND.disable"
-    const val PERMISSION_NPC = "$MAIN_COMMAND.npc"
-    const val PERMISSION_RELOAD = "$MAIN_COMMAND.reload"
-    const val PERMISSION_REJOIN = "$MAIN_COMMAND.rejoin"
-    const val PERMISSION_LEVEL = "$MAIN_COMMAND.level"
-    const val PERMISSION_CHAT_COLOR = "$MAIN_COMMAND.chatcolor"
-    const val PERMISSION_VIP = "$MAIN_COMMAND.vip"
+    const val PERMISSION_SETUP_ARENA = "$BW.setup"
+    const val PERMISSION_ARENA_GROUP = "$BW.groups"
+    const val PERMISSION_BUILD = "$BW.build"
+    const val PERMISSION_CLONE = "$BW.clone"
+    const val PERMISSION_DEL_ARENA = "$BW.delete"
+    const val PERMISSION_ARENA_ENABLE = "$BW.enableRotation"
+    const val PERMISSION_ARENA_DISABLE = "$BW.disable"
+    const val PERMISSION_NPC = "$BW.npc"
+    const val PERMISSION_RELOAD = "$BW.reload"
+    const val PERMISSION_REJOIN = "$BW.rejoin"
+    const val PERMISSION_LEVEL = "$BW.level"
+    const val PERMISSION_CHAT_COLOR = "$BW.chatcolor"
+    const val PERMISSION_VIP = "$BW.vip"
 
     /**
      * Check if player has one of the given permissions.

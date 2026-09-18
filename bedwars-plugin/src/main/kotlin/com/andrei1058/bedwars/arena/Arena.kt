@@ -20,6 +20,7 @@
 package com.andrei1058.bedwars.arena
 
 import com.andrei1058.bedwars.BedWars
+import com.andrei1058.bedwars.Misc
 import com.andrei1058.bedwars.api.arena.GameState
 import com.andrei1058.bedwars.api.arena.IArena
 import com.andrei1058.bedwars.api.arena.NextEvent
@@ -68,8 +69,10 @@ import com.andrei1058.bedwars.listeners.dropshandler.PlayerDrops
 import com.andrei1058.bedwars.money.internal.MoneyPerMinuteTask
 import com.andrei1058.bedwars.shop.ShopCache
 import com.andrei1058.bedwars.sidebar.BwSidebar
-import com.andrei1058.bedwars.support.citizens.JoinNPC
 import com.andrei1058.bedwars.api.util.Utils.teleportSafe
+import com.andrei1058.bedwars.arena.data.LastHit
+import com.andrei1058.bedwars.arena.data.PlayerGoods
+import com.andrei1058.bedwars.arena.data.ReJoin
 import com.andrei1058.bedwars.support.papi.SupportPAPI
 import com.andrei1058.bedwars.support.vault.WithEconomy
 import net.md_5.bungee.api.chat.ClickEvent
@@ -531,7 +534,7 @@ class Arena(
         }
 
         refreshSigns()
-        JoinNPC.updateNPCs(group)
+        plugin.npcSupport?.updateNPCs(group)
         return true
     }
 
@@ -643,7 +646,7 @@ class Arena(
 
         showTime.remove(player)
         refreshSigns()
-        JoinNPC.updateNPCs(group)
+        plugin.npcSupport?.updateNPCs(group)
         return true
     }
 
@@ -816,7 +819,7 @@ class Arena(
         showTime.remove(player)
 
         refreshSigns()
-        JoinNPC.updateNPCs(group)
+        plugin.npcSupport?.updateNPCs(group)
         lastHit?.remove()
 
         // fix #340
@@ -908,7 +911,7 @@ class Arena(
         }
 
         refreshSigns()
-        JoinNPC.updateNPCs(group)
+        plugin.npcSupport?.updateNPCs(group)
     }
 
     /**

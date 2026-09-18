@@ -27,7 +27,7 @@ class GameStatsManager(override val arena: IArena) : GameStatsHolder {
         for (statistic in DefaultStatistics.entries) {
             if (!statistic.isIncrementable) continue
             register(object : GenericStatistic() {
-                override val identifier = statistic.toString()
+                override val identifier = "$statistic"
             })
         }
     }
